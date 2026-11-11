@@ -1,0 +1,37 @@
+{
+  "name": "amiyo-browser",
+  "version": "1.0.0",
+  "description": "AMIYO Browser - Modern, fast, and secure desktop web browser built with Electron and Chromium",
+  "main": "main.js",
+  "scripts": {
+    "start": "node scripts/run-electron.js",
+    "test": "node tests/run-all.js",
+    "test:e2e": "node -e \"const cp = require('child_process'); const env = {...process.env}; delete env.ELECTRON_RUN_AS_NODE; const child = cp.spawn(require('electron'), ['--no-sandbox', '--disable-gpu', 'tests/e2e-verification.js'], { env, stdio: 'inherit' }); child.on('exit', (c) => process.exit(c));\"",
+    "test:integration": "node tests/integration.test.js",
+    "server:test": "node scripts/test-server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/amiyo/amiyo-browser.git"
+  },
+  "keywords": [
+    "browser",
+    "amiyo",
+    "electron",
+    "chromium",
+    "webcontentsview",
+    "desktop-app"
+  ],
+  "author": "AMIYO",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/amiyo/amiyo-browser/issues"
+  },
+  "homepage": "https://github.com/amiyo/amiyo-browser#readme",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "electron": "^45.3.0"
+  }
+}
