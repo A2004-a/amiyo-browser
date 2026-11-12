@@ -85,6 +85,8 @@ const TabManager = {
       let audioHtml = '';
       if (tab.isMuted) {
         audioHtml = `<button class="tab-audio-btn muted" title="Unmute tab">${Utils.icons.audioMuted}</button>`;
+      } else if (tab.isPlayingAudio) {
+        audioHtml = `<button class="tab-audio-btn playing" title="Mute tab">${Utils.icons.audio}</button>`;
       }
 
       tabEl.innerHTML = `
