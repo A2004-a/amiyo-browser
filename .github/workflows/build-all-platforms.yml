@@ -100,26 +100,28 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      - name: Setup Gradle 8.5
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: '8.5'
+
       - name: Build Android APK with Gradle
-        env:
-          ANDROID_HOME: /usr/local/lib/android/sdk
-          ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
         run: |
           cd android
-          chmod +x ./gradlew || true
-          ./gradlew assembleDebug --no-daemon || gradle assembleDebug || true
+          gradle assembleRelease --stacktrace || gradle assembleDebug --stacktrace
 
       - name: Prepare APK for Release
         run: |
           mkdir -p output-apk
-          find android/ -name "*.apk" -exec cp {} output-apk/AMIYO-Browser-v1.0.0-Android.apk \; || true
+          find android/app/build/outputs/apk/ -name "*.apk" -exec cp {} output-apk/AMIYO-Browser-v1.0.0-Android.apk \;
+          ls -lh output-apk/
 
       - name: Upload Android Artifact
         uses: actions/upload-artifact@v4
         with:
           name: AMYIO-Browser-Android-APK
-          path: output-apk/*.apk
-          if-no-files-found: ignore
+          path: output-apk/AMIYO-Browser-v1.0.0-Android.apk
+          if-no-files-found: error
 
       - name: Release Android APK
         uses: softprops/action-gh-release@v2
@@ -127,7 +129,7 @@ jobs:
           tag_name: v1.0.0
           draft: false
           prerelease: false
-          files: output-apk/*.apk
+          files: output-apk/AMIYO-Browser-v1.0.0-Android.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
