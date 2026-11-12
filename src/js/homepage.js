@@ -150,10 +150,10 @@ const Homepage = {
           </div>
         </main>
 
-        <!-- Chrome Floating "Customize Chrome" Button -->
-        <button class="chrome-customize-pill" id="customize-chrome-btn" title="Customize this page">
+        <!-- Floating "Customize AMIYO Browser" Button -->
+        <button class="chrome-customize-pill" id="customize-chrome-btn" title="Customize AMIYO Browser">
           ${Utils.icons.customize}
-          <span>Customize Chrome</span>
+          <span>Customize AMIYO Browser</span>
         </button>
 
         <!-- Shortcut Action Context Menu -->
@@ -412,7 +412,7 @@ const Homepage = {
     const showShortcuts = this.getShortcutsVisible();
     const activeWallpaper = this.getWallpaper();
 
-    App.showModal('Customize Chrome', `
+    App.showModal('Customize AMIYO Browser', `
       <div style="display:flex;flex-direction:column;gap:20px;max-height:65vh;overflow-y:auto;padding-right:4px;">
         <!-- Background Wallpaper Section -->
         <div>
@@ -441,7 +441,7 @@ const Homepage = {
               ☀️ Light
             </button>
             <button class="chrome-theme-choice" id="choice-theme-classic" style="padding:14px;border-radius:8px;border:2px solid var(--border-subtle);background:#1a73e8;color:#fff;cursor:pointer;font-size:13px;font-weight:500;">
-              🔷 Chrome Blue
+              🔷 AMIYO Blue
             </button>
           </div>
         </div>

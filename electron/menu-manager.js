@@ -154,6 +154,64 @@ class MenuManager {
   showContextMenu(browserWindow, tabController, params) {
     const menu = new Menu();
 
+    // Tab context menu (Chrome style)
+    if (params.tabId) {
+      const tab = tabController.getTab(params.tabId);
+      const isPinned = tab?.isPinned;
+      const isMuted = tab?.isMuted;
+
+      menu.append(new MenuItem({
+        label: 'New Tab to the Right',
+        click: () => {
+          const idx = tabController.tabs.findIndex(t => t.id === params.tabId);
+          tabController.createTab('amiyo://newtab', { index: idx !== -1 ? idx + 1 : undefined, active: true });
+        }
+      }));
+      menu.append(new MenuItem({
+        label: 'Reload',
+        accelerator: 'Ctrl+R',
+        click: () => tabController.reload(params.tabId)
+      }));
+      menu.append(new MenuItem({
+        label: 'Duplicate',
+        click: () => tabController.duplicateTab(params.tabId)
+      }));
+      menu.append(new MenuItem({
+        label: isPinned ? 'Unpin Tab' : 'Pin Tab',
+        click: () => tabController.pinTab(params.tabId, !isPinned)
+      }));
+      menu.append(new MenuItem({
+        label: isMuted ? 'Unmute Site' : 'Mute Site',
+        click: () => tabController.muteTab(params.tabId, !isMuted)
+      }));
+      menu.append(new MenuItem({ type: 'separator' }));
+      menu.append(new MenuItem({
+        label: 'Close Tab',
+        accelerator: 'Ctrl+W',
+        click: () => tabController.closeTab(params.tabId)
+      }));
+      menu.append(new MenuItem({
+        label: 'Close Other Tabs',
+        click: () => {
+          const toClose = tabController.tabs.filter(t => t.id !== params.tabId);
+          toClose.forEach(t => tabController.closeTab(t.id));
+        }
+      }));
+      menu.append(new MenuItem({
+        label: 'Close Tabs to the Right',
+        click: () => {
+          const idx = tabController.tabs.findIndex(t => t.id === params.tabId);
+          if (idx !== -1) {
+            const toClose = tabController.tabs.slice(idx + 1);
+            toClose.forEach(t => tabController.closeTab(t.id));
+          }
+        }
+      }));
+
+      menu.popup({ window: browserWindow });
+      return;
+    }
+
     if (params.linkURL) {
       menu.append(new MenuItem({
         label: 'Open Link in New Tab',
