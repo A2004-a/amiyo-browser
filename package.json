@@ -10,7 +10,8 @@
     "test:integration": "node tests/integration.test.js",
     "server:test": "node scripts/test-server.js",
     "dist:win": "electron-builder --win --x64",
-    "pack:win": "electron-builder --win --dir --x64"
+    "pack:win": "electron-builder --win --dir --x64",
+    "build:portable": "node scripts/build-portable-windows.js"
   },
   "repository": {
     "type": "git",
