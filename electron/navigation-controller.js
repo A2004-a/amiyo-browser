@@ -155,6 +155,66 @@ class NavigationController {
 
     return suggestions.slice(0, 8);
   }
+
+  fetchGoogleSuggestions(query) {
+    return new Promise((resolve) => {
+      const https = require('https');
+      const url = `https://suggestqueries.google.com/complete/search?client=chrome&q=${encodeURIComponent(query)}`;
+      const req = https.get(url, { headers: { 'User-Agent': 'Mozilla/5.0' }, timeout: 700 }, (res) => {
+        let data = '';
+        res.on('data', chunk => data += chunk);
+        res.on('end', () => {
+          try {
+            const parsed = JSON.parse(data);
+            if (Array.isArray(parsed) && Array.isArray(parsed[1])) {
+              return resolve(parsed[1]);
+            }
+          } catch (e) {}
+          resolve([]);
+        });
+      });
+      req.on('error', () => resolve([]));
+      req.on('timeout', () => {
+        req.destroy();
+        resolve([]);
+      });
+    });
+  }
+
+  async getSuggestionsAsync(query) {
+    const local = this.getOmniboxSuggestions(query);
+    if (!query || typeof query !== 'string') return local;
+    const q = query.trim();
+    if (!q || q.startsWith('http://') || q.startsWith('https://') || q.startsWith('amiyo://')) {
+      return local;
+    }
+
+    try {
+      const googleQueries = await this.fetchGoogleSuggestions(q);
+      if (googleQueries && googleQueries.length > 0) {
+        const enriched = [local[0]]; // Primary search query
+        for (const gQuery of googleQueries) {
+          if (gQuery && gQuery.toLowerCase() !== q.toLowerCase()) {
+            enriched.push({
+              type: 'search',
+              title: gQuery,
+              url: this.buildSearchUrl(gQuery),
+              query: gQuery
+            });
+            if (enriched.length >= 5) break;
+          }
+        }
+        // Append history/bookmarks
+        for (let i = 1; i < local.length; i++) {
+          if (enriched.length >= 8) break;
+          enriched.push(local[i]);
+        }
+        return enriched;
+      }
+    } catch (e) {}
+
+    return local;
+  }
 }
 
 module.exports = new NavigationController();

@@ -12,6 +12,15 @@ const Homepage = {
     { title: 'Twitter / X', url: 'https://x.com', icon: 'https://abs.twimg.com/favicons/twitter.3.ico' }
   ],
 
+  wallpapers: [
+    { id: 'none', name: 'Classic Clean', url: '' },
+    { id: 'aurora', name: 'Aurora Borealis', url: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=1920&q=80' },
+    { id: 'mountains', name: 'Earth & Mountains', url: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=1920&q=80' },
+    { id: 'city', name: 'Cyber Cityscape', url: 'https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=1920&q=80' },
+    { id: 'abstract', name: 'Minimal Flow', url: 'https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=1920&q=80' },
+    { id: 'ocean', name: 'Deep Ocean', url: 'https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=1920&q=80' }
+  ],
+
   render(container) {
     if (this.clockInterval) {
       clearInterval(this.clockInterval);
@@ -19,9 +28,12 @@ const Homepage = {
 
     const shortcuts = this.getShortcuts();
     const showShortcuts = this.getShortcutsVisible();
+    const activeWallpaper = this.getWallpaper();
+
+    const hasBg = Boolean(activeWallpaper);
 
     container.innerHTML = `
-      <div class="chrome-ntp">
+      <div class="chrome-ntp ${hasBg ? 'has-custom-wallpaper' : ''}" style="${hasBg ? `background-image: url('${activeWallpaper}');` : ''}">
         <!-- Chrome NTP Top-Right Bar -->
         <header class="chrome-ntp-header">
           <a href="https://mail.google.com" class="chrome-nav-link" id="ntp-gmail-link">Gmail</a>
@@ -216,7 +228,7 @@ const Homepage = {
 
     // 3. Google Lens Button
     container.querySelector('#lens-search-btn')?.addEventListener('click', () => {
-      IpcClient.navigateTab(State.activeTabId || '', 'https://images.google.com');
+      this.showGoogleLensModal();
     });
 
     // 4. Google Apps 9-Dots Button
@@ -311,36 +323,69 @@ const Homepage = {
   },
 
   activateVoiceSearch(inputEl) {
+    App.showModal('Voice Search', `
+      <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:18px;padding:16px 0;">
+        <div class="voice-search-pulsing-circle" style="width:72px;height:72px;border-radius:50%;background:#e8f0fe;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 10px rgba(66, 133, 244, 0.2);animation:pulse 1.5s infinite;">
+          <div style="width:36px;height:36px;">${Utils.icons.mic}</div>
+        </div>
+        <div>
+          <h3 style="margin:0;font-size:18px;color:var(--text-primary);" id="voice-modal-status">Listening...</h3>
+          <p style="margin:6px 0 0;font-size:13px;color:var(--text-secondary);">Say something like "weather today" or "news"</p>
+        </div>
+      </div>
+    `, [
+      { label: 'Cancel', class: 'btn-secondary', click: () => App.closeModal() }
+    ]);
+
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRecognition) {
       try {
         const recognition = new SpeechRecognition();
         recognition.lang = 'en-US';
         recognition.interimResults = false;
-        recognition.onstart = () => {
-          if (inputEl) inputEl.placeholder = 'Listening... Speak now';
-        };
         recognition.onresult = (event) => {
           const transcript = event.results[0][0].transcript;
+          App.closeModal();
           if (inputEl) inputEl.value = transcript;
           IpcClient.navigateTab(State.activeTabId || '', transcript);
         };
         recognition.onerror = () => {
-          if (inputEl) inputEl.placeholder = 'Search Google or type a URL';
-        };
-        recognition.onend = () => {
-          if (inputEl) inputEl.placeholder = 'Search Google or type a URL';
+          const statusEl = document.getElementById('voice-modal-status');
+          if (statusEl) statusEl.textContent = 'Could not hear audio';
         };
         recognition.start();
         return;
       } catch (err) {}
     }
-    // Fallback prompt
-    const query = prompt('Enter voice search query:');
-    if (query) {
-      if (inputEl) inputEl.value = query;
-      IpcClient.navigateTab(State.activeTabId || '', query);
-    }
+  },
+
+  showGoogleLensModal() {
+    App.showModal('Search any image with Google Lens', `
+      <div style="display:flex;flex-direction:column;gap:16px;padding:8px 0;">
+        <p style="font-size:13px;color:var(--text-secondary);margin:0;">
+          Search by image to find products, landmarks, plants, translation, or similar visuals.
+        </p>
+        <div>
+          <label style="font-size:12px;font-weight:500;color:var(--text-secondary);display:block;margin-bottom:6px;">Paste Image Link</label>
+          <input type="text" id="lens-image-url" class="settings-input" style="width:100%;padding:10px;border-radius:8px;background:var(--bg-input);color:var(--text-primary);border:1px solid var(--border-subtle);" placeholder="https://example.com/image.jpg" />
+        </div>
+      </div>
+    `, [
+      { label: 'Cancel', class: 'btn-secondary', click: () => App.closeModal() },
+      {
+        label: 'Search Image',
+        class: 'btn-primary',
+        click: () => {
+          const imgUrl = document.getElementById('lens-image-url')?.value.trim();
+          App.closeModal();
+          if (imgUrl) {
+            IpcClient.navigateTab(State.activeTabId || '', `https://lens.google.com/uploadbyurl?url=${encodeURIComponent(imgUrl)}`);
+          } else {
+            IpcClient.navigateTab(State.activeTabId || '', 'https://images.google.com');
+          }
+        }
+      }
+    ]);
   },
 
   showProfileMenu() {
@@ -365,12 +410,29 @@ const Homepage = {
   showCustomizeChrome() {
     const currentTheme = State.settings.theme || 'dark';
     const showShortcuts = this.getShortcutsVisible();
+    const activeWallpaper = this.getWallpaper();
 
     App.showModal('Customize Chrome', `
-      <div style="display:flex;flex-direction:column;gap:20px;">
+      <div style="display:flex;flex-direction:column;gap:20px;max-height:65vh;overflow-y:auto;padding-right:4px;">
+        <!-- Background Wallpaper Section -->
+        <div>
+          <h4 style="margin:0 0 10px;font-size:14px;color:var(--text-primary);">Background Wallpapers</h4>
+          <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:10px;">
+            ${this.wallpapers.map(w => `
+              <div 
+                class="wallpaper-card ${activeWallpaper === w.url ? 'active' : ''}" 
+                data-url="${Utils.escapeHtml(w.url)}"
+                style="height:64px;border-radius:8px;border:2px solid ${activeWallpaper === w.url ? '#4285f4' : 'var(--border-subtle)'};background:${w.url ? `url('${w.url}') center/cover` : 'var(--bg-tertiary)'};cursor:pointer;display:flex;align-items:flex-end;padding:4px 6px;text-shadow:0 1px 3px rgba(0,0,0,0.8);"
+              >
+                <span style="font-size:11px;font-weight:600;color:#fff;">${w.name}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
         <!-- Theme Mode -->
         <div>
-          <h4 style="margin:0 0 10px;font-size:14px;color:var(--text-primary);">Appearance</h4>
+          <h4 style="margin:0 0 10px;font-size:14px;color:var(--text-primary);">Color & Theme</h4>
           <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:10px;">
             <button class="chrome-theme-choice ${currentTheme === 'dark' ? 'active' : ''}" id="choice-theme-dark" style="padding:14px;border-radius:8px;border:2px solid ${currentTheme === 'dark' ? '#4285f4' : 'var(--border-subtle)'};background:#202124;color:#fff;cursor:pointer;font-size:13px;font-weight:500;">
               🌙 Dark
@@ -378,8 +440,8 @@ const Homepage = {
             <button class="chrome-theme-choice ${currentTheme === 'light' ? 'active' : ''}" id="choice-theme-light" style="padding:14px;border-radius:8px;border:2px solid ${currentTheme === 'light' ? '#4285f4' : 'var(--border-subtle)'};background:#ffffff;color:#202124;cursor:pointer;font-size:13px;font-weight:500;">
               ☀️ Light
             </button>
-            <button class="chrome-theme-choice" id="choice-theme-classic" style="padding:14px;border-radius:8px;border:2px solid var(--border-subtle);background:#1a237e;color:#fff;cursor:pointer;font-size:13px;font-weight:500;">
-              🔷 Blue
+            <button class="chrome-theme-choice" id="choice-theme-classic" style="padding:14px;border-radius:8px;border:2px solid var(--border-subtle);background:#1a73e8;color:#fff;cursor:pointer;font-size:13px;font-weight:500;">
+              🔷 Chrome Blue
             </button>
           </div>
         </div>
@@ -406,6 +468,16 @@ const Homepage = {
     `, [
       { label: 'Done', class: 'btn-primary', click: () => App.closeModal() }
     ]);
+
+    // Wallpaper clicks
+    document.querySelectorAll('.wallpaper-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const url = card.dataset.url;
+        this.setWallpaper(url);
+        App.closeModal();
+        this.render(document.getElementById('internal-page-container'));
+      });
+    });
 
     // Theme clicks
     document.getElementById('choice-theme-dark')?.addEventListener('click', () => {
@@ -438,6 +510,18 @@ const Homepage = {
       IpcClient.updateSettings({ searchEngine: e.target.value });
       State.settings.searchEngine = e.target.value;
     });
+  },
+
+  getWallpaper() {
+    return localStorage.getItem('amiyo_ntp_wallpaper') || '';
+  },
+
+  setWallpaper(url) {
+    if (url) {
+      localStorage.setItem('amiyo_ntp_wallpaper', url);
+    } else {
+      localStorage.removeItem('amiyo_ntp_wallpaper');
+    }
   },
 
   getShortcuts() {

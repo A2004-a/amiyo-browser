@@ -164,9 +164,9 @@ function registerIpcHandlers() {
     if (tabCtrl) tabCtrl.stop(tabId || tabCtrl.activeTabId);
   });
 
-  ipcMain.handle('nav:suggestions', (event, query) => {
+  ipcMain.handle('nav:suggestions', async (event, query) => {
     if (typeof query !== 'string') return [];
-    return navigationController.getOmniboxSuggestions(query);
+    return navigationController.getSuggestionsAsync(query);
   });
 
   ipcMain.handle('nav:security-status', (event, url) => {
