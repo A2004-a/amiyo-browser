@@ -18,3 +18,4 @@ If you discover a security vulnerability in AMIYO Browser, please do not file a 
 3. Impact assessment.
 
 We review security disclosures promptly and provide patched releases.
+

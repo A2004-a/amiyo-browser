@@ -25,3 +25,4 @@ Closes #(issue number)
 
 ## Screenshots / Video (if UI changes)
 <!-- Add screenshots or screen recordings if applicable -->
+

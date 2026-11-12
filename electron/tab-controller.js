@@ -230,7 +230,11 @@ class TabController {
         </html>
       `;
       const base64Html = Buffer.from(errorHtml).toString('base64');
-      wc.loadURL(`data:text/html;base64,${base64Html}`).catch(() => {});
+      setImmediate(() => {
+        if (!wc.isDestroyed()) {
+          wc.loadURL(`data:text/html;base64,${base64Html}`).catch(() => {});
+        }
+      });
     });
 
     // Handle new-window / target="_blank"

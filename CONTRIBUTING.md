@@ -48,3 +48,4 @@ Thank you for your interest in contributing to AMIYO Browser!
    - `style:` for CSS/UI design improvements
    - `test:` for test additions or updates
 4. Submit a Pull Request following the PR template checklist.
+

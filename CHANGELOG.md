@@ -15,3 +15,4 @@ All notable changes to AMIYO Browser will be documented in this file.
 - **Private Browsing**: Ephemeral in-memory partition (`Ctrl + Shift + N`).
 - **Settings**: Comprehensive preferences for themes, search engines, startup behavior, and downloads.
 - **Productivity**: Find in Page (`Ctrl + F`), Zoom controls, and custom context menu.
+
