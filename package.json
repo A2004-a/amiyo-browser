@@ -71,8 +71,20 @@
     },
     "mac": {
       "target": [
-        "dmg",
-        "zip"
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
       ],
       "category": "public.app-category.productivity",
       "artifactName": "AMIYO-Browser-${version}-mac-${arch}.${ext}"
@@ -93,9 +105,24 @@
     },
     "linux": {
       "target": [
-        "AppImage",
-        "deb",
-        "tar.gz"
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "deb",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "tar.gz",
+          "arch": [
+            "x64"
+          ]
+        }
       ],
       "category": "Network;WebBrowser;",
       "artifactName": "AMIYO-Browser-${version}-linux-${arch}.${ext}"
