@@ -12,7 +12,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/amiyo/amiyo-browser.git"
+    "url": "https://github.com/A2004-a/amiyo-browser.git"
   },
   "keywords": [
     "browser",
@@ -25,9 +25,9 @@
   "author": "AMIYO",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/amiyo/amiyo-browser/issues"
+    "url": "https://github.com/A2004-a/amiyo-browser/issues"
   },
-  "homepage": "https://github.com/amiyo/amiyo-browser#readme",
+  "homepage": "https://github.com/A2004-a/amiyo-browser#readme",
   "engines": {
     "node": ">=18.0.0"
   },

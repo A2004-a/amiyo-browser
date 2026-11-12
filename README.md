@@ -4,7 +4,7 @@
 
 **A modern, fast, and secure desktop web browser built with Electron, Chromium, and Vanilla Web Technologies.**
 
-[![CI](https://github.com/amiyo/amiyo-browser/actions/workflows/ci.yml/badge.svg)](https://github.com/amiyo/amiyo-browser/actions/workflows/ci.yml)
+[![CI](https://github.com/A2004-a/amiyo-browser/actions/workflows/ci.yml/badge.svg)](https://github.com/A2004-a/amiyo-browser/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Electron](https://img.shields.io/badge/Electron-45.3.0-47848F?logo=electron&logoColor=white)](https://www.electronjs.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-%3E%3D18.0.0-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
@@ -214,7 +214,7 @@ amiyo-browser/
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/amiyo/amiyo-browser.git
+   git clone https://github.com/A2004-a/amiyo-browser.git
    cd amiyo-browser
    ```
 

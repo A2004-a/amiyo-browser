@@ -10,7 +10,7 @@ Thank you for your interest in contributing to AMIYO Browser!
 
 2. **Clone and Install**:
    ```bash
-   git clone https://github.com/amiyo/amiyo-browser.git
+   git clone https://github.com/A2004-a/amiyo-browser.git
    cd amiyo-browser
    npm install
    ```
