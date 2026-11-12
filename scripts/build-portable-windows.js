@@ -56,3 +56,4 @@ console.log(' ✔ Portable Windows 64-bit build completed:');
 console.log(`   Folder: ${appDistDir}`);
 console.log(`   Executable: ${targetExe}`);
 console.log('====================================================\n');
+
