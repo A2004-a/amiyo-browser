@@ -73,6 +73,7 @@ class TabController {
       canGoForward: false,
       isPinned: !!options.isPinned,
       isMuted: false,
+      isPlayingAudio: false,
       isInternal: isInternal,
       zoomFactor: 1.0
     };
@@ -97,6 +98,16 @@ class TabController {
       tab.isLoading = false;
       tab.canGoBack = this.canGoBack(wc);
       tab.canGoForward = this.canGoForward(wc);
+      this.notifyTabUpdated(tab);
+    });
+
+    wc.on('media-started-playing', () => {
+      tab.isPlayingAudio = true;
+      this.notifyTabUpdated(tab);
+    });
+
+    wc.on('media-paused', () => {
+      tab.isPlayingAudio = false;
       this.notifyTabUpdated(tab);
     });
 

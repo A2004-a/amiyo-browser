@@ -23,6 +23,11 @@ const Homepage = {
           <div class="newtab-time" id="newtab-clock">12:00</div>
           <div class="newtab-date" id="newtab-date">Monday, January 1</div>
           <div class="newtab-greeting" id="newtab-greeting">Welcome to AMIYO Browser</div>
+          <div class="newtab-weather" id="newtab-weather" title="Local weather conditions">
+            <span class="weather-icon">☀️</span>
+            <span class="weather-temp" id="weather-temp">24°C</span>
+            <span class="weather-desc" id="weather-desc">Pleasant</span>
+          </div>
         </div>
 
         <div class="newtab-search-container">
@@ -79,8 +84,9 @@ const Homepage = {
       </div>
     `;
 
-    // Start clock
+    // Start clock & weather
     this.updateClock();
+    this.fetchWeather();
     this.clockInterval = setInterval(() => this.updateClock(), 1000);
 
     // Search bar listener
@@ -149,6 +155,40 @@ const Homepage = {
       if (hours < 12) greeting = 'Good morning';
       else if (hours < 18) greeting = 'Good afternoon';
       greetingEl.textContent = `${greeting}, welcome to AMIYO Browser`;
+    }
+  },
+
+  async fetchWeather() {
+    const weatherEl = document.getElementById('newtab-weather');
+    if (!weatherEl) return;
+    try {
+      const now = new Date();
+      const isNight = now.getHours() < 6 || now.getHours() >= 19;
+      const iconEl = weatherEl.querySelector('.weather-icon');
+      const descEl = document.getElementById('weather-desc');
+      if (iconEl && isNight) iconEl.textContent = '🌙';
+      if (descEl && isNight) descEl.textContent = 'Clear Night';
+
+      // Attempt gentle weather lookup if online
+      if (navigator.onLine) {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 2500);
+        const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=28.6139&longitude=77.2090&current_weather=true', { signal: controller.signal });
+        clearTimeout(timeout);
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.current_weather) {
+            const temp = Math.round(data.current_weather.temperature);
+            const isDay = data.current_weather.is_day === 1;
+            const tempEl = document.getElementById('weather-temp');
+            if (tempEl) tempEl.textContent = `${temp}°C`;
+            if (descEl) descEl.textContent = isDay ? 'Sunny & Clear' : 'Clear Night';
+            if (iconEl) iconEl.textContent = isDay ? '☀️' : '🌙';
+          }
+        }
+      }
+    } catch (e) {
+      // Offline fallback: keep graceful default
     }
   },
 

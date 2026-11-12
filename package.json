@@ -8,7 +8,9 @@
     "test": "node tests/run-all.js",
     "test:e2e": "node -e \"const cp = require('child_process'); const env = {...process.env}; delete env.ELECTRON_RUN_AS_NODE; const child = cp.spawn(require('electron'), ['--no-sandbox', '--disable-gpu', 'tests/e2e-verification.js'], { env, stdio: 'inherit' }); child.on('exit', (c) => process.exit(c));\"",
     "test:integration": "node tests/integration.test.js",
-    "server:test": "node scripts/test-server.js"
+    "server:test": "node scripts/test-server.js",
+    "dist:win": "electron-builder --win --x64",
+    "pack:win": "electron-builder --win --dir --x64"
   },
   "repository": {
     "type": "git",
@@ -20,7 +22,8 @@
     "electron",
     "chromium",
     "webcontentsview",
-    "desktop-app"
+    "desktop-app",
+    "windows-64bit"
   ],
   "author": "AMIYO",
   "license": "MIT",
@@ -31,7 +34,56 @@
   "engines": {
     "node": ">=18.0.0"
   },
+  "build": {
+    "appId": "com.amiyo.browser",
+    "productName": "AMIYO Browser",
+    "copyright": "Copyright © 2026 AMIYO",
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "artifactName": "AMIYO-Browser-Setup-${version}-x64.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "AMIYO Browser"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "electron/**/*",
+      "src/**/*",
+      "data/.gitkeep",
+      "!scripts/**",
+      "!tests/**"
+    ]
+  },
   "devDependencies": {
-    "electron": "^45.3.0"
+    "electron": "^45.3.0",
+    "electron-builder": "^24.13.3"
   }
 }

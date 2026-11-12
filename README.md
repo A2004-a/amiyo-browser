@@ -22,6 +22,20 @@
 
 ---
 
+## 💾 Download for Windows (64-bit)
+
+Get the latest release for **Windows 10 / 11 (64-bit)**:
+
+| Format | Architecture | Download Link | Description |
+|:---|:---|:---|:---|
+| **Windows Installer** | `x64` (64-bit) | [⬇️ **Download Installer (.exe)**](https://github.com/A2004-a/amiyo-browser/releases/latest) | Interactive setup with desktop & start menu shortcuts |
+| **Portable Executable** | `x64` (64-bit) | [⬇️ **Download Portable (.exe)**](https://github.com/A2004-a/amiyo-browser/releases/latest) | Run directly without installation |
+| **Portable ZIP Archive**| `x64` (64-bit) | [⬇️ **Download ZIP (.zip)**](https://github.com/A2004-a/amiyo-browser/releases/latest) | Extracted directory package |
+
+> 🚀 **Automated Builds**: Compiled and signed through our continuous integration pipeline: [Build Windows 64-bit Workflow](https://github.com/A2004-a/amiyo-browser/actions/workflows/build-windows.yml). Latest dev builds can also be downloaded directly from the **Actions > Artifacts** section.
+
+---
+
 ## ✨ Key Features
 
 ### 🗂️ Advanced Tab Management
