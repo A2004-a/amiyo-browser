@@ -62,15 +62,15 @@
 
 /* Single Tab */
 .browser-tab {
-  height: 34px;
-  max-width: 220px;
+  height: 36px;
+  max-width: 240px;
   min-width: 80px;
   flex: 1;
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 0 10px;
-  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  border-radius: 8px 8px 0 0;
   background: transparent;
   color: var(--text-secondary);
   font-size: 12px;
@@ -91,7 +91,9 @@
   color: var(--text-primary);
   font-weight: 500;
   border-color: var(--border-subtle);
-  box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.15);
+  border-bottom: 1px solid var(--bg-primary);
+  box-shadow: 0 -1px 4px rgba(0, 0, 0, 0.12);
+  z-index: 2;
 }
 
 /* Pinned Tab */
@@ -185,10 +187,13 @@
 #new-tab-btn {
   width: 28px;
   height: 28px;
-  border-radius: var(--radius-sm);
+  border-radius: 50%;
   color: var(--text-secondary);
   -webkit-app-region: no-drag;
   margin-bottom: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 #new-tab-btn:hover {
