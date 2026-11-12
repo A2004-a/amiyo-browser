@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/bg_dark"
+    tools:context=".MainActivity">
+
+    <!-- Chrome Mobile Top Omnibox Bar -->
+    <LinearLayout
+        android:id="@+id/topBar"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:background="@color/bg_dark">
+
+        <!-- Address Bar Pill -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/bg_omnibox_pill"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp">
+
+            <ImageView
+                android:id="@+id/btnSecurity"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@android:drawable/ic_lock_idle_lock"
+                android:tint="@color/text_secondary"
+                android:contentDescription="Security" />
+
+            <EditText
+                android:id="@+id/urlInput"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@null"
+                android:hint="@string/search_hint"
+                android:textColor="@color/text_primary"
+                android:textColorHint="@color/text_secondary"
+                android:textSize="14sp"
+                android:singleLine="true"
+                android:imeOptions="actionGo"
+                android:inputType="textUri|textNoSuggestions"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp" />
+
+            <ImageView
+                android:id="@+id/btnClearUrl"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@android:drawable/ic_menu_close_clear_cancel"
+                android:tint="@color/text_secondary"
+                android:visibility="gone"
+                android:contentDescription="Clear" />
+        </LinearLayout>
+
+        <!-- Tab Counter Button -->
+        <FrameLayout
+            android:id="@+id/btnTabCount"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginStart="8dp"
+            android:background="?attr/selectableItemBackgroundBorderless">
+
+            <TextView
+                android:id="@+id/txtTabCount"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:layout_gravity="center"
+                android:background="@drawable/bg_tab_counter"
+                android:gravity="center"
+                android:text="1"
+                android:textColor="@color/text_primary"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+        </FrameLayout>
+
+        <!-- 3-Dots Menu Button -->
+        <ImageView
+            android:id="@+id/btnMenu"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:padding="6dp"
+            android:src="@android:drawable/ic_menu_more"
+            android:tint="@color/text_primary"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Menu" />
+    </LinearLayout>
+
+    <!-- Page Loading Progress Bar -->
+    <ProgressBar
+        android:id="@+id/pageProgressBar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="3dp"
+        android:max="100"
+        android:visibility="gone"
+        android:progressTint="@color/accent" />
+
+    <!-- Swipe Refresh & WebView Viewport -->
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipeRefresh"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <WebView
+            android:id="@+id/webView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+    <!-- Bottom Navigation Bar (Back, Forward, Home, Share, Bookmarks) -->
+    <LinearLayout
+        android:id="@+id/bottomBar"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="@color/bg_dark"
+        android:elevation="4dp">
+
+        <ImageView
+            android:id="@+id/btnNavBack"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:padding="12dp"
+            android:src="@android:drawable/ic_media_previous"
+            android:tint="@color/text_secondary"
+            android:background="?attr/selectableItemBackground"
+            android:contentDescription="Back" />
+
+        <ImageView
+            android:id="@+id/btnNavForward"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:padding="12dp"
+            android:src="@android:drawable/ic_media_next"
+            android:tint="@color/text_secondary"
+            android:background="?attr/selectableItemBackground"
+            android:contentDescription="Forward" />
+
+        <ImageView
+            android:id="@+id/btnNavHome"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:padding="12dp"
+            android:src="@android:drawable/ic_menu_today"
+            android:tint="@color/text_primary"
+            android:background="?attr/selectableItemBackground"
+            android:contentDescription="Home" />
+
+        <ImageView
+            android:id="@+id/btnNavBookmark"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:padding="12dp"
+            android:src="@android:drawable/btn_star"
+            android:tint="@color/text_secondary"
+            android:background="?attr/selectableItemBackground"
+            android:contentDescription="Bookmark" />
+
+        <ImageView
+            android:id="@+id/btnNavReload"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:padding="12dp"
+            android:src="@android:drawable/ic_menu_rotate"
+            android:tint="@color/text_secondary"
+            android:background="?attr/selectableItemBackground"
+            android:contentDescription="Reload" />
+    </LinearLayout>
+
+</LinearLayout>
+

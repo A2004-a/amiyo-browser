@@ -66,9 +66,41 @@ const KeyboardShortcuts = {
       }
 
       // Ctrl + D: Bookmark
-      if (isCtrlOrCmd && e.key.toLowerCase() === 'd') {
+      if (isCtrlOrCmd && !e.shiftKey && e.key.toLowerCase() === 'd') {
         e.preventDefault();
         Omnibox.toggleBookmarkCurrentTab();
+        return;
+      }
+
+      // Ctrl + Shift + B: Toggle Bookmarks Bar
+      if (isCtrlOrCmd && e.shiftKey && e.key.toLowerCase() === 'b') {
+        e.preventDefault();
+        const cur = State.settings.showBookmarksBar !== false;
+        IpcClient.saveSettings({ showBookmarksBar: !cur }).then(updated => {
+          State.settings = updated;
+          BookmarksBar.render();
+        });
+        return;
+      }
+
+      // Ctrl + Shift + O: Show All Bookmarks
+      if (isCtrlOrCmd && e.shiftKey && e.key.toLowerCase() === 'o') {
+        e.preventDefault();
+        IpcClient.createTab('amiyo://bookmarks');
+        return;
+      }
+
+      // Ctrl + Shift + N: New Incognito Window
+      if (isCtrlOrCmd && e.shiftKey && e.key.toLowerCase() === 'n') {
+        e.preventDefault();
+        IpcClient.createPrivateWindow();
+        return;
+      }
+
+      // Ctrl + N: New Window
+      if (isCtrlOrCmd && !e.shiftKey && e.key.toLowerCase() === 'n') {
+        e.preventDefault();
+        IpcClient.createNewWindow();
         return;
       }
 

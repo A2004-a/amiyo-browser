@@ -10,6 +10,9 @@
     "test:integration": "node tests/integration.test.js",
     "server:test": "node scripts/test-server.js",
     "dist:win": "electron-builder --win --x64",
+    "dist:mac": "electron-builder --mac --universal",
+    "dist:linux": "electron-builder --linux AppImage deb tar.gz --x64",
+    "dist:all": "electron-builder -mwl",
     "pack:win": "electron-builder --win --dir --x64",
     "build:portable": "node scripts/build-portable-windows.js"
   },
@@ -65,6 +68,37 @@
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "shortcutName": "AMIYO Browser"
+    },
+    "mac": {
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "category": "public.app-category.productivity",
+      "artifactName": "AMIYO-Browser-${version}-mac-${arch}.${ext}"
+    },
+    "dmg": {
+      "contents": [
+        {
+          "x": 130,
+          "y": 220
+        },
+        {
+          "x": 410,
+          "y": 220,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb",
+        "tar.gz"
+      ],
+      "category": "Network;WebBrowser;",
+      "artifactName": "AMIYO-Browser-${version}-linux-${arch}.${ext}"
     },
     "files": [
       "main.js",

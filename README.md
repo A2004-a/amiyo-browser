@@ -22,18 +22,22 @@
 
 ---
 
-## 💾 Download for Windows (64-bit)
+## 💾 Cross-Platform Downloads (Windows, Mac, Linux, Android)
 
-Get the latest release for **Windows 10 / 11 (64-bit)**:
+Get the latest release for your operating system:
 
-| Format | Architecture | Download Link | Description |
-|:---|:---|:---|:---|
-| **Windows Installer (.exe)** | `x64` (64-bit) | [⬇️ **Download Installer (.exe)**](https://github.com/A2004-a/amiyo-browser/releases/download/v1.0.0/AMIYO-Browser-Setup-1.0.0-x64.exe) | Interactive setup with desktop & start menu shortcuts |
-| **Portable ZIP Archive** | `x64` (64-bit) | [⬇️ **Download ZIP (.zip)**](https://github.com/A2004-a/amiyo-browser/releases/download/v1.0.0/AMIYO-Browser-Setup-1.0.0-x64.zip) | Extracted directory package (run without installation) |
-| **All Releases & Assets** | `x64` (64-bit) | [📦 **View GitHub Releases**](https://github.com/A2004-a/amiyo-browser/releases) | Official releases, changelogs, and release binaries |
-| **CI Build Artifacts (Mirror)** | `x64` (64-bit) | [⬇️ **Download from GitHub Actions**](https://github.com/A2004-a/amiyo-browser/actions/runs/43255073885) | Compiled artifact backup from CI pipeline |
+| Platform | Format | Architecture | Download Link | Description |
+|:---|:---|:---|:---|:---|
+| 🪟 **Windows** | **Installer (.exe)** | `x64` (64-bit) | [⬇️ **Download Installer (.exe)**](https://github.com/A2004-a/amiyo-browser/releases/download/v1.0.0/AMIYO-Browser-Setup-1.0.0-x64.exe) | One-click setup with desktop & start menu shortcuts |
+| 🪟 **Windows** | **Portable (.zip)** | `x64` (64-bit) | [⬇️ **Download ZIP (.zip)**](https://github.com/A2004-a/amiyo-browser/releases/download/v1.0.0/AMIYO-Browser-Setup-1.0.0-x64.zip) | Standalone portable executable |
+| 🍎 **macOS** | **Disk Image (.dmg)** | `Universal` / `arm64` / `x64` | [⬇️ **Download DMG (.dmg)**](https://github.com/A2004-a/amiyo-browser/releases/download/v1.0.0/AMIYO-Browser-1.0.0-mac-universal.dmg) | Drag-and-drop installer for Apple Silicon & Intel Macs |
+| 🍎 **macOS** | **ZIP Archive (.zip)** | `Universal` / `arm64` / `x64` | [⬇️ **Download macOS (.zip)**](https://github.com/A2004-a/amiyo-browser/releases/download/v1.0.0/AMIYO-Browser-1.0.0-mac-universal.zip) | Extracted `.app` package |
+| 🐧 **Linux** | **AppImage (.AppImage)** | `x64` | [⬇️ **Download AppImage**](https://github.com/A2004-a/amiyo-browser/releases/download/v1.0.0/AMIYO-Browser-1.0.0-linux-x64.AppImage) | Universal single-file executable for all Linux distros |
+| 🐧 **Linux** | **Debian (.deb)** | `x64` | [⬇️ **Download DEB Package**](https://github.com/A2004-a/amiyo-browser/releases/download/v1.0.0/AMIYO-Browser-1.0.0-linux-x64.deb) | Package for Ubuntu, Debian, Mint |
+| 🤖 **Android** | **Android APK (.apk)** | `arm64-v8a` / `armeabi-v7a` | [⬇️ **Download Android APK**](https://github.com/A2004-a/amiyo-browser/releases/download/v1.0.0/AMIYO-Browser-v1.0.0-Android.apk) | Native Android browser package |
+| 📦 **All Platforms** | **Release Hub** | All Platforms | [📦 **View GitHub Releases**](https://github.com/A2004-a/amiyo-browser/releases/tag/v1.0.0) | All release assets, changelogs, and checksums |
 
-> 🚀 **Automated Builds**: Compiled and signed through our continuous integration pipeline: [Build Windows 64-bit Workflow](https://github.com/A2004-a/amiyo-browser/actions/workflows/build-windows.yml).
+> 🚀 **Automated Multi-Platform Pipeline**: Windows, macOS, Linux, and Android builds are continuously built via our [Cross-Platform Build Workflow](https://github.com/A2004-a/amiyo-browser/actions/workflows/build-all-platforms.yml).
 
 ---
 
