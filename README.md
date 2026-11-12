@@ -28,10 +28,12 @@ Get the latest release for **Windows 10 / 11 (64-bit)**:
 
 | Format | Architecture | Download Link | Description |
 |:---|:---|:---|:---|
-| **Windows 64-bit App (.zip with .exe)** | `x64` (64-bit) | [⬇️ **Download from GitHub Actions Artifacts**](https://github.com/A2004-a/amiyo-browser/actions/runs/43255073885) | Compiled package containing `AMIYO-Browser-Setup.exe` and portable binary |
-| **All Releases & Assets** | `x64` (64-bit) | [📦 **View GitHub Releases**](https://github.com/A2004-a/amiyo-browser/releases) | Official releases, source archives, and release notes |
+| **Windows Installer (.exe)** | `x64` (64-bit) | [⬇️ **Download Installer (.exe)**](https://github.com/A2004-a/amiyo-browser/releases/download/v1.0.0/AMIYO-Browser-Setup-1.0.0-x64.exe) | Interactive setup with desktop & start menu shortcuts |
+| **Portable ZIP Archive** | `x64` (64-bit) | [⬇️ **Download ZIP (.zip)**](https://github.com/A2004-a/amiyo-browser/releases/download/v1.0.0/AMIYO-Browser-Setup-1.0.0-x64.zip) | Extracted directory package (run without installation) |
+| **All Releases & Assets** | `x64` (64-bit) | [📦 **View GitHub Releases**](https://github.com/A2004-a/amiyo-browser/releases) | Official releases, changelogs, and release binaries |
+| **CI Build Artifacts (Mirror)** | `x64` (64-bit) | [⬇️ **Download from GitHub Actions**](https://github.com/A2004-a/amiyo-browser/actions/runs/43255073885) | Compiled artifact backup from CI pipeline |
 
-> 🚀 **Automated Builds**: Compiled and signed through our continuous integration pipeline: [Build Windows 64-bit Workflow](https://github.com/A2004-a/amiyo-browser/actions/workflows/build-windows.yml). Latest dev builds can also be downloaded directly from the **Actions > Artifacts** section.
+> 🚀 **Automated Builds**: Compiled and signed through our continuous integration pipeline: [Build Windows 64-bit Workflow](https://github.com/A2004-a/amiyo-browser/actions/workflows/build-windows.yml).
 
 ---
 
