@@ -90,10 +90,34 @@ const Homepage = {
 
         <!-- Chrome NTP Main Content (Logo + Search + Shortcuts) -->
         <main class="chrome-ntp-center">
-          <!-- Google Chrome Colorful Brand Logo -->
-          <div class="chrome-logo-container">
-            <div class="chrome-google-logo">
-              <span class="c-blue">G</span><span class="c-red">o</span><span class="c-yellow">o</span><span class="c-blue">g</span><span class="c-green">l</span><span class="c-red">e</span>
+          <!-- Unique AMIYO Browser Brand Emblem & Title -->
+          <div class="amiyo-logo-container">
+            <div class="amiyo-brand-emblem">
+              <svg viewBox="0 0 128 128" width="56" height="56" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <linearGradient id="amiyoBgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#7928ca" />
+                    <stop offset="50%" stop-color="#4f46e5" />
+                    <stop offset="100%" stop-color="#06b6d4" />
+                  </linearGradient>
+                  <linearGradient id="amiyoAccentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#ffffff" />
+                    <stop offset="100%" stop-color="#e0e7ff" />
+                  </linearGradient>
+                  <filter id="amiyoGlow" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="5" result="blur" />
+                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                  </filter>
+                </defs>
+                <rect x="12" y="12" width="104" height="104" rx="26" fill="url(#amiyoBgGrad)" filter="url(#amiyoGlow)"/>
+                <circle cx="64" cy="64" r="42" fill="none" stroke="rgba(255, 255, 255, 0.25)" stroke-width="2" stroke-dasharray="8 4" />
+                <path d="M64 28 L86 92 L73 92 L68 76 L60 76 L55 92 L42 92 Z M64 46 L61.5 66 L66.5 66 Z" fill="url(#amiyoAccentGrad)" />
+                <circle cx="92" cy="36" r="6" fill="#38bdf8" />
+              </svg>
+            </div>
+            <div class="amiyo-brand-title">
+              <span class="amiyo-title-main">AMIYO</span>
+              <span class="amiyo-title-sub">Browser</span>
             </div>
           </div>
 

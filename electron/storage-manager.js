@@ -8,15 +8,6 @@ class StorageManager {
     this.dataDir = this.resolveDataDir();
     this.ensureDataDir();
 
-    this.files = {
-      settings: path.join(this.dataDir, 'settings.json'),
-      bookmarks: path.join(this.dataDir, 'bookmarks.json'),
-      history: path.join(this.dataDir, 'history.json'),
-      downloads: path.join(this.dataDir, 'downloads.json'),
-      permissions: path.join(this.dataDir, 'permissions.json'),
-      session: path.join(this.dataDir, 'session.json')
-    };
-
     let defaultDownloadDir = '';
     try {
       if (app && typeof app.isReady === 'function' && app.isReady()) {
@@ -87,27 +78,76 @@ class StorageManager {
     this.init();
   }
 
+  get files() {
+    return {
+      settings: path.join(this.dataDir, 'settings.json'),
+      bookmarks: path.join(this.dataDir, 'bookmarks.json'),
+      history: path.join(this.dataDir, 'history.json'),
+      downloads: path.join(this.dataDir, 'downloads.json'),
+      permissions: path.join(this.dataDir, 'permissions.json'),
+      session: path.join(this.dataDir, 'session.json')
+    };
+  }
+
   resolveDataDir() {
+    // 1. Explicit environment override
     if (process.env.AMIYO_DATA_DIR) {
       return process.env.AMIYO_DATA_DIR;
     }
+
+    // 2. Electron userData if available and not pointing into asar
     try {
       if (app && typeof app.getPath === 'function') {
-        return path.join(app.getPath('userData'), 'data');
+        const userData = app.getPath('userData');
+        if (userData && typeof userData === 'string' && !userData.includes('app.asar')) {
+          return path.join(userData, 'data');
+        }
       }
     } catch (e) {
-      // outside Electron (e.g. unit tests in Node.js)
+      // outside Electron or app not ready
     }
-    return path.join(__dirname, '..', 'data');
+
+    // 3. Packaged app or running inside asar: NEVER resolve inside __dirname
+    const isPackaged = (app && app.isPackaged) || __dirname.includes('app.asar');
+    if (isPackaged) {
+      const baseDir = (process.platform === 'win32' && process.env.APPDATA)
+        ? path.join(process.env.APPDATA, 'AMIYO Browser')
+        : path.join(os.homedir(), '.amiyo-browser');
+      return path.join(baseDir, 'data');
+    }
+
+    // 4. In development outside asar, use project local data directory
+    const devDataDir = path.join(__dirname, '..', 'data');
+    if (devDataDir.includes('app.asar')) {
+      return path.join(os.homedir(), '.amiyo-browser', 'data');
+    }
+    return devDataDir;
   }
 
   ensureDataDir() {
     try {
+      // Guard: Never attempt to write inside an asar archive
+      if (!this.dataDir || this.dataDir.includes('app.asar')) {
+        this.dataDir = (process.platform === 'win32' && process.env.APPDATA)
+          ? path.join(process.env.APPDATA, 'AMIYO Browser', 'data')
+          : path.join(os.homedir(), '.amiyo-browser', 'data');
+      }
+
       if (!fs.existsSync(this.dataDir)) {
         fs.mkdirSync(this.dataDir, { recursive: true });
       }
     } catch (err) {
       console.error(`Failed to ensure data directory (${this.dataDir}):`, err);
+      // Emergency safe fallback to temp directory so app NEVER crashes
+      try {
+        const fallbackDir = path.join(os.tmpdir(), 'amiyo-browser-data');
+        if (!fs.existsSync(fallbackDir)) {
+          fs.mkdirSync(fallbackDir, { recursive: true });
+        }
+        this.dataDir = fallbackDir;
+      } catch (fallbackErr) {
+        console.error('Emergency fallback data directory failed:', fallbackErr);
+      }
     }
   }
 

@@ -1,10 +1,6 @@
-name: Build Windows 64-bit
+name: Build Windows 64-bit (Manual)
 
 on:
-  push:
-    branches: [ main ]
-    tags:
-      - 'v*'
   workflow_dispatch:
 
 permissions:

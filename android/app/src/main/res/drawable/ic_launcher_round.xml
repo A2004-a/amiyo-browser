@@ -5,43 +5,50 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
     
-    <!-- Circular Background -->
+    <!-- Circular Background / Dark Obsidian Base -->
     <path
-        android:fillColor="#18191A"
+        android:fillColor="#0F1117"
         android:pathData="M54,0 A54,54 0 1,1 54,108 A54,54 0 1,1 54,0 Z" />
 
-    <!-- Chrome Outer Arc Red (Top) -->
+    <!-- Outer Orbital Accent Ring -->
     <path
-        android:fillColor="#EA4335"
-        android:pathData="M54,16 A38,38 0 0,1 90,44 L74,48 A22,22 0 0,0 54,32 Z" />
+        android:fillColor="#1E293B"
+        android:pathData="M54,12 A42,42 0 1,1 54,96 A42,42 0 1,1 54,12 Z" />
 
-    <!-- Chrome Outer Arc Yellow (Right) -->
+    <!-- Outer Glowing Crest - Electric Indigo & Cyan -->
     <path
-        android:fillColor="#FBBC05"
-        android:pathData="M90,44 A38,38 0 0,1 66,91 L62,75 A22,22 0 0,0 74,48 Z" />
+        android:fillColor="#4F46E5"
+        android:pathData="M54,14 A40,40 0 0,1 94,54 L86,54 A32,32 0 0,0 54,22 Z" />
 
-    <!-- Chrome Outer Arc Green (Bottom Left) -->
     <path
-        android:fillColor="#34A853"
-        android:pathData="M66,91 A38,38 0 0,1 21,68 L36,60 A22,22 0 0,0 62,75 Z" />
+        android:fillColor="#2563EB"
+        android:pathData="M94,54 A40,40 0 0,1 54,94 L54,86 A32,32 0 0,0 86,54 Z" />
 
-    <!-- Chrome Outer Arc Blue (Top Left) -->
     <path
-        android:fillColor="#4285F4"
-        android:pathData="M21,68 A38,38 0 0,1 54,16 L54,32 A22,22 0 0,0 36,60 Z" />
+        android:fillColor="#0284C7"
+        android:pathData="M54,94 A40,40 0 0,1 14,54 L22,54 A32,32 0 0,0 54,86 Z" />
 
-    <!-- Inner Disc Dark -->
     <path
-        android:fillColor="#242526"
-        android:pathData="M54,54m-22,0a22,22 0 1,0 44,0a22,22 0 1,0 -44,0" />
+        android:fillColor="#06B6D4"
+        android:pathData="M14,54 A40,40 0 0,1 54,14 L54,22 A32,32 0 0,0 22,54 Z" />
 
-    <!-- Inner Vibrant Blue Disc -->
+    <!-- Center Core Disc - Deep Indigo / Midnight -->
     <path
-        android:fillColor="#1A73E8"
-        android:pathData="M54,54m-18,0a18,18 0 1,0 36,0a18,18 0 1,0 -36,0" />
+        android:fillColor="#1E1B4B"
+        android:pathData="M54,54m-28,0a28,28 0 1,0 56,0a28,28 0 1,0 -56,0" />
 
-    <!-- Iconic Bold 'A' Letter for AMIYO -->
+    <!-- Inner Core Gradient Orb -->
+    <path
+        android:fillColor="#4338CA"
+        android:pathData="M54,54m-24,0a24,24 0 1,0 48,0a24,24 0 1,0 -48,0" />
+
+    <!-- Unique AMIYO Architectural 'A' Glyph -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M54,38 L43,68 L48,68 L50.5,61 L57.5,61 L60,68 L65,68 L54,38 Z M54,46 L56.2,56 L51.8,56 L54,46 Z" />
+        android:pathData="M54,34 L40,74 L47,74 L50.2,64 L57.8,64 L61,74 L68,74 L54,34 Z M54,44.5 L56.6,58 L51.4,58 L54,44.5 Z" />
+
+    <!-- Futuristic Cyan Delta Crossbar -->
+    <path
+        android:fillColor="#38BDF8"
+        android:pathData="M48,60 L60,60 L58,63 L50,63 Z" />
 </vector>

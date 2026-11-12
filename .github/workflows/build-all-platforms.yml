@@ -28,7 +28,7 @@ jobs:
             artifact-name: AMYIO-Browser-macOS
           - os: ubuntu-latest
             target: linux
-            args: "--linux AppImage deb tar.gz --x64"
+            args: "--linux --x64"
             artifact-name: AMYIO-Browser-Linux-x64
 
     steps:
@@ -51,7 +51,7 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libfuse2
+          sudo apt-get install -y libfuse2 libarchive-tools
 
       - name: Build Desktop Package
         run: npx --yes electron-builder ${{ matrix.args }} --publish never
