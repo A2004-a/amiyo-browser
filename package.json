@@ -60,9 +60,8 @@
       "artifactName": "AMIYO-Browser-Setup-${version}-x64.${ext}"
     },
     "nsis": {
-      "oneClick": false,
+      "oneClick": true,
       "perMachine": false,
-      "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "shortcutName": "AMIYO Browser"
