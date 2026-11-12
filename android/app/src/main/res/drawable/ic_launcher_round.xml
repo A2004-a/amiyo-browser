@@ -4,28 +4,44 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
+    
+    <!-- Circular Background -->
     <path
-        android:fillColor="#202124"
+        android:fillColor="#18191A"
         android:pathData="M54,0 A54,54 0 1,1 54,108 A54,54 0 1,1 54,0 Z" />
-    <!-- Outer Ring Red -->
+
+    <!-- Chrome Outer Arc Red (Top) -->
     <path
         android:fillColor="#EA4335"
-        android:pathData="M54,20 A34,34 0 0,1 88,54 L72,54 A18,18 0 0,0 54,36 Z" />
-    <!-- Outer Ring Yellow -->
+        android:pathData="M54,16 A38,38 0 0,1 90,44 L74,48 A22,22 0 0,0 54,32 Z" />
+
+    <!-- Chrome Outer Arc Yellow (Right) -->
     <path
         android:fillColor="#FBBC05"
-        android:pathData="M88,54 A34,34 0 0,1 54,88 L54,72 A18,18 0 0,0 72,54 Z" />
-    <!-- Outer Ring Green -->
+        android:pathData="M90,44 A38,38 0 0,1 66,91 L62,75 A22,22 0 0,0 74,48 Z" />
+
+    <!-- Chrome Outer Arc Green (Bottom Left) -->
     <path
         android:fillColor="#34A853"
-        android:pathData="M54,88 A34,34 0 0,1 20,54 L36,54 A18,18 0 0,0 54,72 Z" />
-    <!-- Center Circle Blue -->
+        android:pathData="M66,91 A38,38 0 0,1 21,68 L36,60 A22,22 0 0,0 62,75 Z" />
+
+    <!-- Chrome Outer Arc Blue (Top Left) -->
     <path
         android:fillColor="#4285F4"
-        android:pathData="M54,54m-14,0a14,14 0 1,0 28,0a14,14 0 1,0 -28,0" />
-    <!-- Inner White Core -->
+        android:pathData="M21,68 A38,38 0 0,1 54,16 L54,32 A22,22 0 0,0 36,60 Z" />
+
+    <!-- Inner Disc Dark -->
+    <path
+        android:fillColor="#242526"
+        android:pathData="M54,54m-22,0a22,22 0 1,0 44,0a22,22 0 1,0 -44,0" />
+
+    <!-- Inner Vibrant Blue Disc -->
+    <path
+        android:fillColor="#1A73E8"
+        android:pathData="M54,54m-18,0a18,18 0 1,0 36,0a18,18 0 1,0 -36,0" />
+
+    <!-- Iconic Bold 'A' Letter for AMIYO -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M54,54m-6,0a6,6 0 1,0 12,0a6,6 0 1,0 -12,0" />
+        android:pathData="M54,38 L43,68 L48,68 L50.5,61 L57.5,61 L60,68 L65,68 L54,38 Z M54,46 L56.2,56 L51.8,56 L54,46 Z" />
 </vector>
-

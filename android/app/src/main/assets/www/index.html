@@ -17,18 +17,58 @@
       justify-content: center;
       padding: 24px 16px 80px;
     }
-    .logo {
-      font-size: 48px;
-      font-weight: 500;
-      letter-spacing: -1.5px;
-      margin-bottom: 28px;
+    
+    /* Brand Emblem & Logo */
+    .brand-container {
       display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 28px;
+      gap: 12px;
     }
+
+    .brand-icon-circle {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: #18191a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+      position: relative;
+    }
+
+    .brand-icon-circle svg {
+      width: 48px;
+      height: 48px;
+    }
+
+    .brand-title {
+      font-size: 38px;
+      font-weight: 600;
+      letter-spacing: -0.5px;
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      line-height: 1;
+    }
+
+    .brand-subtitle {
+      font-size: 13px;
+      font-weight: 500;
+      color: #9aa0a6;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-top: -4px;
+    }
+
     .c-blue { color: #4285f4; }
     .c-red { color: #ea4335; }
     .c-yellow { color: #fbbc05; }
     .c-green { color: #34a853; }
 
+    /* Omnibox Search Box */
     .search-box {
       width: 100%;
       max-width: 480px;
@@ -38,10 +78,19 @@
       display: flex;
       align-items: center;
       padding: 0 16px;
-      gap: 12px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      gap: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
       margin-bottom: 32px;
+      border: 1px solid rgba(255,255,255,0.08);
+      transition: box-shadow 0.2s, background-color 0.2s;
     }
+
+    .search-box:focus-within {
+      background: #35363a;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.45);
+      border-color: rgba(255,255,255,0.18);
+    }
+
     .search-input {
       flex: 1;
       height: 100%;
@@ -53,9 +102,15 @@
     }
     .search-input::placeholder { color: #9aa0a6; }
 
+    .search-tools {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
     .icon-btn {
-      width: 24px;
-      height: 24px;
+      width: 28px;
+      height: 28px;
       background: transparent;
       border: none;
       display: flex;
@@ -63,8 +118,10 @@
       justify-content: center;
       color: #9aa0a6;
       cursor: pointer;
+      border-radius: 50%;
     }
 
+    /* Shortcuts Grid */
     .shortcuts-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -89,37 +146,86 @@
       align-items: center;
       justify-content: center;
       font-size: 20px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.25);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      transition: transform 0.15s, background-color 0.15s;
+    }
+    .shortcut:active .circle {
+      transform: scale(0.95);
+      background: #3c4043;
     }
     .label {
       font-size: 12px;
       color: #e8eaed;
       text-align: center;
-      max-width: 72px;
+      max-width: 76px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
+
+    /* Customize Pill */
+    .customize-pill {
+      position: fixed;
+      bottom: 18px;
+      right: 18px;
+      height: 36px;
+      padding: 0 16px;
+      background: #303134;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 18px;
+      color: #e8eaed;
+      font-size: 12px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.35);
+    }
   </style>
 </head>
 <body>
-  <!-- Google 4-color Logo -->
-  <div class="logo">
-    <span class="c-blue">G</span><span class="c-red">o</span><span class="c-yellow">o</span><span class="c-blue">g</span><span class="c-green">l</span><span class="c-red">e</span>
+
+  <!-- AMIYO Browser Colorful Emblem & Logo -->
+  <div class="brand-container">
+    <div class="brand-icon-circle">
+      <svg viewBox="0 0 108 108" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Chrome Arcs -->
+        <path d="M54 16 A38 38 0 0 1 90 44 L74 48 A22 22 0 0 0 54 32 Z" fill="#EA4335" />
+        <path d="M90 44 A38 38 0 0 1 66 91 L62 75 A22 22 0 0 0 74 48 Z" fill="#FBBC05" />
+        <path d="M66 91 A38 38 0 0 1 21 68 L36 60 A22 22 0 0 0 62 75 Z" fill="#34A853" />
+        <path d="M21 68 A38 38 0 0 1 54 16 L54 32 A22 22 0 0 0 36 60 Z" fill="#4285F4" />
+        <!-- Inner Core -->
+        <circle cx="54" cy="54" r="18" fill="#1A73E8" />
+        <!-- Letter A -->
+        <path d="M54 38 L43 68 L48 68 L50.5 61 L57.5 61 L60 68 L65 68 L54 38 Z M54 46 L56.2 56 L51.8 56 L54 46 Z" fill="#FFFFFF" />
+      </svg>
+    </div>
+    <div class="brand-title">
+      <span class="c-blue">A</span><span class="c-red">M</span><span class="c-yellow">I</span><span class="c-blue">Y</span><span class="c-green">O</span>
+    </div>
+    <div class="brand-subtitle">Browser</div>
   </div>
 
   <!-- Search Bar -->
   <form class="search-box" action="https://www.google.com/search" method="GET">
-    <svg style="width:20px;height:20px;color:#9aa0a6;" viewBox="0 0 24 24" fill="currentColor">
+    <svg style="width:20px;height:20px;color:#9aa0a6;flex-shrink:0;" viewBox="0 0 24 24" fill="currentColor">
       <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
     </svg>
-    <input type="text" name="q" class="search-input" placeholder="Search or type URL" autocomplete="off" />
-    <button type="submit" class="icon-btn">
-      <svg style="width:18px;height:18px;" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
-        <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
-      </svg>
-    </button>
+    <input type="text" name="q" class="search-input" placeholder="Search with Google or type URL" autocomplete="off" />
+    <div class="search-tools">
+      <button type="button" class="icon-btn" title="Search by voice" onclick="location.href='https://www.google.com';">
+        <svg style="width:18px;height:18px;" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+          <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+        </svg>
+      </button>
+      <button type="button" class="icon-btn" title="Google Lens" onclick="location.href='https://lens.google.com';">
+        <svg style="width:18px;height:18px;" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6m0-2a5 5 0 1 1 0 10 5 5 0 0 1 0-10m-7 4a7 7 0 1 1 14 0 7 7 0 0 1-14 0"/>
+        </svg>
+      </button>
+    </div>
   </form>
 
   <!-- Shortcuts Grid -->
@@ -157,6 +263,11 @@
       <span class="label">Maps</span>
     </a>
   </div>
+
+  <!-- Customize Button -->
+  <div class="customize-pill">
+    <span>✏️ Customize AMIYO Browser</span>
+  </div>
+
 </body>
 </html>
-
