@@ -1,4 +1,7 @@
 const { app, BrowserWindow } = require('electron');
+if (app && typeof app.setName === 'function') {
+  app.setName('AMIYO Browser');
+}
 const windowManager = require('./electron/window-manager');
 const menuManager = require('./electron/menu-manager');
 const { registerIpcHandlers } = require('./electron/ipc-handlers');

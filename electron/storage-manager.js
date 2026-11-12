@@ -5,7 +5,7 @@ const { app } = require('electron');
 
 class StorageManager {
   constructor() {
-    this.dataDir = path.join(__dirname, '..', 'data');
+    this.dataDir = this.resolveDataDir();
     this.ensureDataDir();
 
     this.files = {
@@ -87,9 +87,27 @@ class StorageManager {
     this.init();
   }
 
+  resolveDataDir() {
+    if (process.env.AMIYO_DATA_DIR) {
+      return process.env.AMIYO_DATA_DIR;
+    }
+    try {
+      if (app && typeof app.getPath === 'function') {
+        return path.join(app.getPath('userData'), 'data');
+      }
+    } catch (e) {
+      // outside Electron (e.g. unit tests in Node.js)
+    }
+    return path.join(__dirname, '..', 'data');
+  }
+
   ensureDataDir() {
-    if (!fs.existsSync(this.dataDir)) {
-      fs.mkdirSync(this.dataDir, { recursive: true });
+    try {
+      if (!fs.existsSync(this.dataDir)) {
+        fs.mkdirSync(this.dataDir, { recursive: true });
+      }
+    } catch (err) {
+      console.error(`Failed to ensure data directory (${this.dataDir}):`, err);
     }
   }
 
@@ -112,6 +130,13 @@ class StorageManager {
     try {
       if (fs.existsSync(filePath)) {
         const raw = fs.readFileSync(filePath, 'utf-8');
+        return JSON.parse(raw);
+      }
+      // Check if fallback seed file exists in bundled project data directory
+      const fileName = path.basename(filePath);
+      const bundledPath = path.join(__dirname, '..', 'data', fileName);
+      if (bundledPath !== filePath && fs.existsSync(bundledPath)) {
+        const raw = fs.readFileSync(bundledPath, 'utf-8');
         return JSON.parse(raw);
       }
     } catch (err) {
