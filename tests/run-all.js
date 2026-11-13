@@ -10,7 +10,7 @@ const memoryTests = require('./memory-saver.test');
 const readerTests = require('./reader-mode.test');
 
 console.log('========================================');
-console.log('       AMIYO Browser Test Suite        ');
+console.log('       AETHER Browser Test Suite       ');
 console.log('========================================\n');
 
 try {

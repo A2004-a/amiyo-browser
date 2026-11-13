@@ -32,113 +32,109 @@ const Homepage = {
     const hasBg = Boolean(activeWallpaper);
 
     const engineMap = {
-      google: 'Google',
-      duckduckgo: 'DuckDuckGo',
-      bing: 'Bing',
-      yahoo: 'Yahoo',
-      ecosia: 'Ecosia',
-      yandex: 'Yandex'
+      google: { name: 'Google', icon: '🌐' },
+      duckduckgo: { name: 'DuckDuckGo', icon: '🦆' },
+      bing: { name: 'Bing', icon: '🔷' },
+      yahoo: { name: 'Yahoo', icon: '🟣' },
+      ecosia: { name: 'Ecosia', icon: '🌿' },
+      yandex: { name: 'Yandex', icon: '🔴' }
     };
-    const currentEngine = (State.settings && State.settings.searchEngine) ? State.settings.searchEngine.toLowerCase() : 'google';
-    const engineLabel = engineMap[currentEngine] || 'the web';
+    const currentEngineKey = (State.settings && State.settings.searchEngine) ? State.settings.searchEngine.toLowerCase() : 'google';
+    const currentEngine = engineMap[currentEngineKey] || engineMap.google;
 
     container.innerHTML = `
       <div class="chrome-ntp ${hasBg ? 'has-custom-wallpaper' : ''}" style="${hasBg ? `background-image: url('${activeWallpaper}');` : ''}">
-        <!-- Chrome NTP Top-Right Bar -->
+        <!-- AETHER Nexus Top Bar -->
         <header class="chrome-ntp-header">
-          <a href="https://mail.google.com" class="chrome-nav-link" id="ntp-gmail-link">Gmail</a>
-          <a href="https://images.google.com" class="chrome-nav-link" id="ntp-images-link">Images</a>
-          <button class="chrome-icon-btn" id="ntp-apps-btn" title="Google apps">
+          <button class="chrome-nav-link" id="ntp-shields-link" style="background:none;border:none;cursor:pointer;">Shields</button>
+          <button class="chrome-nav-link" id="ntp-ai-link" style="background:none;border:none;cursor:pointer;">Intelligence</button>
+          <button class="chrome-icon-btn" id="ntp-apps-btn" title="AETHER Spaces">
             ${Utils.icons.apps}
           </button>
-          <div class="chrome-profile-btn" id="ntp-profile-btn" title="AMIYO Profile">
-            <div class="chrome-profile-avatar">A</div>
+          <div class="chrome-profile-btn" id="ntp-profile-btn" title="AETHER Profile">
+            <div class="chrome-profile-avatar" style="background:linear-gradient(135deg, #121B2B, #35D8F2);color:#fff;">A</div>
           </div>
 
-          <!-- Google Apps 9-Dots Dropdown -->
+          <!-- AETHER Spaces Dropdown -->
           <div class="chrome-apps-menu hidden" id="chrome-apps-menu">
             <div class="apps-grid">
-              <div class="app-item" data-url="https://www.google.com">
-                <div class="app-icon" style="background:#e8f0fe;color:#1a73e8;">🔍</div>
-                <span>Search</span>
+              <div class="app-item" data-action="bookmarks">
+                <div class="app-icon" style="background:#121B2B;color:#35D8F2;">⭐</div>
+                <span>Bookmarks</span>
               </div>
-              <div class="app-item" data-url="https://maps.google.com">
-                <div class="app-icon" style="background:#e6f4ea;color:#1e8e3e;">🗺️</div>
-                <span>Maps</span>
+              <div class="app-item" data-action="history">
+                <div class="app-icon" style="background:#121B2B;color:#7AAEFF;">🕒</div>
+                <span>History</span>
               </div>
-              <div class="app-item" data-url="https://www.youtube.com">
-                <div class="app-icon" style="background:#fce8e6;color:#d93025;">▶️</div>
-                <span>YouTube</span>
+              <div class="app-item" data-action="downloads">
+                <div class="app-icon" style="background:#121B2B;color:#34a853;">📥</div>
+                <span>Downloads</span>
               </div>
-              <div class="app-item" data-url="https://mail.google.com">
-                <div class="app-icon" style="background:#fce8e6;color:#d93025;">✉️</div>
-                <span>Gmail</span>
+              <div class="app-item" data-action="settings">
+                <div class="app-icon" style="background:#121B2B;color:#DCE3EB;">⚙️</div>
+                <span>Settings</span>
               </div>
-              <div class="app-item" data-url="https://news.google.com">
-                <div class="app-icon" style="background:#e8f0fe;color:#1a73e8;">📰</div>
-                <span>News</span>
+              <div class="app-item" data-action="ai">
+                <div class="app-icon" style="background:#121B2B;color:#35D8F2;">✨</div>
+                <span>AI Assist</span>
               </div>
-              <div class="app-item" data-url="https://meet.google.com">
-                <div class="app-icon" style="background:#e6f4ea;color:#1e8e3e;">📹</div>
-                <span>Meet</span>
-              </div>
-              <div class="app-item" data-url="https://drive.google.com">
-                <div class="app-icon" style="background:#fef7e0;color:#f9ab00;">📁</div>
-                <span>Drive</span>
-              </div>
-              <div class="app-item" data-url="https://calendar.google.com">
-                <div class="app-icon" style="background:#e8f0fe;color:#1a73e8;">📅</div>
-                <span>Calendar</span>
-              </div>
-              <div class="app-item" data-url="https://translate.google.com">
-                <div class="app-icon" style="background:#e8f0fe;color:#1a73e8;">🌐</div>
-                <span>Translate</span>
+              <div class="app-item" data-action="shields">
+                <div class="app-icon" style="background:#121B2B;color:#38bdf8;">🛡️</div>
+                <span>Shields</span>
               </div>
             </div>
           </div>
         </header>
 
-        <!-- Chrome NTP Main Content (Logo + Search + Shortcuts) -->
+        <!-- AETHER Nexus Main Content (The Infinite A + Search + Shortcuts) -->
         <main class="chrome-ntp-center">
-          <!-- Unique AMIYO Browser Brand Emblem & Title -->
-          <div class="amiyo-logo-container">
-            <div class="amiyo-brand-emblem">
-              <svg viewBox="0 0 128 128" width="56" height="56" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Official AETHER Infinite A Emblem & Brand Mark -->
+          <div class="aether-logo-container">
+            <div class="aether-brand-emblem">
+              <svg viewBox="0 0 128 128" width="68" height="68" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <defs>
-                  <linearGradient id="amiyoBgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="#7928ca" />
-                    <stop offset="50%" stop-color="#4f46e5" />
-                    <stop offset="100%" stop-color="#06b6d4" />
+                  <linearGradient id="aetherNtpBg" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#0B0F14" />
+                    <stop offset="100%" stop-color="#121B2B" />
                   </linearGradient>
-                  <linearGradient id="amiyoAccentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="#ffffff" />
-                    <stop offset="100%" stop-color="#e0e7ff" />
+                  <linearGradient id="aetherNtpSilver" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#FFFFFF" />
+                    <stop offset="40%" stop-color="#DCE3EB" />
+                    <stop offset="100%" stop-color="#7AAEFF" />
                   </linearGradient>
-                  <filter id="amiyoGlow" x="-20%" y="-20%" width="140%" height="140%">
-                    <feGaussianBlur stdDeviation="5" result="blur" />
+                  <linearGradient id="aetherNtpCyan" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#35D8F2" />
+                    <stop offset="100%" stop-color="#7AAEFF" />
+                  </linearGradient>
+                  <filter id="aetherNtpGlow" x="-30%" y="-30%" width="160%" height="160%">
+                    <feGaussianBlur stdDeviation="4" result="blur" />
                     <feComposite in="SourceGraphic" in2="blur" operator="over" />
                   </filter>
                 </defs>
-                <rect x="12" y="12" width="104" height="104" rx="26" fill="url(#amiyoBgGrad)" filter="url(#amiyoGlow)"/>
-                <circle cx="64" cy="64" r="42" fill="none" stroke="rgba(255, 255, 255, 0.25)" stroke-width="2" stroke-dasharray="8 4" />
-                <path d="M64 28 L86 92 L73 92 L68 76 L60 76 L55 92 L42 92 Z M64 46 L61.5 66 L66.5 66 Z" fill="url(#amiyoAccentGrad)" />
-                <circle cx="92" cy="36" r="6" fill="#38bdf8" />
+                <rect x="8" y="8" width="112" height="112" rx="28" fill="url(#aetherNtpBg)" stroke="#252D38" stroke-width="2"/>
+                <ellipse cx="64" cy="68" rx="46" ry="18" fill="none" stroke="url(#aetherNtpCyan)" stroke-width="2.5" opacity="0.85" filter="url(#aetherNtpGlow)" transform="rotate(-15 64 68)"/>
+                <path d="M64 22 L94 88 L78 88 L64 54 L50 88 L34 88 Z" fill="url(#aetherNtpSilver)" />
+                <path d="M42 66 L86 66 L82 74 L46 74 Z" fill="url(#aetherNtpCyan)" opacity="0.95" />
+                <circle cx="64" cy="22" r="3.5" fill="#35D8F2" filter="url(#aetherNtpGlow)" />
               </svg>
             </div>
-            <div class="amiyo-brand-title">
-              <span class="amiyo-title-main">AMIYO</span>
-              <span class="amiyo-title-sub">Browser</span>
+            <div class="aether-brand-title">
+              <span class="aether-title-main">AETHER</span>
+              <span class="aether-title-sub">EXPLORE WITHOUT LIMITS.</span>
             </div>
           </div>
 
-          <!-- Chrome Omnibox Search Container -->
+          <!-- AETHER Search Box with Dynamic Engine Selector -->
           <div class="chrome-search-box" id="chrome-search-box">
-            <div class="chrome-search-icon">${Utils.icons.search}</div>
+            <button class="ntp-engine-badge" id="ntp-engine-badge" title="Active Search Engine: ${currentEngine.name} (Click to switch engine)">
+              <span class="engine-badge-icon">${currentEngine.icon}</span>
+              <span class="engine-badge-name">${currentEngine.name}</span>
+            </button>
             <input 
               type="text" 
               class="chrome-search-input" 
               id="newtab-search-input" 
-              placeholder="Search ${engineLabel} or type a URL" 
+              placeholder="Search with ${currentEngine.name} or type a URL" 
               autocomplete="off" 
               spellcheck="false" 
               autofocus 
@@ -147,7 +143,7 @@ const Homepage = {
               <button class="chrome-tool-btn" id="voice-search-btn" title="Search by voice">
                 ${Utils.icons.mic}
               </button>
-              <button class="chrome-tool-btn" id="lens-search-btn" title="Search by image">
+              <button class="chrome-tool-btn" id="lens-search-btn" title="AETHER Prism Lens">
                 ${Utils.icons.lens}
               </button>
             </div>
@@ -184,10 +180,10 @@ const Homepage = {
           </div>
         </main>
 
-        <!-- Floating "Customize AMIYO Browser" Button -->
-        <button class="chrome-customize-pill" id="customize-chrome-btn" title="Customize AMIYO Browser">
+        <!-- Floating "Customize AETHER Browser" Button -->
+        <button class="chrome-customize-pill" id="customize-chrome-btn" title="Customize AETHER Browser">
           ${Utils.icons.customize}
-          <span>Customize AMIYO Browser</span>
+          <span>Customize AETHER Browser</span>
         </button>
 
         <!-- Shortcut Action Context Menu -->
@@ -255,6 +251,25 @@ const Homepage = {
       });
     }
 
+    // 1b. Search Engine Badge Click
+    container.querySelector('#ntp-engine-badge')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.showCustomizeChrome();
+    });
+
+    // 1c. NTP Top Bar links
+    container.querySelector('#ntp-shields-link')?.addEventListener('click', () => {
+      if (typeof Omnibox !== 'undefined' && Omnibox.toggleShieldsPopover) {
+        Omnibox.toggleShieldsPopover();
+      }
+    });
+
+    container.querySelector('#ntp-ai-link')?.addEventListener('click', () => {
+      if (typeof AiPanel !== 'undefined') {
+        AiPanel.toggle();
+      }
+    });
+
     // 2. Voice Search Button
     container.querySelector('#voice-search-btn')?.addEventListener('click', () => {
       this.activateVoiceSearch(searchInput);
@@ -265,7 +280,7 @@ const Homepage = {
       this.showGoogleLensModal();
     });
 
-    // 4. Google Apps 9-Dots Button
+    // 4. AETHER Spaces / Apps Button
     const appsBtn = container.querySelector('#ntp-apps-btn');
     const appsMenu = container.querySelector('#chrome-apps-menu');
     if (appsBtn && appsMenu) {
@@ -275,8 +290,16 @@ const Homepage = {
       });
       appsMenu.querySelectorAll('.app-item').forEach(item => {
         item.addEventListener('click', () => {
+          appsMenu.classList.add('hidden');
+          const action = item.dataset.action;
           const url = item.dataset.url;
-          if (url) IpcClient.navigateTab(State.activeTabId || '', url);
+          if (action === 'bookmarks') IpcClient.createTab('aether://bookmarks');
+          else if (action === 'history') IpcClient.createTab('aether://history');
+          else if (action === 'downloads') IpcClient.createTab('aether://downloads');
+          else if (action === 'settings') IpcClient.createTab('aether://settings');
+          else if (action === 'ai' && typeof AiPanel !== 'undefined') AiPanel.toggle();
+          else if (action === 'shields' && typeof Omnibox !== 'undefined') Omnibox.toggleShieldsPopover();
+          else if (url) IpcClient.navigateTab(State.activeTabId || '', url);
         });
       });
     }
@@ -445,8 +468,9 @@ const Homepage = {
     const currentTheme = State.settings.theme || 'dark';
     const showShortcuts = this.getShortcutsVisible();
     const activeWallpaper = this.getWallpaper();
+    const currentEngine = (State.settings && State.settings.searchEngine) ? State.settings.searchEngine.toLowerCase() : 'google';
 
-    App.showModal('Customize AMIYO Browser', `
+    App.showModal('Customize AETHER Browser', `
       <div style="display:flex;flex-direction:column;gap:20px;max-height:65vh;overflow-y:auto;padding-right:4px;">
         <!-- Background Wallpaper Section -->
         <div>
@@ -456,7 +480,7 @@ const Homepage = {
               <div 
                 class="wallpaper-card ${activeWallpaper === w.url ? 'active' : ''}" 
                 data-url="${Utils.escapeHtml(w.url)}"
-                style="height:64px;border-radius:8px;border:2px solid ${activeWallpaper === w.url ? '#4285f4' : 'var(--border-subtle)'};background:${w.url ? `url('${w.url}') center/cover` : 'var(--bg-tertiary)'};cursor:pointer;display:flex;align-items:flex-end;padding:4px 6px;text-shadow:0 1px 3px rgba(0,0,0,0.8);"
+                style="height:64px;border-radius:8px;border:2px solid ${activeWallpaper === w.url ? 'var(--cyan-accent, #35D8F2)' : 'var(--border-subtle)'};background:${w.url ? `url('${w.url}') center/cover` : 'var(--bg-tertiary)'};cursor:pointer;display:flex;align-items:flex-end;padding:4px 6px;text-shadow:0 1px 3px rgba(0,0,0,0.8);"
               >
                 <span style="font-size:11px;font-weight:600;color:#fff;">${w.name}</span>
               </div>
@@ -468,14 +492,14 @@ const Homepage = {
         <div>
           <h4 style="margin:0 0 10px;font-size:14px;color:var(--text-primary);">Color & Theme</h4>
           <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:10px;">
-            <button class="chrome-theme-choice ${currentTheme === 'dark' ? 'active' : ''}" id="choice-theme-dark" style="padding:14px;border-radius:8px;border:2px solid ${currentTheme === 'dark' ? '#4285f4' : 'var(--border-subtle)'};background:#202124;color:#fff;cursor:pointer;font-size:13px;font-weight:500;">
-              🌙 Dark
+            <button class="chrome-theme-choice ${currentTheme === 'dark' ? 'active' : ''}" id="choice-theme-dark" style="padding:14px;border-radius:8px;border:2px solid ${currentTheme === 'dark' ? 'var(--cyan-accent, #35D8F2)' : 'var(--border-subtle)'};background:#0B0F14;color:#DCE3EB;cursor:pointer;font-size:13px;font-weight:600;">
+              🌙 Obsidian Dark
             </button>
-            <button class="chrome-theme-choice ${currentTheme === 'light' ? 'active' : ''}" id="choice-theme-light" style="padding:14px;border-radius:8px;border:2px solid ${currentTheme === 'light' ? '#4285f4' : 'var(--border-subtle)'};background:#ffffff;color:#202124;cursor:pointer;font-size:13px;font-weight:500;">
-              ☀️ Light
+            <button class="chrome-theme-choice ${currentTheme === 'light' ? 'active' : ''}" id="choice-theme-light" style="padding:14px;border-radius:8px;border:2px solid ${currentTheme === 'light' ? 'var(--cyan-accent, #35D8F2)' : 'var(--border-subtle)'};background:#ffffff;color:#121B2B;cursor:pointer;font-size:13px;font-weight:600;">
+              ☀️ Modern Light
             </button>
-            <button class="chrome-theme-choice" id="choice-theme-classic" style="padding:14px;border-radius:8px;border:2px solid var(--border-subtle);background:#1a73e8;color:#fff;cursor:pointer;font-size:13px;font-weight:500;">
-              🔷 AMIYO Blue
+            <button class="chrome-theme-choice" id="choice-theme-cyan" style="padding:14px;border-radius:8px;border:2px solid var(--border-subtle);background:#121B2B;color:#35D8F2;cursor:pointer;font-size:13px;font-weight:600;">
+              ⚡ AETHER Cyan
             </button>
           </div>
         </div>
@@ -486,23 +510,46 @@ const Homepage = {
             <div style="font-size:14px;font-weight:500;color:var(--text-primary);">Show shortcuts</div>
             <div style="font-size:12px;color:var(--text-secondary);">Display quick shortcut icons on the New Tab page</div>
           </div>
-          <input type="checkbox" id="toggle-shortcuts-cb" ${showShortcuts ? 'checked' : ''} style="width:18px;height:18px;accent-color:#4285f4;cursor:pointer;" />
+          <input type="checkbox" id="toggle-shortcuts-cb" ${showShortcuts ? 'checked' : ''} style="width:18px;height:18px;accent-color:var(--cyan-accent, #35D8F2);cursor:pointer;" />
         </div>
 
         <!-- Search Engine -->
         <div>
-          <h4 style="margin:0 0 8px;font-size:14px;color:var(--text-primary);">Search Engine</h4>
-          <select id="customize-search-select" class="settings-select" style="width:100%;padding:10px;border-radius:8px;background:var(--bg-input);color:var(--text-primary);border:1px solid var(--border-subtle);">
-            <option value="google" ${(!State.settings.searchEngine || State.settings.searchEngine === 'google') ? 'selected' : ''}>Google (Default)</option>
-            <option value="duckduckgo" ${State.settings.searchEngine === 'duckduckgo' ? 'selected' : ''}>DuckDuckGo</option>
-            <option value="bing" ${State.settings.searchEngine === 'bing' ? 'selected' : ''}>Bing</option>
-            <option value="yahoo" ${State.settings.searchEngine === 'yahoo' ? 'selected' : ''}>Yahoo</option>
-            <option value="ecosia" ${State.settings.searchEngine === 'ecosia' ? 'selected' : ''}>Ecosia</option>
+          <h4 style="margin:0 0 8px;font-size:14px;color:var(--text-primary);">Default Search Engine</h4>
+          <select id="customize-search-select" class="settings-select" style="width:100%;padding:10px 12px;border-radius:8px;background:var(--bg-input);color:var(--text-primary);border:1px solid var(--border-subtle);font-size:14px;cursor:pointer;">
+            <option value="google" ${(!currentEngine || currentEngine === 'google') ? 'selected' : ''}>🌐 Google (Default)</option>
+            <option value="duckduckgo" ${currentEngine === 'duckduckgo' ? 'selected' : ''}>🦆 DuckDuckGo (Privacy & Anti-Tracking)</option>
+            <option value="bing" ${currentEngine === 'bing' ? 'selected' : ''}>🔷 Bing (Microsoft)</option>
+            <option value="yahoo" ${currentEngine === 'yahoo' ? 'selected' : ''}>🟣 Yahoo</option>
+            <option value="ecosia" ${currentEngine === 'ecosia' ? 'selected' : ''}>🌿 Ecosia (Eco)</option>
           </select>
         </div>
       </div>
     `, [
-      { label: 'Done', class: 'btn-primary', click: () => App.closeModal() }
+      {
+        label: 'Done',
+        class: 'btn-primary',
+        click: async () => {
+          const selectEl = document.getElementById('customize-search-select');
+          if (selectEl && selectEl.value) {
+            const selected = selectEl.value;
+            State.settings.searchEngine = selected;
+            await IpcClient.saveSettings({ searchEngine: selected });
+            if (typeof Omnibox !== 'undefined' && Omnibox.updateSearchEngine) {
+              Omnibox.updateSearchEngine(selected);
+            }
+            this.updateSearchPlaceholder(selected);
+          }
+          App.closeModal();
+          const container = document.getElementById('internal-page-container');
+          if (container) {
+            this.render(container);
+          }
+          if (typeof Omnibox !== 'undefined') {
+            Omnibox.update();
+          }
+        }
+      }
     ]);
 
     // Wallpaper clicks
@@ -528,9 +575,12 @@ const Homepage = {
       this.render(document.getElementById('internal-page-container'));
       App.closeModal();
     });
-    document.getElementById('choice-theme-classic')?.addEventListener('click', () => {
-      document.documentElement.style.setProperty('--accent', '#4285f4');
-      document.documentElement.style.setProperty('--border-focus', '#4285f4');
+    document.getElementById('choice-theme-cyan')?.addEventListener('click', async () => {
+      ThemeManager.setTheme('dark');
+      document.documentElement.style.setProperty('--accent', '#35D8F2');
+      document.documentElement.style.setProperty('--border-focus', '#35D8F2');
+      await IpcClient.saveSettings({ theme: 'dark' });
+      this.render(document.getElementById('internal-page-container'));
       App.closeModal();
     });
 
@@ -541,32 +591,44 @@ const Homepage = {
       if (section) section.classList.toggle('hidden', !e.target.checked);
     });
 
-    // Search Engine change
-    document.getElementById('customize-search-select')?.addEventListener('change', async (e) => {
-      const selected = e.target.value;
+    // Search Engine change (listen to both change and input events for instant persistence)
+    const handleEngineChange = async (selected) => {
       State.settings.searchEngine = selected;
       await IpcClient.saveSettings({ searchEngine: selected });
       if (typeof Omnibox !== 'undefined' && Omnibox.updateSearchEngine) {
         Omnibox.updateSearchEngine(selected);
       }
       this.updateSearchPlaceholder(selected);
-    });
+    };
+
+    const engineSelect = document.getElementById('customize-search-select');
+    if (engineSelect) {
+      engineSelect.addEventListener('change', (e) => handleEngineChange(e.target.value));
+      engineSelect.addEventListener('input', (e) => handleEngineChange(e.target.value));
+    }
   },
 
   updateSearchPlaceholder(engine) {
     const engineMap = {
-      google: 'Google',
-      duckduckgo: 'DuckDuckGo',
-      bing: 'Bing',
-      yahoo: 'Yahoo',
-      ecosia: 'Ecosia',
-      yandex: 'Yandex'
+      google: { name: 'Google', icon: '🌐' },
+      duckduckgo: { name: 'DuckDuckGo', icon: '🦆' },
+      bing: { name: 'Bing', icon: '🔷' },
+      yahoo: { name: 'Yahoo', icon: '🟣' },
+      ecosia: { name: 'Ecosia', icon: '🌿' },
+      yandex: { name: 'Yandex', icon: '🔴' }
     };
-    const label = engineMap[(engine || 'google').toLowerCase()] || 'the web';
+    const key = (engine || 'google').toLowerCase();
+    const item = engineMap[key] || engineMap.google;
     const input = document.getElementById('newtab-search-input');
     if (input) {
-      input.placeholder = `Search ${label} or type a URL`;
+      input.placeholder = `Search with ${item.name} or type a URL`;
     }
+    const badge = document.getElementById('ntp-engine-badge');
+    if (badge) {
+      badge.innerHTML = `<span class="engine-badge-icon">${item.icon}</span> <span class="engine-badge-name">${item.name}</span>`;
+      badge.title = `Active Search Engine: ${item.name} (Click to switch engine)`;
+    }
+  },
   },
 
   getWallpaper() {

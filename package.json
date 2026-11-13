@@ -1,7 +1,7 @@
 {
-  "name": "amiyo-browser",
+  "name": "aether-browser",
   "version": "1.0.0",
-  "description": "AMIYO Browser - Modern, fast, and secure desktop web browser built with Electron and Chromium",
+  "description": "AETHER Browser — Explore Without Limits. Modern, fast, and secure desktop web browser built with Electron and Chromium",
   "main": "main.js",
   "scripts": {
     "start": "node scripts/run-electron.js",
@@ -22,14 +22,16 @@
   },
   "keywords": [
     "browser",
-    "amiyo",
+    "aether",
     "electron",
     "chromium",
     "webcontentsview",
     "desktop-app",
-    "windows-64bit"
+    "windows-64bit",
+    "privacy-browser",
+    "ai-browser"
   ],
-  "author": "AMIYO",
+  "author": "AETHER",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/A2004-a/amiyo-browser/issues"
@@ -39,9 +41,9 @@
     "node": ">=18.0.0"
   },
   "build": {
-    "appId": "com.amiyo.browser",
-    "productName": "AMIYO Browser",
-    "copyright": "Copyright © 2026 AMIYO",
+    "appId": "com.aether.browser",
+    "productName": "AETHER Browser",
+    "copyright": "Copyright © 2026 AETHER",
     "directories": {
       "output": "dist"
     },

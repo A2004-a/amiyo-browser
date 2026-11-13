@@ -91,6 +91,9 @@ class StorageManager {
 
   resolveDataDir() {
     // 1. Explicit environment override
+    if (process.env.AETHER_DATA_DIR) {
+      return process.env.AETHER_DATA_DIR;
+    }
     if (process.env.AMIYO_DATA_DIR) {
       return process.env.AMIYO_DATA_DIR;
     }
@@ -111,15 +114,15 @@ class StorageManager {
     const isPackaged = (app && app.isPackaged) || __dirname.includes('app.asar');
     if (isPackaged) {
       const baseDir = (process.platform === 'win32' && process.env.APPDATA)
-        ? path.join(process.env.APPDATA, 'AMIYO Browser')
-        : path.join(os.homedir(), '.amiyo-browser');
+        ? path.join(process.env.APPDATA, 'AETHER Browser')
+        : path.join(os.homedir(), '.aether-browser');
       return path.join(baseDir, 'data');
     }
 
     // 4. In development outside asar, use project local data directory
     const devDataDir = path.join(__dirname, '..', 'data');
     if (devDataDir.includes('app.asar')) {
-      return path.join(os.homedir(), '.amiyo-browser', 'data');
+      return path.join(os.homedir(), '.aether-browser', 'data');
     }
     return devDataDir;
   }
@@ -129,18 +132,35 @@ class StorageManager {
       // Guard: Never attempt to write inside an asar archive
       if (!this.dataDir || this.dataDir.includes('app.asar')) {
         this.dataDir = (process.platform === 'win32' && process.env.APPDATA)
-          ? path.join(process.env.APPDATA, 'AMIYO Browser', 'data')
-          : path.join(os.homedir(), '.amiyo-browser', 'data');
+          ? path.join(process.env.APPDATA, 'AETHER Browser', 'data')
+          : path.join(os.homedir(), '.aether-browser', 'data');
       }
 
       if (!fs.existsSync(this.dataDir)) {
         fs.mkdirSync(this.dataDir, { recursive: true });
       }
+
+      // Seamless migration from legacy AMIYO Browser data if it exists
+      if (process.platform === 'win32' && process.env.APPDATA) {
+        const legacyDir = path.join(process.env.APPDATA, 'AMIYO Browser', 'data');
+        if (fs.existsSync(legacyDir) && this.dataDir !== legacyDir) {
+          try {
+            const files = ['settings.json', 'bookmarks.json', 'history.json', 'permissions.json'];
+            for (const f of files) {
+              const src = path.join(legacyDir, f);
+              const dest = path.join(this.dataDir, f);
+              if (fs.existsSync(src) && !fs.existsSync(dest)) {
+                fs.copyFileSync(src, dest);
+              }
+            }
+          } catch (migErr) {}
+        }
+      }
     } catch (err) {
       console.error(`Failed to ensure data directory (${this.dataDir}):`, err);
       // Emergency safe fallback to temp directory so app NEVER crashes
       try {
-        const fallbackDir = path.join(os.tmpdir(), 'amiyo-browser-data');
+        const fallbackDir = path.join(os.tmpdir(), 'aether-browser-data');
         if (!fs.existsSync(fallbackDir)) {
           fs.mkdirSync(fallbackDir, { recursive: true });
         }

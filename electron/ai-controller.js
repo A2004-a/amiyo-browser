@@ -4,7 +4,7 @@ const storageManager = require('./storage-manager');
 
 class AiController {
   constructor() {
-    this.systemPrompt = `You are AMIYO AI, a helpful, fast, and intelligent web browsing assistant integrated into AMIYO Browser. 
+    this.systemPrompt = `You are AETHER Intelligence, a helpful, fast, and intelligent web browsing assistant integrated into AETHER Browser. 
 Provide clear, accurate, and concise responses. Format with Markdown (bold, bullet points, headers, code blocks).
 When analyzing web pages, highlight the core ideas, actionable facts, and critical takeaways.`;
   }
@@ -288,11 +288,11 @@ When analyzing web pages, highlight the core ideas, actionable facts, and critic
 
     // Browser tips / Help
     if (q.includes('help') || q.includes('what can you do') || q.includes('features')) {
-      return `### ✨ AMIYO AI Assistant Capabilities:
+      return `### ✨ AETHER Intelligence Capabilities:
 - **📄 Page Summarization**: Summarize any article, blog, or documentation with one click.
 - **📌 Key Takeaways**: Extract the most critical bullet points from long pages.
 - **🔍 Smart Search & Q&A**: Ask questions about the current page or general topics.
-- **🌐 Cloud AI Integration**: Connect your free Google Gemini or OpenAI API key in **Settings → AI Assistant** for full multi-turn conversational AI!
+- **🌐 Cloud AI Integration**: Connect your free Google Gemini or OpenAI API key in **Settings → AETHER Intelligence** for full multi-turn conversational AI!
 - **⚡ Omnibox Command**: Type \`@ai <question>\` in the address bar anytime to ask AI instantly!`;
     }
 
@@ -302,14 +302,14 @@ When analyzing web pages, highlight the core ideas, actionable facts, and critic
       return `### 💡 Answer from page: **${pageContext.title || 'Current Page'}**\n\n` +
         `Here is the relevant information found on this page regarding your query:\n\n` +
         `> ${sentences.slice(0, 2).join('. ')}.\n\n` +
-        `*Tip: For conversational deep-dive reasoning, add your free **Google Gemini API Key** in [Settings](amiyo://settings)!*`;
+        `*Tip: For conversational deep-dive reasoning, add your free **Google Gemini API Key** in [Settings](aether://settings)!*`;
     }
 
-    return `### ✨ AMIYO AI Assistant\nI'm ready to help you browse! Here's what you can do:\n\n` +
+    return `### ✨ AETHER Intelligence\nI'm ready to help you browse! Here's what you can do:\n\n` +
       `- Click **"Summarize Page"** to get a breakdown of the active tab.\n` +
       `- Ask questions about the webpage you're currently viewing.\n` +
       `- Type \`@ai <prompt>\` in the omnibox for instant AI assistance.\n\n` +
-      `*To enable Gemini 1.5/2.5 Flash, add your API key in **Settings → AI Assistant**!*`;
+      `*To enable Gemini 1.5/2.5 Flash, add your API key in **Settings → AETHER Intelligence**!*`;
   }
 
   builtinSummarize(title, url, text) {

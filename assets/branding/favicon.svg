@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <defs>
+    <linearGradient id="favAether" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#121B2B" />
+      <stop offset="100%" stop-color="#0B0F14" />
+    </linearGradient>
+  </defs>
+  <rect width="32" height="32" rx="7" fill="url(#favAether)" stroke="#252D38" stroke-width="0.8" />
+  <!-- Infinite A -->
+  <path d="M16 5 L5 27 L9.5 27 L13 19 L16 19 Z" fill="#FFFFFF" />
+  <path d="M16 5 L16 19 L19 19 L22.5 27 L27 27 Z" fill="#94A3B8" />
+  <polygon points="16,5 14.5,9 17.5,9" fill="#0B0F14" />
+  <polygon points="16,10 13.5,17 18.5,17" fill="#0B0F14" />
+  <!-- Electric Cyan Horizon Bar -->
+  <path d="M3 20 C8 18, 24 18, 29 20 C25 21, 7 21, 3 20 Z" fill="#35D8F2" />
+  <circle cx="23" cy="19.5" r="1" fill="#FFFFFF" />
+</svg>

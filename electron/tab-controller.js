@@ -239,7 +239,7 @@ class TabController {
           <div class="error-card">
             <svg class="error-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
             <h1>This site can’t be reached</h1>
-            <p>AMIYO Browser could not connect to <strong>${safeUrl}</strong>.<br>Please check your connection and try again.</p>
+            <p>AETHER Browser could not connect to <strong>${safeUrl}</strong>.<br>Please check your connection and try again.</p>
             <button class="btn" onclick="window.location.href='${safeUrl}'">Try Again</button>
             <div class="error-code">${errorDescription || 'Error'} (${errorCode})</div>
           </div>
@@ -303,12 +303,12 @@ class TabController {
   }
 
   getInternalTitle(url) {
-    if (url === 'amiyo://newtab') return 'New Tab';
-    if (url === 'amiyo://history') return 'History';
-    if (url === 'amiyo://bookmarks') return 'Bookmarks';
-    if (url === 'amiyo://downloads') return 'Downloads';
-    if (url === 'amiyo://settings') return 'Settings';
-    return 'AMIYO Browser';
+    if (url === 'amiyo://newtab' || url === 'aether://newtab') return 'New Tab';
+    if (url === 'amiyo://history' || url === 'aether://history') return 'History';
+    if (url === 'amiyo://bookmarks' || url === 'aether://bookmarks') return 'Bookmarks';
+    if (url === 'amiyo://downloads' || url === 'aether://downloads') return 'Downloads';
+    if (url === 'amiyo://settings' || url === 'aether://settings') return 'Settings';
+    return 'AETHER Browser';
   }
 
   switchTab(tabId) {
@@ -727,9 +727,9 @@ class TabController {
     }
     if (tab.isInternal) {
       return {
-        title: tab.title || 'AMIYO Browser Internal Page',
+        title: tab.title || 'AETHER Browser Internal Page',
         url: tab.url,
-        text: 'AMIYO Browser internal management page.'
+        text: 'AETHER Browser internal management page.'
       };
     }
     try {

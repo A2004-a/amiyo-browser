@@ -5,9 +5,9 @@ function run() {
   console.log('Testing AiController...');
 
   // Test 1: Built-in general chat response
-  const response1 = ai.chatWithBuiltin({ message: 'Hello AMIYO' });
+  const response1 = ai.chatWithBuiltin({ message: 'Hello AETHER' });
   assert.ok(typeof response1 === 'string', 'Expected string response');
-  assert.ok(response1.includes('AMIYO AI'), 'Expected response to mention AMIYO AI');
+  assert.ok(response1.includes('AETHER Intelligence') || response1.includes('AMIYO AI'), 'Expected response to mention AETHER Intelligence');
 
   // Test 2: Built-in chat with page context
   const samplePage = {

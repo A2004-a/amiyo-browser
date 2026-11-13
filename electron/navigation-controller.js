@@ -14,23 +14,31 @@ class NavigationController {
 
   isInternalUrl(url) {
     if (!url) return false;
-    return url.startsWith('amiyo://');
+    return url.startsWith('amiyo://') || url.startsWith('aether://');
   }
 
   resolveUrl(input, customSearchEngine) {
     if (!input || typeof input !== 'string') {
-      return 'amiyo://newtab';
+      return 'aether://newtab';
     }
 
     const trimmed = input.trim();
     if (!trimmed) {
-      return 'amiyo://newtab';
+      return 'aether://newtab';
     }
 
     // Check for internal protocols
-    if (trimmed.startsWith('amiyo://')) {
+    if (trimmed.startsWith('amiyo://') || trimmed.startsWith('aether://')) {
       return trimmed;
     }
+
+    // Check for bang shortcuts
+    if (trimmed.startsWith('!g ')) return this.buildSearchUrl(trimmed.slice(3).trim(), 'google');
+    if (trimmed.startsWith('!d ') || trimmed.startsWith('!ddg ')) return this.buildSearchUrl(trimmed.replace(/^!(d|ddg)\s+/, '').trim(), 'duckduckgo');
+    if (trimmed.startsWith('!b ')) return this.buildSearchUrl(trimmed.slice(3).trim(), 'bing');
+    if (trimmed.startsWith('!y ')) return `https://www.youtube.com/results?search_query=${encodeURIComponent(trimmed.slice(3).trim())}`;
+    if (trimmed.startsWith('!w ')) return `https://en.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(trimmed.slice(3).trim())}`;
+    if (trimmed.startsWith('!e ')) return this.buildSearchUrl(trimmed.slice(3).trim(), 'ecosia');
 
     // Check for standard protocols
     if (/^[a-zA-Z]+:\/\//.test(trimmed)) {
@@ -70,8 +78,8 @@ class NavigationController {
 
   getSecurityStatus(url) {
     if (!url) return { isSecure: false, type: 'unknown', text: 'Not secure' };
-    if (url.startsWith('amiyo://')) {
-      return { isSecure: true, type: 'internal', text: 'AMIYO Internal' };
+    if (url.startsWith('amiyo://') || url.startsWith('aether://')) {
+      return { isSecure: true, type: 'internal', text: 'AETHER Internal' };
     }
     if (url.startsWith('https://')) {
       return { isSecure: true, type: 'secure', text: 'Secure Connection' };
@@ -148,12 +156,24 @@ class NavigationController {
     }
 
     // 4. Add Search Query item
-    const searchUrl = this.buildSearchUrl(q);
+    const settings = storageManager.getSettings();
+    const currentEngine = (settings.searchEngine || 'google').toLowerCase();
+    const searchUrl = this.buildSearchUrl(q, currentEngine);
+    const engineNames = {
+      google: 'Google',
+      duckduckgo: 'DuckDuckGo',
+      bing: 'Bing',
+      yahoo: 'Yahoo',
+      ecosia: 'Ecosia',
+      yandex: 'Yandex'
+    };
+    const engineName = engineNames[currentEngine] || 'Web';
     suggestions.unshift({
       type: 'search',
-      title: `Search for "${query}"`,
+      title: `Search ${engineName} for "${query}"`,
       url: searchUrl,
-      query: query
+      query: query,
+      engine: currentEngine
     });
 
     return suggestions.slice(0, 8);
@@ -209,23 +229,24 @@ class NavigationController {
     const local = this.getOmniboxSuggestions(query);
     if (!query || typeof query !== 'string') return local;
     const q = query.trim();
-    if (!q || q.startsWith('http://') || q.startsWith('https://') || q.startsWith('amiyo://')) {
+    if (!q || q.startsWith('http://') || q.startsWith('https://') || q.startsWith('amiyo://') || q.startsWith('aether://')) {
       return local;
     }
 
     try {
       const settings = storageManager.getSettings();
-      const engine = settings.searchEngine || 'google';
+      const engine = (settings.searchEngine || 'google').toLowerCase();
       const onlineQueries = await this.fetchSearchSuggestions(q, engine);
       if (onlineQueries && onlineQueries.length > 0) {
-        const enriched = [local[0]]; // Primary search query
+        const enriched = [local[0]]; // Primary search query with active engine
         for (const oQuery of onlineQueries) {
           if (oQuery && oQuery.toLowerCase() !== q.toLowerCase()) {
             enriched.push({
               type: 'search',
               title: oQuery,
-              url: this.buildSearchUrl(oQuery),
-              query: oQuery
+              url: this.buildSearchUrl(oQuery, engine),
+              query: oQuery,
+              engine: engine
             });
             if (enriched.length >= 6) break;
           }

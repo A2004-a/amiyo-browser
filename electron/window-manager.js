@@ -25,8 +25,8 @@ class WindowManager {
       minHeight: 400,
       frame: false, // Custom sleek modern window chrome
       titleBarStyle: 'hidden',
-      title: isPrivate ? 'AMIYO Browser (Private)' : 'AMIYO Browser',
-      backgroundColor: isPrivate ? '#14121e' : '#18191c',
+      title: isPrivate ? 'AETHER Browser (Private)' : 'AETHER Browser',
+      backgroundColor: '#0B0F14',
       webPreferences: {
         nodeIntegration: false,
         contextIsolation: true,

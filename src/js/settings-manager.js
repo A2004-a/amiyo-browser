@@ -10,13 +10,13 @@ const SettingsManager = {
           <div class="settings-nav-item ${this.activeSection === 'general' ? 'active' : ''}" data-sec="general">General</div>
           <div class="settings-nav-item ${this.activeSection === 'appearance' ? 'active' : ''}" data-sec="appearance">Appearance</div>
           <div class="settings-nav-item ${this.activeSection === 'search' ? 'active' : ''}" data-sec="search">Search Engine</div>
-          <div class="settings-nav-item ${this.activeSection === 'shields' ? 'active' : ''}" data-sec="shields">🛡️ AMIYO Shields</div>
+          <div class="settings-nav-item ${this.activeSection === 'shields' ? 'active' : ''}" data-sec="shields">🛡️ AETHER Shield</div>
           <div class="settings-nav-item ${this.activeSection === 'performance' ? 'active' : ''}" data-sec="performance">⚡ Performance &amp; Memory</div>
-          <div class="settings-nav-item ${this.activeSection === 'ai' ? 'active' : ''}" data-sec="ai">✨ AI Assistant</div>
+          <div class="settings-nav-item ${this.activeSection === 'ai' ? 'active' : ''}" data-sec="ai">✨ AETHER Intelligence</div>
           <div class="settings-nav-item ${this.activeSection === 'privacy' ? 'active' : ''}" data-sec="privacy">Privacy & Security</div>
           <div class="settings-nav-item ${this.activeSection === 'downloads' ? 'active' : ''}" data-sec="downloads">Downloads</div>
           <div class="settings-nav-item ${this.activeSection === 'permissions' ? 'active' : ''}" data-sec="permissions">Permissions</div>
-          <div class="settings-nav-item ${this.activeSection === 'about' ? 'active' : ''}" data-sec="about">About AMIYO</div>
+          <div class="settings-nav-item ${this.activeSection === 'about' ? 'active' : ''}" data-sec="about">About AETHER</div>
         </div>
 
         <div class="settings-content" id="settings-content-pane">
@@ -50,7 +50,7 @@ const SettingsManager = {
             <div class="settings-card">
               <div class="settings-card-info">
                 <span class="settings-card-title">On Startup</span>
-                <span class="settings-card-desc">Choose what to display when AMIYO Browser opens.</span>
+                <span class="settings-card-desc">Choose what to display when AETHER Browser opens.</span>
               </div>
               <select id="setting-startup" class="settings-select">
                 <option value="newtab" ${!s.restoreTabsOnStartup ? 'selected' : ''}>Open the New Tab page</option>
@@ -142,14 +142,14 @@ const SettingsManager = {
       case 'shields':
         return `
           <div class="settings-section">
-            <h3 class="settings-section-title">🛡️ AMIYO Shields (Ad &amp; Tracker Protection)</h3>
+            <h3 class="settings-section-title">🛡️ AETHER Shield (Zero-Telemetry Privacy Protection)</h3>
             <p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;">
-              AMIYO Shields protects your privacy by blocking third-party trackers, deceptive advertising networks, and fingerprinting scripts automatically.
+              AETHER Shield protects your privacy by blocking third-party trackers, invasive advertising networks, and fingerprinting scripts automatically.
             </p>
 
             <div class="settings-card">
               <div class="settings-card-info">
-                <span class="settings-card-title">Enable AMIYO Shields</span>
+                <span class="settings-card-title">Enable AETHER Shield</span>
                 <span class="settings-card-desc">Master switch to block malicious advertising scripts and trackers.</span>
               </div>
               <label class="toggle-switch">
@@ -291,7 +291,7 @@ const SettingsManager = {
         const aiProvider = s.aiProvider || 'builtin';
         return `
           <div class="settings-section">
-            <h3 class="settings-section-title">✨ AMIYO AI Assistant</h3>
+            <h3 class="settings-section-title">✨ AETHER Intelligence</h3>
             <p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;">
               Configure your built-in AI assistant, choose your intelligence provider, or connect Google Gemini or OpenAI.
             </p>
@@ -299,7 +299,7 @@ const SettingsManager = {
             <div class="settings-card">
               <div class="settings-card-info">
                 <span class="settings-card-title">AI Provider</span>
-                <span class="settings-card-desc">Select which engine powers the AMIYO AI sidebar.</span>
+                <span class="settings-card-desc">Select which engine powers the AETHER Intelligence sidebar.</span>
               </div>
               <select id="setting-ai-provider" class="settings-select">
                 <option value="builtin" ${aiProvider === 'builtin' ? 'selected' : ''}>Built-in Smart Assistant (Free & Offline)</option>
@@ -339,7 +339,7 @@ const SettingsManager = {
             <div class="settings-card">
               <div class="settings-card-info">
                 <span class="settings-card-title">Active Webpage Context</span>
-                <span class="settings-card-desc">Allow AMIYO AI to extract clean readable text from your active tab when asking questions.</span>
+                <span class="settings-card-desc">Allow AETHER Intelligence to extract clean readable text from your active tab when asking questions.</span>
               </div>
               <label class="toggle-switch">
                 <input type="checkbox" id="setting-ai-page-context" ${s.aiPageContext !== false ? 'checked' : ''} />
@@ -384,23 +384,31 @@ const SettingsManager = {
       case 'about':
         return `
           <div class="settings-section">
-            <h3 class="settings-section-title">About AMIYO Browser</h3>
+            <h3 class="settings-section-title">About AETHER Browser</h3>
             
             <div class="settings-card" style="align-items:flex-start;">
               <div class="settings-card-info" style="gap:12px;">
                 <div style="display:flex;align-items:center;gap:12px;">
-                  <div style="width:40px;height:40px;background:var(--accent-gradient);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px;color:#fff;">A</div>
+                  <div style="width:44px;height:44px;background:#121B2B;border:1px solid #252D38;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;">
+                    <svg viewBox="0 0 32 32" width="26" height="26" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <ellipse cx="16" cy="17" rx="12" ry="4.5" fill="none" stroke="#35D8F2" stroke-width="1.2" opacity="0.85" transform="rotate(-15 16 17)"/>
+                      <path d="M16 5 L24 23 L20 23 L16 14 L12 23 L8 23 Z" fill="#DCE3EB" />
+                      <path d="M10 17 L22 17 L21 19 L11 19 Z" fill="#35D8F2" />
+                      <circle cx="16" cy="5" r="1.5" fill="#35D8F2" />
+                    </svg>
+                  </div>
                   <div>
-                    <h4 style="font-size:16px;font-weight:700;">AMIYO Browser</h4>
-                    <p style="font-size:12px;color:var(--text-muted);">Version 1.0.0 (Production Release)</p>
+                    <h4 style="font-size:16px;font-weight:700;color:var(--text-primary);letter-spacing:1px;">AETHER Browser</h4>
+                    <p style="font-size:12px;color:var(--cyan-accent);font-weight:500;">Explore Without Limits &bull; Version 1.0.0</p>
                   </div>
                 </div>
                 <p style="font-size:13px;color:var(--text-secondary);line-height:1.5;">
-                  A fast, secure, modern desktop web browser built with pure HTML5, CSS3, Vanilla JavaScript, and Electron. Powered by isolated Chromium WebContentsView architecture.
+                  A premium, high-performance desktop browser engineered with pure modern standards, zero telemetry, autonomous AI intelligence, and multi-process Chromium WebContentsView architecture.
                 </p>
                 <div style="font-size:12px;color:var(--text-muted);display:flex;flex-direction:column;gap:4px;">
                   <div>Engine: Chromium 156.0.8078.96</div>
                   <div>Runtime: Electron 45.3.0 &amp; Node.js</div>
+                  <div>Brand: AETHER (The Infinite A)</div>
                   <div>Status: Up to date</div>
                 </div>
               </div>
@@ -448,8 +456,7 @@ const SettingsManager = {
     const searchSelect = pane.querySelector('#setting-search-engine');
     const customCard = pane.querySelector('#custom-search-card');
     if (searchSelect) {
-      searchSelect.addEventListener('change', async (e) => {
-        const val = e.target.value;
+      const handleEngineChange = async (val) => {
         if (customCard) customCard.classList.toggle('hidden', val !== 'custom');
         State.settings = await IpcClient.saveSettings({ searchEngine: val });
         if (typeof Omnibox !== 'undefined' && Omnibox.updateSearchEngine) {
@@ -458,7 +465,9 @@ const SettingsManager = {
         if (typeof Homepage !== 'undefined' && Homepage.updateSearchPlaceholder) {
           Homepage.updateSearchPlaceholder(val);
         }
-      });
+      };
+      searchSelect.addEventListener('change', (e) => handleEngineChange(e.target.value));
+      searchSelect.addEventListener('input', (e) => handleEngineChange(e.target.value));
     }
 
     const customSearchInput = pane.querySelector('#setting-custom-search');

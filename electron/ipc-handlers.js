@@ -490,7 +490,7 @@ function registerIpcHandlers() {
           name = 'Renderer (Browser Shell)';
         }
       } else if (m.type === 'Browser') {
-        name = 'AMIYO Browser (Main Process)';
+        name = 'AETHER Browser (Main Process)';
       } else if (m.type === 'GPU') {
         name = 'GPU Process';
       }

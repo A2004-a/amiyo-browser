@@ -115,7 +115,7 @@ const AiPanel = {
       openai: 'OpenAI GPT',
       ollama: 'Local Ollama'
     };
-    this.providerPillEl.textContent = labels[provider.toLowerCase()] || 'AMIYO AI';
+    this.providerPillEl.textContent = labels[provider.toLowerCase()] || 'AETHER Intelligence';
   },
 
   toggle(forcedState) {
@@ -178,7 +178,7 @@ const AiPanel = {
     welcomeBubble.className = 'ai-bubble assistant';
     welcomeBubble.innerHTML = `
       <div style="font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:6px;">
-        <span>✨ Welcome to AMIYO AI</span>
+        <span>✨ Welcome to AETHER Intelligence</span>
       </div>
       <p>I am your built-in AI assistant. I can summarize any webpage, answer questions, explain code, and extract key insights.</p>
       <p style="font-size:12px;color:var(--text-muted);margin-bottom:0;">

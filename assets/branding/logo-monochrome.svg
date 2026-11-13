@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 96" width="380" height="96">
+  <!-- Monochrome Emblem (Pure Platinum / White) -->
+  <g transform="translate(12, 12)">
+    <rect x="0" y="0" width="72" height="72" rx="18" fill="none" stroke="#DCE3EB" stroke-width="2" />
+    <path d="M36 12 L12 60 L21 60 L29 42 L36 42 Z" fill="#FFFFFF" />
+    <path d="M36 12 L36 42 L43 42 L51 60 L60 60 Z" fill="#DCE3EB" />
+    <polygon points="36,12 33,20 39,20" fill="#0B0F14" />
+    <polygon points="36,22 31,38 41,38" fill="#0B0F14" />
+    <path d="M8 44 C20 40, 52 40, 64 44 C54 46, 22 46, 8 44 Z" fill="#FFFFFF" />
+  </g>
+
+  <!-- Typography -->
+  <g transform="translate(104, 20)">
+    <text x="0" y="38" font-family="'Space Grotesk', -apple-system, sans-serif" font-size="34" font-weight="800" letter-spacing="5" fill="#FFFFFF">AETHER</text>
+    <text x="2" y="58" font-family="'Inter', -apple-system, sans-serif" font-size="10" font-weight="700" letter-spacing="3" fill="#DCE3EB">EXPLORE WITHOUT LIMITS.</text>
+  </g>
+</svg>

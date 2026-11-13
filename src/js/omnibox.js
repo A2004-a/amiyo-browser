@@ -129,9 +129,19 @@ const Omnibox = {
 
     // Do not overwrite input if currently focused by user
     if (document.activeElement !== this.inputEl) {
-      if (tab.url === 'amiyo://newtab') {
+      if (tab.url === 'amiyo://newtab' || tab.url === 'aether://newtab') {
         this.inputEl.value = '';
-        this.inputEl.placeholder = 'Search with Google or enter address';
+        const engineMap = {
+          google: 'Google',
+          duckduckgo: 'DuckDuckGo',
+          bing: 'Bing',
+          yahoo: 'Yahoo',
+          ecosia: 'Ecosia',
+          yandex: 'Yandex'
+        };
+        const current = (State.settings && State.settings.searchEngine) ? State.settings.searchEngine.toLowerCase() : 'google';
+        const label = engineMap[current] || 'the web';
+        this.inputEl.placeholder = `Search with ${label} or enter address`;
       } else {
         this.inputEl.value = tab.url;
       }
@@ -331,6 +341,20 @@ const Omnibox = {
       else if (item.type === 'bookmark') iconHtml = Utils.icons.bookmark;
       else if (item.type === 'history') iconHtml = Utils.icons.history;
       else if (item.type === 'internal') iconHtml = Utils.icons.globe;
+      else if (item.type === 'search') {
+        const engineIcons = {
+          duckduckgo: '🦆',
+          bing: '🔷',
+          ecosia: '🌿',
+          yahoo: '🟣',
+          google: '🌐'
+        };
+        const activeEngine = (item.engine || (State.settings && State.settings.searchEngine) || 'google').toLowerCase();
+        const iconEmoji = engineIcons[activeEngine];
+        if (iconEmoji) {
+          iconHtml = `<span style="font-size:14px;line-height:1;display:inline-flex;align-items:center;justify-content:center;">${iconEmoji}</span>`;
+        }
+      }
 
       el.innerHTML = `
         <div class="suggestion-icon">${iconHtml}</div>
@@ -410,8 +434,15 @@ const Omnibox = {
       ecosia: 'Ecosia',
       yandex: 'Yandex'
     };
-    const label = engineMap[(engine || 'google').toLowerCase()] || 'the web';
-    this.inputEl.placeholder = `Search with ${label} or enter address`;
+    const current = (engine || (State.settings && State.settings.searchEngine) || 'google').toLowerCase();
+    const label = engineMap[current] || 'the web';
+    if (State.settings) {
+      State.settings.searchEngine = current;
+    }
+    const tab = State.getActiveTab();
+    if (!tab || tab.url === 'amiyo://newtab' || tab.url === 'aether://newtab') {
+      this.inputEl.placeholder = `Search with ${label} or enter address`;
+    }
   },
 
   closeSuggestions() {
@@ -425,7 +456,7 @@ const Omnibox = {
 
   async toggleBookmarkCurrentTab() {
     const tab = State.getActiveTab();
-    if (!tab || !tab.url || tab.url === 'amiyo://newtab') return;
+    if (!tab || !tab.url || tab.url === 'amiyo://newtab' || tab.url === 'aether://newtab') return;
 
     const existing = State.bookmarks.find(b => b.url === tab.url);
     if (existing) {
@@ -457,8 +488,8 @@ const Omnibox = {
       `;
     } else if (status.type === 'internal') {
       info = `
-        <h4 style="color:var(--accent);font-weight:600;">AMIYO Browser Built-in Page</h4>
-        <p style="font-size:13px;color:var(--text-secondary);margin-top:6px;">This is an internal secure application page running directly inside AMIYO Browser.</p>
+        <h4 style="color:var(--accent);font-weight:600;">AETHER Browser Built-in Page</h4>
+        <p style="font-size:13px;color:var(--text-secondary);margin-top:6px;">This is an internal secure application page running directly inside AETHER Browser.</p>
       `;
     } else {
       info = `

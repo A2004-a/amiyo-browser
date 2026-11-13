@@ -1,6 +1,6 @@
 const { app, BrowserWindow } = require('electron');
 if (app && typeof app.setName === 'function') {
-  app.setName('AMIYO Browser');
+  app.setName('AETHER Browser');
 }
 const windowManager = require('./electron/window-manager');
 const menuManager = require('./electron/menu-manager');

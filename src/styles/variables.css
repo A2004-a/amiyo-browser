@@ -1,97 +1,111 @@
 :root {
+  /* ========================================================
+     AETHER Official Design Tokens — Obsidian + Electric Cyan
+     ======================================================== */
+  --aether-obsidian: #0B0F14;
+  --aether-midnight: #121B2B;
+  --aether-platinum: #DCE3EB;
+  --aether-cyan: #35D8F2;
+  --aether-arctic: #7AAEFF;
+  --aether-graphite: #252D38;
+  --aether-surface: #162234;
+  --aether-surface-hover: rgba(53, 216, 242, 0.08);
+  --aether-border: rgba(220, 227, 235, 0.12);
+  --aether-border-glow: rgba(53, 216, 242, 0.35);
+
   /* Dark Theme (Default) */
-  --bg-primary: #121316;
-  --bg-secondary: #18191d;
-  --bg-tertiary: #202227;
-  --bg-card: #252830;
-  --bg-hover: rgba(255, 255, 255, 0.08);
-  --bg-active: rgba(255, 255, 255, 0.12);
-  --bg-input: #1a1b20;
+  --bg-primary: #0B0F14;
+  --bg-secondary: #121B2B;
+  --bg-tertiary: #192436;
+  --bg-card: #162234;
+  --bg-hover: rgba(220, 227, 235, 0.08);
+  --bg-active: rgba(53, 216, 242, 0.15);
+  --bg-input: #0F1622;
   
-  --border-subtle: #292c34;
-  --border-focus: #6366f1;
-  --border-hover: #3d414d;
+  --border-subtle: rgba(220, 227, 235, 0.12);
+  --border-focus: #35D8F2;
+  --border-hover: rgba(53, 216, 242, 0.3);
   
-  --text-primary: #f3f4f6;
-  --text-secondary: #9ca3af;
-  --text-muted: #6b7280;
-  --text-inverse: #111827;
+  --text-primary: #DCE3EB;
+  --text-secondary: #8FA3B8;
+  --text-muted: #5B6E84;
+  --text-inverse: #0B0F14;
   
-  --accent: #8ab4f8;
-  --accent-hover: #aecbfa;
-  --accent-light: rgba(138, 180, 248, 0.15);
-  --accent-gradient: linear-gradient(135deg, #8ab4f8 0%, #4285f4 100%);
+  --accent: #35D8F2;
+  --accent-hover: #67E8F9;
+  --accent-light: rgba(53, 216, 242, 0.12);
+  --accent-gradient: linear-gradient(135deg, #35D8F2 0%, #7AAEFF 100%);
+  --cyan-glow: 0 0 16px rgba(53, 216, 242, 0.35);
+  --arctic-glow: 0 0 16px rgba(122, 174, 255, 0.35);
+
+  --danger: #F43F5E;
+  --danger-hover: #E11D48;
+  --success: #10B981;
+  --warning: #F59E0B;
   
-  --google-blue: #4285f4;
-  --google-red: #ea4335;
-  --google-yellow: #fbbc05;
-  --google-green: #34a853;
-  
-  --danger: #ea4335;
-  --danger-hover: #d93025;
-  --success: #34a853;
-  --warning: #fbbc05;
-  
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.25);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.35), 0 2px 4px -1px rgba(0, 0, 0, 0.25);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.45), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.55), 0 10px 10px -5px rgba(0, 0, 0, 0.4);
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 20px -3px rgba(0, 0, 0, 0.6), 0 4px 6px -2px rgba(0, 0, 0, 0.4);
+  --shadow-xl: 0 20px 30px -5px rgba(0, 0, 0, 0.7), 0 10px 15px -5px rgba(0, 0, 0, 0.5);
 
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 14px;
   --radius-full: 9999px;
   
-  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --transition-fast: 0.15s ease;
-  --transition-normal: 0.25s ease;
+  --font-brand: 'Space Grotesk', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', Consolas, "Courier New", monospace;
+  --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   
   --header-height: 84px;
 }
 
 [data-theme="light"] {
-  --bg-primary: #ffffff;
-  --bg-secondary: #f3f4f6;
-  --bg-tertiary: #e5e7eb;
-  --bg-card: #f9fafb;
-  --bg-hover: rgba(0, 0, 0, 0.05);
-  --bg-active: rgba(0, 0, 0, 0.09);
-  --bg-input: #ffffff;
+  --bg-primary: #F8FAFC;
+  --bg-secondary: #EDF2F7;
+  --bg-tertiary: #E2E8F0;
+  --bg-card: #FFFFFF;
+  --bg-hover: rgba(15, 23, 42, 0.05);
+  --bg-active: rgba(2, 132, 199, 0.1);
+  --bg-input: #FFFFFF;
   
-  --border-subtle: #e5e7eb;
-  --border-focus: #6366f1;
-  --border-hover: #d1d5db;
+  --border-subtle: #CBD5E1;
+  --border-focus: #0284C7;
+  --border-hover: #94A3B8;
   
-  --text-primary: #111827;
-  --text-secondary: #4b5563;
-  --text-muted: #9ca3af;
-  --text-inverse: #f9fafb;
+  --text-primary: #0B0F14;
+  --text-secondary: #475569;
+  --text-muted: #64748B;
+  --text-inverse: #F8FAFC;
   
-  --accent: #1a73e8;
-  --accent-hover: #1557b0;
-  --accent-light: rgba(26, 115, 232, 0.1);
-  --accent-gradient: linear-gradient(135deg, #1a73e8 0%, #4285f4 100%);
+  --accent: #0284C7;
+  --accent-hover: #0369A1;
+  --accent-light: rgba(2, 132, 199, 0.1);
+  --accent-gradient: linear-gradient(135deg, #0284C7 0%, #0EA5E9 100%);
+  --cyan-glow: 0 0 12px rgba(2, 132, 199, 0.2);
+  --arctic-glow: 0 0 12px rgba(14, 165, 233, 0.2);
   
-  --danger: #ea4335;
-  --danger-hover: #d93025;
-  --success: #34a853;
-  --warning: #fbbc05;
+  --danger: #EF4444;
+  --danger-hover: #DC2626;
+  --success: #10B981;
+  --warning: #F59E0B;
   
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.12), 0 10px 10px -5px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.12);
 }
 
 [data-private="true"] {
-  --bg-primary: #110e1b;
-  --bg-secondary: #171324;
-  --bg-tertiary: #1f1b30;
-  --bg-card: #27223c;
-  --border-subtle: #312b4d;
-  --accent: #a855f7;
-  --accent-hover: #9333ea;
-  --accent-light: rgba(168, 85, 247, 0.18);
-  --accent-gradient: linear-gradient(135deg, #a855f7 0%, #c084fc 100%);
+  --bg-primary: #07090D;
+  --bg-secondary: #0D131E;
+  --bg-tertiary: #131B2A;
+  --bg-card: #101726;
+  --border-subtle: rgba(53, 216, 242, 0.18);
+  --accent: #35D8F2;
+  --accent-hover: #67E8F9;
+  --accent-light: rgba(53, 216, 242, 0.16);
+  --accent-gradient: linear-gradient(135deg, #35D8F2 0%, #7AAEFF 100%);
 }
-

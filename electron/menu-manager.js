@@ -6,7 +6,7 @@ class MenuManager {
 
     const template = [
       ...(isMac ? [{
-        label: 'AMIYO Browser',
+        label: 'AETHER Browser',
         submenu: [
           { role: 'about' },
           { type: 'separator' },
@@ -296,7 +296,7 @@ class MenuManager {
 
     if (params.selectionText) {
       menu.append(new MenuItem({
-        label: '✨ Ask AMIYO AI about this',
+        label: '✨ Ask AETHER Intelligence about this',
         click: () => {
           browserWindow.webContents.send('ai:ask-selection', params.selectionText);
         }
@@ -325,7 +325,7 @@ class MenuManager {
 
     // AI Page Summary
     menu.append(new MenuItem({
-      label: '✨ Summarize Page with AMIYO AI',
+      label: '✨ Summarize Page with AETHER Intelligence',
       click: () => {
         browserWindow.webContents.send('ai:trigger-summarize');
       }
