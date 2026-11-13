@@ -10,6 +10,7 @@ const SettingsManager = {
           <div class="settings-nav-item ${this.activeSection === 'general' ? 'active' : ''}" data-sec="general">General</div>
           <div class="settings-nav-item ${this.activeSection === 'appearance' ? 'active' : ''}" data-sec="appearance">Appearance</div>
           <div class="settings-nav-item ${this.activeSection === 'search' ? 'active' : ''}" data-sec="search">Search Engine</div>
+          <div class="settings-nav-item ${this.activeSection === 'ai' ? 'active' : ''}" data-sec="ai">✨ AI Assistant</div>
           <div class="settings-nav-item ${this.activeSection === 'privacy' ? 'active' : ''}" data-sec="privacy">Privacy & Security</div>
           <div class="settings-nav-item ${this.activeSection === 'downloads' ? 'active' : ''}" data-sec="downloads">Downloads</div>
           <div class="settings-nav-item ${this.activeSection === 'permissions' ? 'active' : ''}" data-sec="permissions">Permissions</div>
@@ -199,6 +200,68 @@ const SettingsManager = {
           </div>
         `;
 
+      case 'ai':
+        const aiProvider = s.aiProvider || 'builtin';
+        return `
+          <div class="settings-section">
+            <h3 class="settings-section-title">✨ AMIYO AI Assistant</h3>
+            <p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;">
+              Configure your built-in AI assistant, choose your intelligence provider, or connect Google Gemini or OpenAI.
+            </p>
+
+            <div class="settings-card">
+              <div class="settings-card-info">
+                <span class="settings-card-title">AI Provider</span>
+                <span class="settings-card-desc">Select which engine powers the AMIYO AI sidebar.</span>
+              </div>
+              <select id="setting-ai-provider" class="settings-select">
+                <option value="builtin" ${aiProvider === 'builtin' ? 'selected' : ''}>Built-in Smart Assistant (Free & Offline)</option>
+                <option value="gemini" ${aiProvider === 'gemini' ? 'selected' : ''}>Google Gemini (Recommended)</option>
+                <option value="openai" ${aiProvider === 'openai' ? 'selected' : ''}>OpenAI (ChatGPT)</option>
+                <option value="ollama" ${aiProvider === 'ollama' ? 'selected' : ''}>Local Ollama</option>
+              </select>
+            </div>
+
+            <div class="settings-card ${aiProvider === 'builtin' ? 'hidden' : ''}" id="ai-apikey-card">
+              <div class="settings-card-info">
+                <span class="settings-card-title">API Key</span>
+                <span class="settings-card-desc">Your secret API key (stored securely locally on your device).</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <input type="password" id="setting-ai-apikey" class="settings-input" style="width:240px;" placeholder="Paste API Key here..." value="${Utils.escapeHtml(s.aiApiKey || '')}" />
+                <button class="btn-secondary" id="ai-apikey-toggle-btn" style="padding:6px 12px;font-size:12px;cursor:pointer;">Show</button>
+              </div>
+            </div>
+
+            <div class="settings-card ${aiProvider === 'builtin' ? 'hidden' : ''}" id="ai-model-card">
+              <div class="settings-card-info">
+                <span class="settings-card-title">Model Name</span>
+                <span class="settings-card-desc">e.g. gemini-1.5-flash, gemini-1.5-pro, gpt-4o-mini</span>
+              </div>
+              <input type="text" id="setting-ai-model" class="settings-input" style="width:200px;" value="${Utils.escapeHtml(s.aiModel || 'gemini-1.5-flash')}" />
+            </div>
+
+            <div class="settings-card ${aiProvider !== 'ollama' ? 'hidden' : ''}" id="ai-ollama-card">
+              <div class="settings-card-info">
+                <span class="settings-card-title">Ollama Endpoint</span>
+                <span class="settings-card-desc">Local Ollama host URL</span>
+              </div>
+              <input type="text" id="setting-ai-ollama" class="settings-input" style="width:240px;" value="${Utils.escapeHtml(s.aiOllamaUrl || 'http://127.0.0.1:11434')}" />
+            </div>
+
+            <div class="settings-card">
+              <div class="settings-card-info">
+                <span class="settings-card-title">Active Webpage Context</span>
+                <span class="settings-card-desc">Allow AMIYO AI to extract clean readable text from your active tab when asking questions.</span>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="setting-ai-page-context" ${s.aiPageContext !== false ? 'checked' : ''} />
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+        `;
+
       case 'permissions':
         return `
           <div class="settings-section">
@@ -334,6 +397,63 @@ const SettingsManager = {
     if (askDlToggle) {
       askDlToggle.addEventListener('change', async (e) => {
         State.settings = await IpcClient.saveSettings({ askDownloadPath: e.target.checked });
+      });
+    }
+
+    // AI Assistant
+    const aiProviderSelect = pane.querySelector('#setting-ai-provider');
+    const aiKeyCard = pane.querySelector('#ai-apikey-card');
+    const aiModelCard = pane.querySelector('#ai-model-card');
+    const aiOllamaCard = pane.querySelector('#ai-ollama-card');
+
+    if (aiProviderSelect) {
+      aiProviderSelect.addEventListener('change', async (e) => {
+        const prov = e.target.value;
+        if (aiKeyCard) aiKeyCard.classList.toggle('hidden', prov === 'builtin');
+        if (aiModelCard) aiModelCard.classList.toggle('hidden', prov === 'builtin');
+        if (aiOllamaCard) aiOllamaCard.classList.toggle('hidden', prov !== 'ollama');
+
+        State.settings = await IpcClient.saveSettings({ aiProvider: prov });
+        if (typeof AiPanel !== 'undefined' && AiPanel.updateProviderBadge) {
+          AiPanel.updateProviderBadge();
+        }
+      });
+    }
+
+    const aiApiKeyInput = pane.querySelector('#setting-ai-apikey');
+    if (aiApiKeyInput) {
+      aiApiKeyInput.addEventListener('change', async (e) => {
+        State.settings = await IpcClient.saveSettings({ aiApiKey: e.target.value.trim() });
+      });
+    }
+
+    const aiKeyToggleBtn = pane.querySelector('#ai-apikey-toggle-btn');
+    if (aiKeyToggleBtn && aiApiKeyInput) {
+      aiKeyToggleBtn.addEventListener('click', () => {
+        const isPwd = aiApiKeyInput.type === 'password';
+        aiApiKeyInput.type = isPwd ? 'text' : 'password';
+        aiKeyToggleBtn.textContent = isPwd ? 'Hide' : 'Show';
+      });
+    }
+
+    const aiModelInput = pane.querySelector('#setting-ai-model');
+    if (aiModelInput) {
+      aiModelInput.addEventListener('change', async (e) => {
+        State.settings = await IpcClient.saveSettings({ aiModel: e.target.value.trim() });
+      });
+    }
+
+    const aiOllamaInput = pane.querySelector('#setting-ai-ollama');
+    if (aiOllamaInput) {
+      aiOllamaInput.addEventListener('change', async (e) => {
+        State.settings = await IpcClient.saveSettings({ aiOllamaUrl: e.target.value.trim() });
+      });
+    }
+
+    const aiPageContextToggle = pane.querySelector('#setting-ai-page-context');
+    if (aiPageContextToggle) {
+      aiPageContextToggle.addEventListener('change', async (e) => {
+        State.settings = await IpcClient.saveSettings({ aiPageContext: e.target.checked });
       });
     }
 

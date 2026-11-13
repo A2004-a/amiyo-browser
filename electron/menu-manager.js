@@ -238,6 +238,12 @@ class MenuManager {
 
     if (params.selectionText) {
       menu.append(new MenuItem({
+        label: '✨ Ask AMIYO AI about this',
+        click: () => {
+          browserWindow.webContents.send('ai:ask-selection', params.selectionText);
+        }
+      }));
+      menu.append(new MenuItem({
         label: 'Copy',
         role: 'copy'
       }));
@@ -258,6 +264,15 @@ class MenuManager {
       menu.append(new MenuItem({ role: 'selectAll' }));
       menu.append(new MenuItem({ type: 'separator' }));
     }
+
+    // AI Page Summary
+    menu.append(new MenuItem({
+      label: '✨ Summarize Page with AMIYO AI',
+      click: () => {
+        browserWindow.webContents.send('ai:trigger-summarize');
+      }
+    }));
+    menu.append(new MenuItem({ type: 'separator' }));
 
     // Navigation items
     menu.append(new MenuItem({

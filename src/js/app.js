@@ -11,6 +11,7 @@ const App = {
       Omnibox.init();
       BookmarksBar.init();
       DownloadManager.init();
+      if (typeof AiPanel !== 'undefined') AiPanel.init();
       KeyboardShortcuts.init();
       this.initFindBar();
       this.initChromeMenu();
@@ -218,6 +219,11 @@ const App = {
       if (!menuEl.contains(e.target) && e.target !== menuBtn) {
         menuEl.classList.add('hidden');
       }
+    });
+
+    document.getElementById('menu-ai')?.addEventListener('click', () => {
+      menuEl.classList.add('hidden');
+      if (typeof AiPanel !== 'undefined') AiPanel.toggle(true);
     });
 
     document.getElementById('menu-new-tab')?.addEventListener('click', () => {

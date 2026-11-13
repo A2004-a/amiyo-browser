@@ -153,6 +153,24 @@ contextBridge.exposeInMainWorld('amiyoAPI', {
     show: (params) => ipcRenderer.invoke('context-menu:show', params)
   },
 
+  // --- AI Assistant ---
+  ai: {
+    chat: (data) => ipcRenderer.invoke('ai:chat', data),
+    summarize: (tabId) => ipcRenderer.invoke('ai:summarize', tabId),
+    getPageContent: (tabId) => ipcRenderer.invoke('ai:get-page-content', tabId),
+    setSideOffset: (offset) => ipcRenderer.invoke('window:set-side-offset', offset),
+    onAskSelection: (callback) => {
+      const listener = (event, text) => callback(text);
+      ipcRenderer.on('ai:ask-selection', listener);
+      return () => ipcRenderer.removeListener('ai:ask-selection', listener);
+    },
+    onTriggerSummarize: (callback) => {
+      const listener = () => callback();
+      ipcRenderer.on('ai:trigger-summarize', listener);
+      return () => ipcRenderer.removeListener('ai:trigger-summarize', listener);
+    }
+  },
+
   // --- Triggers ---
   triggers: {
     onFindInPage: (callback) => {

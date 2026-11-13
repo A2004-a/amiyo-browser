@@ -230,6 +230,10 @@
 
   <!-- Shortcuts Grid -->
   <div class="shortcuts-grid">
+    <a href="https://gemini.google.com" class="shortcut">
+      <div class="circle" style="color:#a855f7;background:rgba(168,85,247,0.15);">✨</div>
+      <span class="label">AMIYO AI</span>
+    </a>
     <a href="https://www.youtube.com" class="shortcut">
       <div class="circle" style="color:#ff0000;">▶</div>
       <span class="label">YouTube</span>
@@ -258,10 +262,6 @@
       <div class="circle" style="color:#4285f4;">📰</div>
       <span class="label">News</span>
     </a>
-    <a href="https://maps.google.com" class="shortcut">
-      <div class="circle" style="color:#34a853;">📍</div>
-      <span class="label">Maps</span>
-    </a>
   </div>
 
   <!-- Customize Button -->
@@ -288,6 +288,11 @@
       const input = document.getElementById('android-search-input');
       const val = input ? input.value.trim() : '';
       if (!val) return;
+      if (val.startsWith('@ai ') || val.startsWith('@gemini ')) {
+        const q = val.replace(/^@(ai|gemini)\s*/i, '');
+        location.href = 'https://gemini.google.com/app?q=' + encodeURIComponent(q);
+        return;
+      }
       if (/^[a-zA-Z]+:\/\//.test(val) || (/^[a-zA-Z0-9][-a-zA-Z0-9]*\.[a-zA-Z0-9]+/.test(val) && !val.includes(' '))) {
         location.href = val.startsWith('http') ? val : ('https://' + val);
       } else {

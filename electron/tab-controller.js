@@ -14,6 +14,7 @@ class TabController {
     this.activeTabId = null;
     this.recentlyClosed = [];
     this.topOffset = 84; // Header height
+    this.sideOffset = 0; // AI sidebar offset
   }
 
   setTopOffset(offset) {
@@ -548,6 +549,52 @@ class TabController {
     }
   }
 
+  setSideOffset(offset) {
+    this.sideOffset = typeof offset === 'number' && offset >= 0 ? offset : 0;
+    this.updateActiveViewBounds();
+  }
+
+  async getActiveTabContent(tabId) {
+    const tab = this.getTab(tabId || this.activeTabId);
+    if (!tab || !tab.view) {
+      return { title: '', url: '', text: '' };
+    }
+    if (tab.isInternal) {
+      return {
+        title: tab.title || 'AMIYO Browser Internal Page',
+        url: tab.url,
+        text: 'AMIYO Browser internal management page.'
+      };
+    }
+    try {
+      const data = await tab.view.webContents.executeJavaScript(`
+        (() => {
+          try {
+            const title = document.title || '';
+            const clone = document.body ? document.body.cloneNode(true) : null;
+            if (!clone) return { title, url: window.location.href, text: '' };
+            const removeTags = ['script', 'style', 'noscript', 'iframe', 'svg', 'canvas'];
+            removeTags.forEach(tag => {
+              clone.querySelectorAll(tag).forEach(el => el.remove());
+            });
+            const text = (clone.innerText || clone.textContent || '').replace(/\\s+/g, ' ').trim();
+            return {
+              title,
+              url: window.location.href,
+              text: text.slice(0, 15000)
+            };
+          } catch (e) {
+            return { title: document.title || '', url: window.location.href, text: '' };
+          }
+        })()
+      `);
+      return data || { title: tab.title || '', url: tab.url, text: '' };
+    } catch (err) {
+      console.warn('Could not extract tab content:', err.message);
+      return { title: tab.title || '', url: tab.url, text: '' };
+    }
+  }
+
   updateActiveViewBounds() {
     const activeTab = this.getActiveTab();
     if (!activeTab || !activeTab.view || activeTab.isInternal) {
@@ -556,12 +603,13 @@ class TabController {
 
     try {
       const [width, height] = this.browserWindow.getContentSize();
-      const offset = typeof this.topOffset === 'number' && this.topOffset > 0 ? this.topOffset : 84;
+      const topOffset = typeof this.topOffset === 'number' && this.topOffset > 0 ? this.topOffset : 84;
+      const sideOffset = typeof this.sideOffset === 'number' && this.sideOffset > 0 ? this.sideOffset : 0;
       const viewBounds = {
         x: 0,
-        y: offset,
-        width: width,
-        height: Math.max(0, height - offset)
+        y: topOffset,
+        width: Math.max(0, width - sideOffset),
+        height: Math.max(0, height - topOffset)
       };
       activeTab.view.setBounds(viewBounds);
     } catch (e) {

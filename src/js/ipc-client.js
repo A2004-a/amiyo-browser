@@ -71,6 +71,24 @@ const IpcClient = {
   setZoom(tabId, factor) { return this.api.zoom.set(tabId, factor); },
 
   // Context Menu
-  showContextMenu(params) { return this.api.contextMenu.show(params); }
+  showContextMenu(params) { return this.api.contextMenu.show(params); },
+
+  // AI Assistant
+  aiChat(data) { return this.api.ai ? this.api.ai.chat(data) : Promise.resolve('AI service unavailable'); },
+  aiSummarize(tabId) { return this.api.ai ? this.api.ai.summarize(tabId) : Promise.resolve({ summary: 'Unavailable' }); },
+  aiGetPageContent(tabId) { return this.api.ai ? this.api.ai.getPageContent(tabId) : Promise.resolve({ title: '', url: '', text: '' }); },
+  setSideOffset(offset) { return this.api.ai ? this.api.ai.setSideOffset(offset) : Promise.resolve(); },
+  onAiAskSelection(callback) {
+    if (this.api.ai && this.api.ai.onAskSelection) {
+      return this.api.ai.onAskSelection(callback);
+    }
+    return () => {};
+  },
+  onAiTriggerSummarize(callback) {
+    if (this.api.ai && this.api.ai.onTriggerSummarize) {
+      return this.api.ai.onTriggerSummarize(callback);
+    }
+    return () => {};
+  }
 };
 

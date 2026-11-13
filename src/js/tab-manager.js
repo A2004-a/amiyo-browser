@@ -47,6 +47,9 @@ const TabManager = {
         Navigation.updateToolbar();
         Omnibox.update();
         App.handleInternalPage(tabData);
+        if (typeof AiPanel !== 'undefined' && AiPanel.updateActivePageContext) {
+          AiPanel.updateActivePageContext();
+        }
       }
     });
 
@@ -57,6 +60,9 @@ const TabManager = {
       Navigation.updateToolbar();
       Omnibox.update();
       App.handleInternalPage(tab);
+      if (typeof AiPanel !== 'undefined' && AiPanel.updateActivePageContext) {
+        AiPanel.updateActivePageContext();
+      }
     });
   },
 

@@ -5,6 +5,7 @@ const navigationController = require('./navigation-controller');
 const downloadController = require('./download-controller');
 const permissionController = require('./permission-controller');
 const menuManager = require('./menu-manager');
+const aiController = require('./ai-controller');
 
 function getTabControllerForSender(event) {
   const win = BrowserWindow.fromWebContents(event.sender);
@@ -326,6 +327,32 @@ function registerIpcHandlers() {
     if (win && tabCtrl) {
       menuManager.showContextMenu(win, tabCtrl, params);
     }
+  });
+
+  // --- Window Side Offset for AI Panel ---
+  ipcMain.handle('window:set-side-offset', (event, offset) => {
+    const tabCtrl = getTabControllerForSender(event);
+    if (tabCtrl) {
+      tabCtrl.setSideOffset(offset);
+    }
+  });
+
+  // --- AI Assistant ---
+  ipcMain.handle('ai:chat', async (event, data) => {
+    return await aiController.chat(data);
+  });
+
+  ipcMain.handle('ai:summarize', async (event, tabId) => {
+    const tabCtrl = getTabControllerForSender(event);
+    if (!tabCtrl) return { summary: 'Tab controller not available', takeaways: [] };
+    const pageContent = await tabCtrl.getActiveTabContent(tabId);
+    return await aiController.summarizePage(pageContent);
+  });
+
+  ipcMain.handle('ai:get-page-content', async (event, tabId) => {
+    const tabCtrl = getTabControllerForSender(event);
+    if (!tabCtrl) return { title: '', url: '', text: '' };
+    return await tabCtrl.getActiveTabContent(tabId);
   });
 }
 

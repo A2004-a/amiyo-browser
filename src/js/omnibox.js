@@ -177,9 +177,27 @@ const Omnibox = {
       this.closeSuggestions();
       return;
     }
+
+    const trimmed = query.trim();
+    const isAiQuery = trimmed.startsWith('@ai') || trimmed.startsWith('@gemini');
+    let aiPrompt = '';
+    if (isAiQuery) {
+      aiPrompt = trimmed.replace(/^@(ai|gemini)\s*/i, '');
+    }
+
     const suggestions = await IpcClient.getSuggestions(query);
     this.currentSuggestions = suggestions || [];
-    this.selectedIndex = -1;
+
+    if (isAiQuery) {
+      this.currentSuggestions.unshift({
+        type: 'ai',
+        title: aiPrompt ? `✨ Ask AMIYO AI: "${aiPrompt}"` : '✨ Ask AMIYO AI (Type your question)',
+        url: `@ai ${aiPrompt}`,
+        prompt: aiPrompt
+      });
+    }
+
+    this.selectedIndex = isAiQuery ? 0 : -1;
     this.renderSuggestions();
   },
 
@@ -198,7 +216,8 @@ const Omnibox = {
       el.className = `suggestion-item ${idx === this.selectedIndex ? 'selected' : ''}`;
 
       let iconHtml = Utils.icons.search;
-      if (item.type === 'bookmark') iconHtml = Utils.icons.bookmark;
+      if (item.type === 'ai') iconHtml = Utils.icons.sparkle;
+      else if (item.type === 'bookmark') iconHtml = Utils.icons.bookmark;
       else if (item.type === 'history') iconHtml = Utils.icons.history;
       else if (item.type === 'internal') iconHtml = Utils.icons.globe;
 
@@ -257,6 +276,16 @@ const Omnibox = {
     console.log('[OMNIBOX] navigateToUrl called with url:', url, 'activeTabId:', State.activeTabId);
     this.closeSuggestions();
     this.inputEl.blur();
+
+    const trimmed = (url || '').trim();
+    if (trimmed.startsWith('@ai') || trimmed.startsWith('@gemini')) {
+      const prompt = trimmed.replace(/^@(ai|gemini)\s*/i, '').trim();
+      if (typeof AiPanel !== 'undefined') {
+        AiPanel.openWithPrompt(prompt);
+      }
+      return;
+    }
+
     IpcClient.navigateTab(State.activeTabId || '', url);
   },
 

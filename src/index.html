@@ -15,6 +15,7 @@
   <link rel="stylesheet" href="styles/history.css">
   <link rel="stylesheet" href="styles/downloads.css">
   <link rel="stylesheet" href="styles/settings.css">
+  <link rel="stylesheet" href="styles/ai-panel.css">
 </head>
 <body>
   <div id="app">
@@ -77,6 +78,9 @@
 
         <!-- Toolbar Right Actions -->
         <div class="toolbar-actions">
+          <button class="nav-btn ai-sparkle-btn" id="ai-tool-btn" title="AMIYO AI Assistant (Ctrl+Shift+A)">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5zM19 15l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 19l-2.75-1.25L19 15z"/></svg>
+          </button>
           <button class="nav-btn" id="downloads-tool-btn" title="Downloads (Ctrl+J)">
             <svg class="icon" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
             <span class="badge-counter hidden" id="dl-badge">0</span>
@@ -88,6 +92,11 @@
 
         <!-- Chrome 3-Dots Application Menu Dropdown -->
         <div id="chrome-app-menu" class="chrome-menu-dropdown hidden">
+          <div class="chrome-menu-item" id="menu-ai">
+            <span class="menu-label">✨ AMIYO AI Assistant</span>
+            <span class="menu-shortcut">Ctrl+Shift+A</span>
+          </div>
+          <div class="chrome-menu-divider"></div>
           <div class="chrome-menu-item" id="menu-new-tab">
             <span class="menu-label">New tab</span>
             <span class="menu-shortcut">Ctrl+T</span>
@@ -168,6 +177,58 @@
 
       <!-- Internal Pages Container (New Tab, History, Settings, etc.) -->
       <div id="internal-page-container"></div>
+
+      <!-- AMIYO AI Assistant Side Panel -->
+      <aside id="ai-side-panel" class="ai-panel hidden">
+        <!-- Header -->
+        <div class="ai-header">
+          <div class="ai-brand">
+            <div class="ai-brand-badge">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5zM19 15l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 19l-2.75-1.25L19 15z"/></svg>
+            </div>
+            <div class="ai-title-wrap">
+              <span class="ai-title">AMIYO AI</span>
+              <span class="ai-provider-pill" id="ai-provider-pill">Built-in Assistant</span>
+            </div>
+          </div>
+          <div class="ai-header-actions">
+            <button class="ai-btn-icon" id="ai-clear-btn" title="Clear conversation">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M19 4h-3.5l-1-1h-5l-1 1H5v2h14V4zM6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12z"/></svg>
+            </button>
+            <button class="ai-btn-icon" id="ai-close-btn" title="Close AI panel">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Quick Action Chips -->
+        <div class="ai-quick-actions">
+          <button class="ai-chip" data-action="summarize">📄 Summarize Page</button>
+          <button class="ai-chip" data-action="highlights">✨ Key Highlights</button>
+          <button class="ai-chip" data-action="explain">💡 Explain Simply</button>
+          <button class="ai-chip" data-action="actionable">🎯 Action Items</button>
+        </div>
+
+        <!-- Messages Area -->
+        <div class="ai-messages" id="ai-messages"></div>
+
+        <!-- Input Area -->
+        <div class="ai-input-container">
+          <div class="ai-context-toggle">
+            <label class="ai-context-pill">
+              <input type="checkbox" id="ai-context-chk" checked />
+              <span>Active Page Context</span>
+            </label>
+            <span id="ai-context-page-title" class="ai-context-title" style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;color:var(--text-muted);"></span>
+          </div>
+          <div class="ai-input-wrap">
+            <textarea id="ai-prompt-input" class="ai-textarea" rows="1" placeholder="Ask AMIYO AI anything or about this page..."></textarea>
+            <button id="ai-send-btn" class="ai-send-btn" title="Send (Enter)">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+            </button>
+          </div>
+        </div>
+      </aside>
     </main>
 
     <!-- Modal / Dialog Backdrop -->
@@ -189,6 +250,7 @@
   <script src="js/history-manager.js"></script>
   <script src="js/download-manager.js"></script>
   <script src="js/settings-manager.js"></script>
+  <script src="js/ai-panel.js"></script>
   <script src="js/keyboard-shortcuts.js"></script>
   <script src="js/app.js"></script>
 </body>

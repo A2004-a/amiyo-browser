@@ -90,6 +90,15 @@ const KeyboardShortcuts = {
         return;
       }
 
+      // Ctrl + Shift + A: Toggle AMIYO AI Assistant
+      if (isCtrlOrCmd && e.shiftKey && e.key.toLowerCase() === 'a') {
+        e.preventDefault();
+        if (typeof AiPanel !== 'undefined') {
+          AiPanel.toggle();
+        }
+        return;
+      }
+
       // Ctrl + Shift + N: New Incognito Window
       if (isCtrlOrCmd && e.shiftKey && e.key.toLowerCase() === 'n') {
         e.preventDefault();
