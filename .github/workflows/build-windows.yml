@@ -31,7 +31,7 @@ jobs:
         run: npx --yes electron-builder --win --x64 --publish never
 
       - name: Upload Windows 64-bit Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: AETHER-Browser-Windows-x64
           path: |

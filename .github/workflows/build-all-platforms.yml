@@ -57,7 +57,7 @@ jobs:
         run: npx --yes electron-builder ${{ matrix.args }} --publish never
 
       - name: Upload Desktop Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.artifact-name }}
           path: |
@@ -117,7 +117,7 @@ jobs:
           ls -lh output-apk/
 
       - name: Upload Android Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: AETHER-Browser-Android-APK
           path: output-apk/AETHER-Browser-v1.1.0-Android.apk
@@ -149,7 +149,7 @@ jobs:
           ls -lh AETHER-Browser-v1.1.0-iOS.ipa
 
       - name: Upload iOS IPA Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: AETHER-Browser-iOS-IPA
           path: output-ios/AETHER-Browser-v1.1.0-iOS.ipa
