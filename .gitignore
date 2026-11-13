@@ -8,6 +8,7 @@ build/
 out/
 bin/
 *.exe
+.tmp_test_data/
 
 # User runtime storage (Personal browsing data, session, cookies, history)
 data/*.json
