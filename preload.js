@@ -201,7 +201,8 @@ const api = {
     getStatus: () => ipcRenderer.invoke('shields:get-status'),
     toggle: (enabled) => ipcRenderer.invoke('shields:toggle', enabled),
     getTabStats: (tabId) => ipcRenderer.invoke('shields:get-tab-stats', tabId),
-    toggleWhitelist: (domain, allow) => ipcRenderer.invoke('shields:toggle-whitelist', domain, allow)
+    toggleWhitelist: (domain, allow) => ipcRenderer.invoke('shields:toggle-whitelist', domain, allow),
+    setMode: (mode) => ipcRenderer.invoke('shields:set-mode', mode)
   },
 
   // --- Reader Mode ---

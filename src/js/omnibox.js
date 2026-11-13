@@ -274,6 +274,52 @@ const Omnibox = {
           siteBtn.textContent = isWhitelisted ? `Turn Shields ON for ${hostname}` : `Turn Shields OFF for ${hostname}`;
         }
 
+        // Shields Mode Selector (Standard vs Aggressive)
+        const stdBtn = document.getElementById('shields-mode-standard');
+        const aggBtn = document.getElementById('shields-mode-aggressive');
+        const currentMode = status?.mode || 'standard';
+        if (stdBtn && aggBtn) {
+          stdBtn.classList.toggle('active', currentMode === 'standard');
+          aggBtn.classList.toggle('active', currentMode === 'aggressive');
+
+          stdBtn.onclick = async () => {
+            stdBtn.classList.add('active');
+            aggBtn.classList.remove('active');
+            if (IpcClient.api?.shields?.setMode) await IpcClient.api.shields.setMode('standard');
+          };
+          aggBtn.onclick = async () => {
+            aggBtn.classList.add('active');
+            stdBtn.classList.remove('active');
+            if (IpcClient.api?.shields?.setMode) await IpcClient.api.shields.setMode('aggressive');
+          };
+        }
+
+        // Blocked Items List (Brave Advanced View)
+        const viewItemsBtn = document.getElementById('shields-view-items-btn');
+        const itemsListEl = document.getElementById('shields-blocked-items-list');
+        const itemsCountEl = document.getElementById('shields-items-btn-count');
+        const blockedUrls = tabStats?.blockedUrls || [];
+        if (itemsCountEl) itemsCountEl.textContent = blockedUrls.length;
+
+        if (viewItemsBtn && itemsListEl) {
+          itemsListEl.classList.add('hidden');
+          viewItemsBtn.onclick = () => {
+            const isListHidden = itemsListEl.classList.toggle('hidden');
+            if (!isListHidden) {
+              if (blockedUrls.length === 0) {
+                itemsListEl.innerHTML = '<div style="text-align:center;padding:8px;font-size:10px;color:var(--text-muted);">No blocked requests yet</div>';
+              } else {
+                itemsListEl.innerHTML = blockedUrls.map(item => `
+                  <div class="shields-blocked-item">
+                    <span class="shields-blocked-host" title="${Utils.escapeHtml(item.url)}">${Utils.escapeHtml(item.domain || item.url)}</span>
+                    <span class="shields-blocked-tag ${item.type === 'ad' ? 'ad' : 'tracker'}">${item.type}</span>
+                  </div>
+                `).join('');
+              }
+            }
+          };
+        }
+
         // Script Blocker per-site
         const scriptToggle = document.getElementById('shields-script-toggle');
         if (scriptToggle) {

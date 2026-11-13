@@ -351,19 +351,11 @@ class TabController {
       menuManager.showContextMenu(this.browserWindow, this, params);
     });
 
-    // Cosmetic Ad-Hiding for pristine browsing
+    // Brave Shields: Cosmetic Ad Hiding + YouTube Defuser + Anti-AdBlock Scriptlet
     wc.on('dom-ready', () => {
       if (!tab.isInternal && shieldsController.enabled && !shieldsController.isSiteWhitelisted(tab.url)) {
-        wc.insertCSS(`
-          .ad, .ads, .advertisement, ins.adsbygoogle, [id^="google_ads"], [class*="sponsored-content"], .taboola-ad, .outbrain-ad, [data-ad-unit], [data-ad-slot], .dfp-ad {
-            display: none !important;
-            visibility: hidden !important;
-            height: 0 !important;
-            max-height: 0 !important;
-            opacity: 0 !important;
-            pointer-events: none !important;
-          }
-        `).catch(() => {});
+        wc.insertCSS(shieldsController.getCosmeticCss()).catch(() => {});
+        wc.executeJavaScript(shieldsController.getInPageScriptlet()).catch(() => {});
       }
     });
 

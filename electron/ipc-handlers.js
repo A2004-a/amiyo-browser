@@ -441,6 +441,10 @@ function registerIpcHandlers() {
     return shieldsController.toggleSiteWhitelist(domain, allow);
   });
 
+  ipcMain.handle('shields:set-mode', (event, mode) => {
+    return shieldsController.setMode(mode);
+  });
+
   // --- Tab Suspension / Memory Saver ---
   ipcMain.handle('tabs:suspend', (event, tabId) => {
     const tabCtrl = getTabControllerForSender(event);

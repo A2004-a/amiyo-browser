@@ -56,6 +56,35 @@ function run() {
   shields.toggle(true);
   assert.strictEqual(shields.enabled, true, 'Shields should be re-enabled');
 
+  // Test 8: YouTube ad endpoints blocking
+  const ytCheck1 = shields.isUrlBlocked('https://www.youtube.com/pagead/parallel?video_id=123');
+  assert.strictEqual(ytCheck1.blocked, true, 'YouTube pagead endpoint should be blocked');
+
+  const ytCheck2 = shields.isUrlBlocked('https://www.youtube.com/api/stats/ads?adformat=2');
+  assert.strictEqual(ytCheck2.blocked, true, 'YouTube stats ads endpoint should be blocked');
+
+  // Test 9: URL Tracking parameter stripping (Brave Query Filter)
+  const dirtyUrl = 'https://news.ycombinator.com/item?id=123&utm_source=twitter&utm_medium=social&fbclid=IwAR123';
+  const cleanUrl = shields.cleanTrackingUrl(dirtyUrl);
+  assert.strictEqual(cleanUrl.includes('utm_source'), false, 'utm_source should be stripped');
+  assert.strictEqual(cleanUrl.includes('fbclid'), false, 'fbclid should be stripped');
+  assert.strictEqual(cleanUrl.includes('id=123'), true, 'legitimate id parameter should be preserved');
+
+  // Test 10: Cosmetic CSS & In-Page Scriptlet
+  const css = shields.getCosmeticCss();
+  assert.ok(css.includes('ins.adsbygoogle'), 'Cosmetic CSS should hide adsbygoogle');
+  assert.ok(css.includes('ytp-ad-module'), 'Cosmetic CSS should hide YouTube ad modules');
+
+  const scriptlet = shields.getInPageScriptlet();
+  assert.ok(scriptlet.includes('skipYouTubeAds'), 'Scriptlet should contain YouTube ad skipper');
+  assert.ok(scriptlet.includes('canRunAds'), 'Scriptlet should contain anti-adblock defuser stubs');
+
+  // Test 11: Shields Mode switching
+  shields.setMode('aggressive');
+  assert.strictEqual(shields.mode, 'aggressive', 'Shields mode should be aggressive');
+  shields.setMode('standard');
+  assert.strictEqual(shields.mode, 'standard', 'Shields mode should be standard');
+
   console.log('✔ ShieldsController tests passed!');
 }
 

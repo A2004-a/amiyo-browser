@@ -158,13 +158,32 @@
                 <div class="shields-stat-label">Est. Time Saved</div>
               </div>
             </div>
+            <!-- Brave Shield Mode Selector (Standard vs Aggressive) -->
+            <div class="shields-mode-selector">
+              <button class="shields-mode-btn active" id="shields-mode-standard" data-mode="standard">Standard</button>
+              <button class="shields-mode-btn" id="shields-mode-aggressive" data-mode="aggressive">Aggressive</button>
+            </div>
             <div class="shields-options">
               <div class="shields-toggle-row">
                 <div>
                   <div>Block Trackers &amp; Ads</div>
-                  <div class="shields-toggle-desc">Stop cross-site trackers &amp; aggressive ads</div>
+                  <div class="shields-toggle-desc">Stop cross-site trackers &amp; video/banner ads</div>
                 </div>
                 <span class="shields-status-tag" id="shields-tag-ads">ACTIVE</span>
+              </div>
+              <div class="shields-toggle-row">
+                <div>
+                  <div>YouTube Ad Defuser</div>
+                  <div class="shields-toggle-desc">Auto-skip pre-roll, mid-roll &amp; overlay ads</div>
+                </div>
+                <span class="shields-status-tag" id="shields-tag-yt">ENABLED</span>
+              </div>
+              <div class="shields-toggle-row">
+                <div>
+                  <div>Strip URL Trackers</div>
+                  <div class="shields-toggle-desc">Auto-clean UTM tags, fbclid, gclid from URLs</div>
+                </div>
+                <span class="shields-status-tag" id="shields-tag-params">CLEANED</span>
               </div>
               <div class="shields-toggle-row">
                 <div>
@@ -186,11 +205,14 @@
               <div class="shields-toggle-row">
                 <div>
                   <div>Strict Anti-Fingerprinting</div>
-                  <div class="shields-toggle-desc">Sec-GPC, DNT &amp; canvas probe defenses</div>
+                  <div class="shields-toggle-desc">Brave Farbling: Canvas &amp; audio noise defenses</div>
                 </div>
-                <span class="shields-status-tag" id="shields-tag-fp">PROTECTED</span>
+                <span class="shields-status-tag" id="shields-tag-fp">FARBLING</span>
               </div>
             </div>
+            <!-- Blocked Requests Audit List (Brave Advanced View) -->
+            <button class="shields-view-items-btn" id="shields-view-items-btn">🔍 View Blocked Items (<span id="shields-items-btn-count">0</span>)</button>
+            <div id="shields-blocked-items-list" class="shields-blocked-list hidden"></div>
             <div class="shields-footer">
               <button class="shields-site-btn" id="shields-toggle-site-btn">Turn Shields Off for this site</button>
             </div>
