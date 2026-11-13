@@ -1,4 +1,32 @@
 process.noDeprecation = true;
+
+// CLI evaluation & version checks (e.g. VS Code debugger inspection)
+if (process.argv.includes('-v') || process.argv.includes('--version')) {
+  console.log(`v${process.versions.node}`);
+  process.exit(0);
+}
+const pIdx = process.argv.findIndex(arg => arg === '-p' || arg === '--print');
+if (pIdx !== -1 && process.argv[pIdx + 1]) {
+  try {
+    const res = eval(process.argv[pIdx + 1]);
+    if (res !== undefined) console.log(res);
+  } catch (err) {
+    console.error(err);
+    process.exit(1);
+  }
+  process.exit(0);
+}
+const eIdx = process.argv.findIndex(arg => arg === '-e' || arg === '--eval');
+if (eIdx !== -1 && process.argv[eIdx + 1]) {
+  try {
+    eval(process.argv[eIdx + 1]);
+  } catch (err) {
+    console.error(err);
+    process.exit(1);
+  }
+  process.exit(0);
+}
+
 const electron = require('electron');
 
 // Auto-spawn under Electron when executed directly with `node main.js` (e.g. VS Code Run/Debug)
@@ -6,11 +34,14 @@ if (typeof electron === 'string') {
   const { spawn } = require('child_process');
   const env = { ...process.env };
   delete env.ELECTRON_RUN_AS_NODE;
-  env.ELECTRON_ENABLE_LOGGING = '1';
+  delete env.NODE_OPTIONS;
+  delete env.VSCODE_INSPECTOR_OPTIONS;
+  env.ELECTRON_ENABLE_LOGGING = '0';
 
   const flags = [
     '--no-sandbox',
     '--disable-gpu',
+    '--no-deprecation',
     '.',
     ...process.argv.slice(2)
   ];

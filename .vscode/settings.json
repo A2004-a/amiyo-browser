@@ -1,5 +1,7 @@
 {
+  "debug.javascript.autoAttachFilter": "disabled",
   "java.configuration.updateBuildConfiguration": "disabled",
+  "java.project.incompleteClasspath.severity": "ignore",
   "java.errors.incompleteClasspath.severity": "ignore",
   "java.import.gradle.enabled": false,
   "java.autobuild.enabled": false,

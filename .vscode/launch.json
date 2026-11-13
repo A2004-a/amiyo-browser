@@ -3,9 +3,31 @@
   "configurations": [
     {
       "name": "Launch AETHER Browser",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/electron",
+      "windows": {
+        "runtimeExecutable": "${workspaceFolder}/node_modules/electron/dist/electron.exe"
+      },
+      "runtimeArgs": [
+        "--no-sandbox",
+        "--disable-gpu",
+        "--no-deprecation",
+        "."
+      ],
+      "env": {
+        "ELECTRON_ENABLE_LOGGING": "0"
+      },
+      "outputCapture": "std",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Run with npm start",
       "type": "node-terminal",
       "request": "launch",
-      "command": "npm start"
+      "command": "npm start",
+      "autoAttachChildProcesses": false
     }
   ]
 }

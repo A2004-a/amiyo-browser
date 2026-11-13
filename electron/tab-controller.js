@@ -158,6 +158,7 @@ class TabController {
 
     // Switch to tab if requested or if first tab
     if (options.active !== false || this.tabs.length === 1) {
+      this.isViewVisible = true;
       this.switchTab(tabId);
     } else {
       this.notifyTabsList();
@@ -218,6 +219,10 @@ class TabController {
       tab.canGoBack = this.canGoBack(wc);
       tab.canGoForward = this.canGoForward(wc);
       tab.lastAccessed = Date.now();
+      if (!tab.isInternal && this.activeTabId === tab.id) {
+        this.isViewVisible = true;
+        this.updateActiveViewBounds();
+      }
       if (!tab.isInternal && !this.isPrivate) {
         storageManager.addHistory({
           title: tab.title || navigatedUrl,
@@ -554,6 +559,7 @@ class TabController {
         if (targetTab.view) targetTab.view.setBounds({ x: 0, y: 0, width: 0, height: 0 });
       } catch (e) {}
     } else if (targetTab.view) {
+      this.isViewVisible = true;
       try {
         if (!this.browserWindow.contentView.children.includes(targetTab.view)) {
           this.browserWindow.contentView.addChildView(targetTab.view);
@@ -862,6 +868,7 @@ class TabController {
       } catch (e) {}
       this.notifyTabUpdated(tab);
     } else {
+      this.isViewVisible = true;
       tab.title = 'Loading...';
       tab.isLoading = true;
       if (this.activeTabId === tabId) {

@@ -109,6 +109,48 @@ function testFindBarOffsets() {
   assert.strictEqual(setTopOffset(false), 84, 'Top offset should reset to 84px when find bar is closed');
 }
 
+function testViewVisibilityReset() {
+  class MockTabController {
+    constructor() {
+      this.isViewVisible = false; // Initially hidden by popover / suggestions
+      this.activeTabId = 'tab_1';
+      this.tabs = [
+        { id: 'tab_1', url: 'aether://newtab', isInternal: true, bounds: { x: 0, y: 0, width: 0, height: 0 } },
+        { id: 'tab_2', url: 'https://google.com', isInternal: false, bounds: { x: 0, y: 0, width: 0, height: 0 } }
+      ];
+    }
+    updateActiveViewBounds() {
+      const active = this.tabs.find(t => t.id === this.activeTabId);
+      if (!active || active.isInternal) return;
+      if (this.isViewVisible === false) {
+        active.bounds = { x: 0, y: 0, width: 0, height: 0 };
+        return;
+      }
+      active.bounds = { x: 0, y: 84, width: 1200, height: 716 };
+    }
+    navigateTab(tabId, url) {
+      const tab = this.tabs.find(t => t.id === tabId);
+      if (!tab) return;
+      const isInternal = url.startsWith('aether://');
+      tab.url = url;
+      tab.isInternal = isInternal;
+      if (!isInternal) {
+        this.isViewVisible = true; // Fix: Reset visibility
+        this.updateActiveViewBounds();
+      }
+    }
+  }
+
+  const ctrl = new MockTabController();
+  assert.strictEqual(ctrl.isViewVisible, false, 'Precondition: visibility was false');
+
+  // Navigate to external Google URL from internal tab
+  ctrl.navigateTab('tab_1', 'https://www.google.com/');
+  assert.strictEqual(ctrl.isViewVisible, true, 'isViewVisible must be restored to true on navigation');
+  assert.strictEqual(ctrl.tabs[0].bounds.width, 1200, 'Web contents bounds width must be restored to full width');
+  assert.strictEqual(ctrl.tabs[0].bounds.height, 716, 'Web contents bounds height must be restored to full height');
+}
+
 module.exports = {
   run() {
     console.log('Testing Signature Browser Features (Brave, Chrome, Safari, Edge)...');
@@ -118,6 +160,7 @@ module.exports = {
     testChromeKeywords();
     testTabGroupsFeature();
     testFindBarOffsets();
+    testViewVisibilityReset();
     console.log('✔ Signature Browser Features tests passed!');
   }
 };

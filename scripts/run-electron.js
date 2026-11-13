@@ -3,6 +3,8 @@ const electronPath = require('electron');
 
 const env = { ...process.env };
 delete env.ELECTRON_RUN_AS_NODE;
+delete env.NODE_OPTIONS;
+delete env.VSCODE_INSPECTOR_OPTIONS;
 
 const extraArgs = process.argv.slice(2);
 const verbose = extraArgs.includes('--verbose') || extraArgs.includes('--enable-logging');
@@ -16,6 +18,7 @@ const target = hasTarget ? [] : ['.'];
 const flags = [
   '--no-sandbox',
   '--disable-gpu',
+  '--no-deprecation',
   ...(verbose ? ['--enable-logging'] : ['--log-level=3']),
   ...target,
   ...extraArgs.filter(a => a !== '--verbose')

@@ -205,8 +205,7 @@ const Omnibox = {
       freeze.classList.add('hidden');
       freeze.style.backgroundImage = '';
     }
-    const tab = State.getActiveTab();
-    if (tab && !tab.isInternal && IpcClient.setViewVisible) {
+    if (IpcClient.setViewVisible) {
       IpcClient.setViewVisible(true);
     }
   },
@@ -650,6 +649,9 @@ const Omnibox = {
       return;
     }
 
+    if (IpcClient.setViewVisible) {
+      IpcClient.setViewVisible(true);
+    }
     IpcClient.navigateTab(State.activeTabId || '', url);
   },
 
@@ -709,10 +711,9 @@ const Omnibox = {
         freeze.classList.add('hidden');
         freeze.style.backgroundImage = '';
       }
-      const tab = State.getActiveTab();
-      if (tab && !tab.isInternal && IpcClient.setViewVisible) {
-        IpcClient.setViewVisible(true);
-      }
+    }
+    if (IpcClient.setViewVisible) {
+      IpcClient.setViewVisible(true);
     }
   },
 

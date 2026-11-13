@@ -490,8 +490,7 @@ const App = {
       freeze.classList.add('hidden');
       freeze.style.backgroundImage = '';
     }
-    const tab = State.getActiveTab();
-    if (tab && !tab.isInternal && IpcClient.setViewVisible) {
+    if (IpcClient.setViewVisible) {
       IpcClient.setViewVisible(true);
     }
   },
