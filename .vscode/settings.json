@@ -1,9 +1,12 @@
 {
-  "java.configuration.updateBuildConfiguration": "interactive",
+  "java.configuration.updateBuildConfiguration": "disabled",
   "java.errors.incompleteClasspath.severity": "ignore",
+  "java.import.gradle.enabled": false,
+  "java.autobuild.enabled": false,
   "java.project.import.exclusions": [
     "**/node_modules/**",
     "**/.git/**",
-    "**/dist/**"
+    "**/dist/**",
+    "**/android/**"
   ]
 }

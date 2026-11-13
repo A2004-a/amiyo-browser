@@ -136,7 +136,15 @@ class StorageManager {
           : path.join(os.homedir(), '.aether-browser', 'data');
       }
 
-      if (!fs.existsSync(this.dataDir)) {
+      if (fs.existsSync(this.dataDir)) {
+        try {
+          const stat = fs.statSync(this.dataDir);
+          if (!stat.isDirectory()) {
+            fs.unlinkSync(this.dataDir);
+            fs.mkdirSync(this.dataDir, { recursive: true });
+          }
+        } catch (stErr) {}
+      } else {
         fs.mkdirSync(this.dataDir, { recursive: true });
       }
 

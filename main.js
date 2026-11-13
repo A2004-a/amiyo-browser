@@ -1,3 +1,4 @@
+process.noDeprecation = true;
 const electron = require('electron');
 
 // Auto-spawn under Electron when executed directly with `node main.js` (e.g. VS Code Run/Debug)
@@ -8,6 +9,8 @@ if (typeof electron === 'string') {
   env.ELECTRON_ENABLE_LOGGING = '1';
 
   const flags = [
+    '--no-sandbox',
+    '--disable-gpu',
     '.',
     ...process.argv.slice(2)
   ];

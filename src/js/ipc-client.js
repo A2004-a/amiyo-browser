@@ -74,8 +74,9 @@ const IpcClient = {
   // Zoom
   setZoom(tabId, factor) { return this.api.zoom.set(tabId, factor); },
 
-  // Context Menu
+  // Context Menu & App Menu
   showContextMenu(params) { return this.api.contextMenu.show(params); },
+  showAppMenu(coords) { return this.api.contextMenu?.showAppMenu ? this.api.contextMenu.showAppMenu(coords) : Promise.resolve(false); },
 
   // AI Assistant
   aiChat(data) { return this.api.ai ? this.api.ai.chat(data) : Promise.resolve('AI service unavailable'); },

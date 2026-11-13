@@ -63,7 +63,7 @@ class WindowManager {
     });
 
     // Window events
-    if (process.env.AETHER_DEBUG) {
+    if (process.env.AETHER_DEBUG === '1' || process.env.AETHER_DEBUG === 'true') {
       win.webContents.on('console-message', (event) => {
         const msg = event?.message || '';
         const lvl = event?.level || 0;

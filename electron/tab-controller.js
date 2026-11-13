@@ -37,17 +37,24 @@ class TabController {
     const activeTab = this.getActiveTab();
     if (activeTab && activeTab.view && !activeTab.isInternal) {
       try {
-        activeTab.view.setVisible(this.isViewVisible);
-        if (this.isViewVisible) {
+        if (!this.isViewVisible) {
+          activeTab.view.setBounds({ x: 0, y: 0, width: 0, height: 0 });
+        } else {
           this.updateActiveViewBounds();
         }
-      } catch (e) {}
+      } catch (e) {
+        console.error('Error setting active view bounds:', e);
+      }
     }
     if (this.splitTabId) {
       const splitTab = this.getTab(this.splitTabId);
       if (splitTab && splitTab.view && !splitTab.isInternal) {
         try {
-          splitTab.view.setVisible(this.isViewVisible);
+          if (!this.isViewVisible) {
+            splitTab.view.setBounds({ x: 0, y: 0, width: 0, height: 0 });
+          } else {
+            this.updateActiveViewBounds();
+          }
         } catch (e) {}
       }
     }
@@ -130,7 +137,7 @@ class TabController {
     // Add view to window's contentView
     try {
       this.browserWindow.contentView.addChildView(view);
-      view.setVisible(false);
+      view.setBounds({ x: 0, y: 0, width: 0, height: 0 });
     } catch (e) {
       console.error('Failed to attach child view:', e);
     }
@@ -162,7 +169,7 @@ class TabController {
   setupTabListeners(tab, wc) {
     if (!wc || !tab) return;
 
-    if (process.env.AETHER_DEBUG) {
+    if (process.env.AETHER_DEBUG === '1' || process.env.AETHER_DEBUG === 'true') {
       wc.on('console-message', (event) => {
         const msg = event?.message || '';
         const lvl = event?.level || 0;
@@ -543,7 +550,7 @@ class TabController {
     for (const t of this.tabs) {
       if (t.id !== tabId && t.id !== this.splitTabId && t.view) {
         try {
-          t.view.setVisible(false);
+          t.view.setBounds({ x: 0, y: 0, width: 0, height: 0 });
         } catch (e) {}
       }
     }
@@ -552,14 +559,13 @@ class TabController {
 
     if (targetTab.isInternal) {
       try {
-        if (targetTab.view) targetTab.view.setVisible(false);
+        if (targetTab.view) targetTab.view.setBounds({ x: 0, y: 0, width: 0, height: 0 });
       } catch (e) {}
     } else if (targetTab.view) {
       try {
         if (!this.browserWindow.contentView.children.includes(targetTab.view)) {
           this.browserWindow.contentView.addChildView(targetTab.view);
         }
-        targetTab.view.setVisible(true);
         this.updateActiveViewBounds();
       } catch (e) {}
     }
@@ -633,7 +639,9 @@ class TabController {
 
     try {
       this.browserWindow.contentView.addChildView(view);
-      view.setVisible(tab.id === this.activeTabId || tab.id === this.splitTabId);
+      if (tab.id !== this.activeTabId && tab.id !== this.splitTabId) {
+        view.setBounds({ x: 0, y: 0, width: 0, height: 0 });
+      }
     } catch (e) {}
 
     if (!tab.isInternal) {
@@ -725,7 +733,7 @@ class TabController {
     const oldSplit = this.getTab(this.splitTabId);
     if (oldSplit && oldSplit.view && oldSplit.id !== this.activeTabId) {
       try {
-        oldSplit.view.setVisible(false);
+        oldSplit.view.setBounds({ x: 0, y: 0, width: 0, height: 0 });
       } catch (e) {}
     }
     this.splitTabId = null;
@@ -843,7 +851,7 @@ class TabController {
       tab.title = this.getInternalTitle(resolvedUrl);
       tab.isLoading = false;
       try {
-        tab.view.setVisible(false);
+        if (tab.view) tab.view.setBounds({ x: 0, y: 0, width: 0, height: 0 });
       } catch (e) {}
       this.notifyTabUpdated(tab);
     } else {
@@ -854,7 +862,6 @@ class TabController {
           if (!this.browserWindow.contentView.children.includes(tab.view)) {
             this.browserWindow.contentView.addChildView(tab.view);
           }
-          tab.view.setVisible(true);
           this.updateActiveViewBounds();
         } catch (e) {}
       }
@@ -984,6 +991,19 @@ class TabController {
       return;
     }
 
+    if (this.isViewVisible === false) {
+      try {
+        activeTab.view.setBounds({ x: 0, y: 0, width: 0, height: 0 });
+        if (this.splitTabId) {
+          const splitTab = this.getTab(this.splitTabId);
+          if (splitTab && splitTab.view) {
+            splitTab.view.setBounds({ x: 0, y: 0, width: 0, height: 0 });
+          }
+        }
+      } catch (e) {}
+      return;
+    }
+
     try {
       const [width, height] = this.browserWindow.getContentSize();
       const topOffset = typeof this.topOffset === 'number' && this.topOffset > 0 ? this.topOffset : 84;
@@ -1002,7 +1022,6 @@ class TabController {
           width: halfWidth,
           height: availableHeight
         });
-        activeTab.view.setVisible(this.isViewVisible !== false);
 
         splitTab.view.setBounds({
           x: leftOffset + halfWidth,
@@ -1010,7 +1029,6 @@ class TabController {
           width: availableWidth - halfWidth,
           height: availableHeight
         });
-        splitTab.view.setVisible(this.isViewVisible !== false);
         return;
       }
 
@@ -1021,7 +1039,6 @@ class TabController {
         width: availableWidth,
         height: availableHeight
       });
-      activeTab.view.setVisible(this.isViewVisible !== false);
     } catch (e) {
       console.error('Error updating view bounds:', e);
     }

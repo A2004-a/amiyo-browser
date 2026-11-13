@@ -377,6 +377,17 @@ function registerIpcHandlers() {
     }
   });
 
+  // --- App / Nexus Menu ---
+  ipcMain.handle('menu:show-app-menu', (event, coords) => {
+    const win = BrowserWindow.fromWebContents(event.sender);
+    const tabCtrl = getTabControllerForSender(event);
+    if (win && tabCtrl) {
+      menuManager.showAppMenu(win, tabCtrl, coords);
+      return true;
+    }
+    return false;
+  });
+
   // --- Window Side Offset for AI Panel ---
   ipcMain.handle('window:set-side-offset', (event, offset) => {
     const tabCtrl = getTabControllerForSender(event);

@@ -2,6 +2,7 @@ const { Menu, MenuItem, clipboard } = require('electron');
 
 class MenuManager {
   setupAppMenu(windowManager) {
+    this.windowManager = windowManager;
     const isMac = process.platform === 'darwin';
 
     const template = [
@@ -373,6 +374,168 @@ class MenuManager {
     }));
 
     menu.popup({ window: browserWindow });
+  }
+
+  showAppMenu(browserWindow, tabController, coords) {
+    const isPrivate = tabController?.isPrivate;
+    const activeTab = tabController?.getActiveTab();
+    const zoomFactor = activeTab?.zoomFactor || 1.0;
+    const zoomPct = Math.round(zoomFactor * 100);
+
+    const menu = new Menu();
+
+    menu.append(new MenuItem({
+      label: '✨ AETHER Intelligence',
+      accelerator: 'CmdOrCtrl+Shift+A',
+      click: () => browserWindow.webContents.send('trigger-ai-panel')
+    }));
+
+    menu.append(new MenuItem({ type: 'separator' }));
+
+    menu.append(new MenuItem({
+      label: 'New Tab',
+      accelerator: 'CmdOrCtrl+T',
+      click: () => tabController?.createTab('aether://newtab')
+    }));
+
+    menu.append(new MenuItem({
+      label: 'New Window',
+      accelerator: 'CmdOrCtrl+N',
+      click: () => this.windowManager?.createWindow(false)
+    }));
+
+    menu.append(new MenuItem({
+      label: 'New Private Window',
+      accelerator: 'CmdOrCtrl+Shift+N',
+      click: () => this.windowManager?.createWindow(true)
+    }));
+
+    menu.append(new MenuItem({ type: 'separator' }));
+
+    // Zoom submenu
+    const zoomSubmenu = new Menu();
+    zoomSubmenu.append(new MenuItem({
+      label: `Zoom Level: ${zoomPct}%`,
+      enabled: false
+    }));
+    zoomSubmenu.append(new MenuItem({
+      label: 'Zoom In (+)',
+      accelerator: 'CmdOrCtrl+Plus',
+      click: () => tabController && activeTab && tabController.setZoom(activeTab.id, Math.min(3.0, zoomFactor + 0.1))
+    }));
+    zoomSubmenu.append(new MenuItem({
+      label: 'Zoom Out (-)',
+      accelerator: 'CmdOrCtrl+-',
+      click: () => tabController && activeTab && tabController.setZoom(activeTab.id, Math.max(0.25, zoomFactor - 0.1))
+    }));
+    zoomSubmenu.append(new MenuItem({
+      label: 'Reset Zoom (100%)',
+      accelerator: 'CmdOrCtrl+0',
+      click: () => tabController && activeTab && tabController.setZoom(activeTab.id, 1.0)
+    }));
+    zoomSubmenu.append(new MenuItem({
+      label: 'Toggle Full Screen',
+      accelerator: 'F11',
+      click: () => browserWindow.setFullScreen(!browserWindow.isFullScreen())
+    }));
+
+    menu.append(new MenuItem({
+      label: `Zoom (${zoomPct}%)`,
+      submenu: zoomSubmenu
+    }));
+
+    menu.append(new MenuItem({ type: 'separator' }));
+
+    menu.append(new MenuItem({
+      label: 'AETHER Vault: Bookmarks',
+      accelerator: 'CmdOrCtrl+Shift+O',
+      click: () => tabController?.createTab('aether://bookmarks')
+    }));
+
+    menu.append(new MenuItem({
+      label: 'AETHER Vault: History',
+      accelerator: 'CmdOrCtrl+H',
+      click: () => tabController?.createTab('aether://history')
+    }));
+
+    menu.append(new MenuItem({
+      label: 'Downloads',
+      accelerator: 'CmdOrCtrl+J',
+      click: () => tabController?.createTab('aether://downloads')
+    }));
+
+    menu.append(new MenuItem({ type: 'separator' }));
+
+    menu.append(new MenuItem({
+      label: 'Find in Page...',
+      accelerator: 'CmdOrCtrl+F',
+      click: () => browserWindow.webContents.send('trigger-find-in-page')
+    }));
+
+    menu.append(new MenuItem({
+      label: 'Print...',
+      accelerator: 'CmdOrCtrl+P',
+      click: () => tabController && activeTab && tabController.print(activeTab.id)
+    }));
+
+    menu.append(new MenuItem({
+      label: '📸 AETHER Prism Capture',
+      accelerator: 'CmdOrCtrl+Shift+S',
+      click: () => browserWindow.webContents.send('trigger-web-capture')
+    }));
+
+    menu.append(new MenuItem({
+      label: tabController?.splitTabId ? '🪟 Close Split Screen' : '🪟 AETHER Split Screen',
+      click: () => browserWindow.webContents.send('trigger-split-screen')
+    }));
+
+    menu.append(new MenuItem({
+      label: '⚡ AETHER Pulse (Task Manager)',
+      accelerator: 'Shift+Esc',
+      click: () => browserWindow.webContents.send('trigger-task-manager')
+    }));
+
+    menu.append(new MenuItem({ type: 'separator' }));
+
+    menu.append(new MenuItem({
+      label: '↗️ Safari Share Sheet & QR Code',
+      click: () => browserWindow.webContents.send('trigger-share-sheet')
+    }));
+
+    menu.append(new MenuItem({
+      label: '📝 Edge Scratchpad (Quick Notes)',
+      accelerator: 'CmdOrCtrl+Alt+N',
+      click: () => browserWindow.webContents.send('trigger-quick-notes')
+    }));
+
+    menu.append(new MenuItem({
+      label: '🧹 Clear Browsing Data...',
+      accelerator: 'CmdOrCtrl+Shift+Delete',
+      click: () => browserWindow.webContents.send('trigger-clear-browsing-data')
+    }));
+
+    menu.append(new MenuItem({ type: 'separator' }));
+
+    menu.append(new MenuItem({
+      label: 'Settings',
+      click: () => tabController?.createTab('aether://settings')
+    }));
+
+    menu.append(new MenuItem({
+      label: 'Exit AETHER',
+      click: () => {
+        const { app } = require('electron');
+        app.quit();
+      }
+    }));
+
+    const popupOptions = { window: browserWindow };
+    if (coords && typeof coords.x === 'number' && typeof coords.y === 'number') {
+      popupOptions.x = Math.round(coords.x);
+      popupOptions.y = Math.round(coords.y);
+    }
+
+    menu.popup(popupOptions);
   }
 }
 

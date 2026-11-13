@@ -212,15 +212,16 @@ const App = {
   initChromeMenu() {
     const menuBtn = document.getElementById('chrome-menu-btn');
     const menuEl = document.getElementById('chrome-app-menu');
-    if (!menuBtn || !menuEl) return;
+    if (!menuBtn) return;
 
     menuBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      menuEl.classList.toggle('hidden');
-      const zoomValEl = document.getElementById('menu-zoom-val');
-      const tab = State.getActiveTab();
-      if (zoomValEl && tab) {
-        zoomValEl.textContent = `${Math.round((tab.zoomFactor || 1) * 100)}%`;
+      const rect = menuBtn.getBoundingClientRect();
+      if (IpcClient.showAppMenu) {
+        IpcClient.showAppMenu({
+          x: Math.round(rect.right),
+          y: Math.round(rect.bottom + 4)
+        });
       }
     });
 
@@ -429,10 +430,24 @@ const App = {
     }
   },
 
-  showModal(title, bodyHtml, buttons = []) {
+  async showModal(title, bodyHtml, buttons = []) {
     const backdrop = document.getElementById('overlay-backdrop');
     const dialog = document.getElementById('modal-dialog-content');
     if (!backdrop || !dialog) return;
+
+    const tab = State.getActiveTab();
+    if (tab && !tab.isInternal && tab.url && tab.url.startsWith('http')) {
+      try {
+        const res = await IpcClient.captureViewport(tab.id);
+        if (res && res.dataUrl) {
+          const freeze = document.getElementById('freeze-backdrop');
+          if (freeze) {
+            freeze.style.backgroundImage = `url(${res.dataUrl})`;
+            freeze.classList.remove('hidden');
+          }
+        }
+      } catch (e) {}
+    }
 
     if (IpcClient.setViewVisible) {
       IpcClient.setViewVisible(false);
@@ -468,7 +483,13 @@ const App = {
     if (backdrop) {
       backdrop.classList.remove('active');
     }
-    if (IpcClient.setViewVisible) {
+    const freeze = document.getElementById('freeze-backdrop');
+    if (freeze) {
+      freeze.classList.add('hidden');
+      freeze.style.backgroundImage = '';
+    }
+    const tab = State.getActiveTab();
+    if (tab && !tab.isInternal && IpcClient.setViewVisible) {
       IpcClient.setViewVisible(true);
     }
   },
@@ -918,6 +939,28 @@ const App = {
     if (winBridge?.onCreateTabGroup) {
       winBridge.onCreateTabGroup((tabId) => this.promptCreateTabGroup(tabId));
     }
+
+    const triggers = window.aetherAPI?.triggers || window.amiyoAPI?.triggers;
+    if (triggers?.onAiPanel) {
+      triggers.onAiPanel(() => {
+        if (typeof AiPanel !== 'undefined') AiPanel.toggle(true);
+      });
+    }
+    if (triggers?.onSplitScreen) {
+      triggers.onSplitScreen(() => this.toggleSplitScreen());
+    }
+    if (triggers?.onTaskManager) {
+      triggers.onTaskManager(() => this.openTaskManager());
+    }
+    if (triggers?.onShareSheet) {
+      triggers.onShareSheet(() => this.openShareSheet());
+    }
+    if (triggers?.onQuickNotes) {
+      triggers.onQuickNotes(() => this.toggleQuickNotes());
+    }
+    if (triggers?.onClearBrowsingData) {
+      triggers.onClearBrowsingData(() => this.showClearBrowsingDataDialog());
+    }
   },
 
   initShareSheet() {
@@ -1129,6 +1172,9 @@ const App = {
     if (!panel) return;
     const isHidden = panel.classList.toggle('hidden');
     notesBtn?.classList.toggle('active', !isHidden);
+    if (IpcClient.setSideOffset) {
+      IpcClient.setSideOffset(!isHidden ? 320 : 0);
+    }
     if (!isHidden) {
       document.getElementById('quick-notes-textarea')?.focus();
     }

@@ -197,16 +197,48 @@ const Omnibox = {
     }
   },
 
+  closeShieldsPopover() {
+    if (!this.shieldsPopoverEl) return;
+    this.shieldsPopoverEl.classList.add('hidden');
+    const freeze = document.getElementById('freeze-backdrop');
+    if (freeze) {
+      freeze.classList.add('hidden');
+      freeze.style.backgroundImage = '';
+    }
+    const tab = State.getActiveTab();
+    if (tab && !tab.isInternal && IpcClient.setViewVisible) {
+      IpcClient.setViewVisible(true);
+    }
+  },
+
   async toggleShieldsPopover() {
     if (!this.shieldsPopoverEl) return;
     const isHidden = this.shieldsPopoverEl.classList.contains('hidden');
     if (!isHidden) {
-      this.shieldsPopoverEl.classList.add('hidden');
+      this.closeShieldsPopover();
       return;
     }
 
-    // Populate data
+    // Freeze-frame snapshot backdrop to prevent WebContentsView clipping
     const tab = State.getActiveTab();
+    const isWeb = tab && !tab.isInternal && tab.url && tab.url.startsWith('http');
+    if (isWeb) {
+      try {
+        const res = await IpcClient.captureViewport(tab.id);
+        if (res && res.dataUrl) {
+          const freeze = document.getElementById('freeze-backdrop');
+          if (freeze) {
+            freeze.style.backgroundImage = `url(${res.dataUrl})`;
+            freeze.classList.remove('hidden');
+          }
+        }
+      } catch (e) {}
+      if (IpcClient.setViewVisible) {
+        await IpcClient.setViewVisible(false);
+      }
+    }
+
+    // Populate data
     let hostname = 'this site';
     if (tab && tab.url && tab.url.startsWith('http')) {
       try {
@@ -269,7 +301,7 @@ const Omnibox = {
           siteBtn.onclick = async () => {
             const nextAllow = !isWhitelisted;
             await IpcClient.api.shields.toggleWhitelist(hostname, nextAllow);
-            this.toggleShieldsPopover(); // close
+            this.closeShieldsPopover();
           };
         }
       }
@@ -282,7 +314,7 @@ const Omnibox = {
     // Close on click outside
     const closeListener = (e) => {
       if (!this.shieldsPopoverEl.contains(e.target) && !this.shieldsBtnEl.contains(e.target)) {
-        this.shieldsPopoverEl.classList.add('hidden');
+        this.closeShieldsPopover();
         document.removeEventListener('click', closeListener);
       }
     };
@@ -459,6 +491,7 @@ const Omnibox = {
       return;
     }
 
+    this.ensureSuggestionsBackdrop();
     this.suggestionsEl.innerHTML = '';
     this.suggestionsEl.classList.remove('hidden');
 
@@ -595,12 +628,45 @@ const Omnibox = {
     }
   },
 
+  async ensureSuggestionsBackdrop() {
+    if (this.isSuggestionsBackdropActive) return;
+    const tab = State.getActiveTab();
+    if (tab && !tab.isInternal && tab.url && tab.url.startsWith('http')) {
+      this.isSuggestionsBackdropActive = true;
+      try {
+        const res = await IpcClient.captureViewport(tab.id);
+        if (res && res.dataUrl) {
+          const freeze = document.getElementById('freeze-backdrop');
+          if (freeze) {
+            freeze.style.backgroundImage = `url(${res.dataUrl})`;
+            freeze.classList.remove('hidden');
+          }
+        }
+      } catch (e) {}
+      if (IpcClient.setViewVisible) {
+        IpcClient.setViewVisible(false);
+      }
+    }
+  },
+
   closeSuggestions() {
     if (this.suggestionsEl) {
       this.suggestionsEl.classList.add('hidden');
       this.suggestionsEl.innerHTML = '';
       this.currentSuggestions = [];
       this.selectedIndex = -1;
+    }
+    if (this.isSuggestionsBackdropActive) {
+      this.isSuggestionsBackdropActive = false;
+      const freeze = document.getElementById('freeze-backdrop');
+      if (freeze) {
+        freeze.classList.add('hidden');
+        freeze.style.backgroundImage = '';
+      }
+      const tab = State.getActiveTab();
+      if (tab && !tab.isInternal && IpcClient.setViewVisible) {
+        IpcClient.setViewVisible(true);
+      }
     }
   },
 

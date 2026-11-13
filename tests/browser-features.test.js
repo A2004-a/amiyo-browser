@@ -90,3 +90,4 @@ module.exports = {
     console.log('✔ Signature Browser Features tests passed!');
   }
 };
+

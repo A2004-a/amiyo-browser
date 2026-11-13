@@ -172,9 +172,10 @@ const api = {
     set: (tabId, factor) => ipcRenderer.invoke('zoom:set', tabId, factor)
   },
 
-  // --- Context Menu ---
+  // --- Context Menu & App Menu ---
   contextMenu: {
-    show: (params) => ipcRenderer.invoke('context-menu:show', params)
+    show: (params) => ipcRenderer.invoke('context-menu:show', params),
+    showAppMenu: (coords) => ipcRenderer.invoke('menu:show-app-menu', coords)
   },
 
   // --- AI Assistant ---
@@ -252,6 +253,36 @@ const api = {
       const listener = (event, tabId) => callback(tabId);
       ipcRenderer.on('trigger-create-tab-group', listener);
       return () => ipcRenderer.removeListener('trigger-create-tab-group', listener);
+    },
+    onAiPanel: (callback) => {
+      const listener = () => callback();
+      ipcRenderer.on('trigger-ai-panel', listener);
+      return () => ipcRenderer.removeListener('trigger-ai-panel', listener);
+    },
+    onSplitScreen: (callback) => {
+      const listener = () => callback();
+      ipcRenderer.on('trigger-split-screen', listener);
+      return () => ipcRenderer.removeListener('trigger-split-screen', listener);
+    },
+    onTaskManager: (callback) => {
+      const listener = () => callback();
+      ipcRenderer.on('trigger-task-manager', listener);
+      return () => ipcRenderer.removeListener('trigger-task-manager', listener);
+    },
+    onShareSheet: (callback) => {
+      const listener = () => callback();
+      ipcRenderer.on('trigger-share-sheet', listener);
+      return () => ipcRenderer.removeListener('trigger-share-sheet', listener);
+    },
+    onQuickNotes: (callback) => {
+      const listener = () => callback();
+      ipcRenderer.on('trigger-quick-notes', listener);
+      return () => ipcRenderer.removeListener('trigger-quick-notes', listener);
+    },
+    onClearBrowsingData: (callback) => {
+      const listener = () => callback();
+      ipcRenderer.on('trigger-clear-browsing-data', listener);
+      return () => ipcRenderer.removeListener('trigger-clear-browsing-data', listener);
     }
   }
 };

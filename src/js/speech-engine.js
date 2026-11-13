@@ -187,3 +187,4 @@ const SpeechEngine = {
 if (typeof window !== 'undefined') {
   window.SpeechEngine = SpeechEngine;
 }
+
