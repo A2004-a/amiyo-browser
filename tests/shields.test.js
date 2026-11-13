@@ -101,6 +101,36 @@ function run() {
   assert.ok(scriptlet.includes('AudioBuffer.prototype.getChannelData'), 'Scriptlet should farble AudioContext');
   assert.ok(scriptlet.includes('hardwareConcurrency'), 'Scriptlet should standardize CPU cores');
 
+  // Test 15: Header Bidding & GPT Defusers
+  assert.ok(scriptlet.includes('window.googletag'), 'Scriptlet should stub Google Publisher Tag (GPT)');
+  assert.ok(scriptlet.includes('window.pbjs'), 'Scriptlet should stub Prebid.js');
+  assert.ok(scriptlet.includes('window.apstag'), 'Scriptlet should stub Amazon Publisher Services');
+
+  // Test 16: Pop-under Defusers
+  assert.ok(scriptlet.includes('window.open'), 'Scriptlet should protect against pop-under windows');
+
+  // Test 17: High-Throughput Ultra-Fast Performance Benchmark
+  const testUrls = [
+    'https://securepubads.g.doubleclick.net/gampad/ads?env=vp',
+    'https://www.google-analytics.com/analytics.js',
+    'https://cdn.example.com/assets/app.min.js',
+    'https://images.example.com/banner.png',
+    'https://api.mixpanel.com/track',
+    'https://github.com/torvalds/linux',
+    'https://adservice.google.com/adsid/google/ui',
+    'https://wikipedia.org/wiki/Main_Page'
+  ];
+
+  const startTime = Date.now();
+  const iterations = 10000;
+  for (let i = 0; i < iterations; i++) {
+    shields.isUrlBlocked(testUrls[i % testUrls.length]);
+  }
+  const duration = Date.now() - startTime;
+  const avgMicroseconds = ((duration / iterations) * 1000).toFixed(2);
+  console.log(`    ↳ High-Throughput Benchmark: ${iterations} URL lookups in ${duration}ms (${avgMicroseconds} µs/lookup)`);
+  assert.ok(duration < 250, `10,000 lookups must execute in under 250ms (actual: ${duration}ms)`);
+
   console.log('✔ ShieldsController tests passed!');
 }
 
