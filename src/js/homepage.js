@@ -674,7 +674,6 @@ const Homepage = {
       badge.title = `Active Search Engine: ${item.name} (Click to switch engine)`;
     }
   },
-  },
 
   getWallpaper() {
     return localStorage.getItem('aether_ntp_wallpaper') || localStorage.getItem('amiyo_ntp_wallpaper') || '';
