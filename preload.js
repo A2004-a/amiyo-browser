@@ -49,6 +49,7 @@ const api = {
     suspend: (tabId) => ipcRenderer.invoke('tabs:suspend', tabId),
     resume: (tabId) => ipcRenderer.invoke('tabs:resume', tabId),
     createGroup: (data) => ipcRenderer.invoke('tabs:create-group', data),
+    createTabGroup: (data) => ipcRenderer.invoke('tabs:create-group', data),
     updateGroup: (groupId, updates) => ipcRenderer.invoke('tabs:update-group', groupId, updates),
     deleteGroup: (groupId) => ipcRenderer.invoke('tabs:delete-group', groupId),
     setGroup: (tabId, groupId) => ipcRenderer.invoke('tabs:set-group', tabId, groupId),

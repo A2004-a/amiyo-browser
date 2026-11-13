@@ -646,15 +646,24 @@ class TabController {
   }
 
   // --- Tab Groups ---
-  createGroup({ id, title, color } = {}) {
+  createGroup({ id, title, name, color, tabIds } = {}) {
     const groupId = id || `group_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`;
     const group = {
       id: groupId,
-      title: title || 'New Group',
+      title: title || name || 'New Group',
       color: color || '#6366f1',
       isCollapsed: false
     };
     this.groups.set(groupId, group);
+
+    if (Array.isArray(tabIds)) {
+      for (const tid of tabIds) {
+        const tab = this.getTab(tid);
+        if (tab) tab.groupId = groupId;
+      }
+      this.notifyTabsList();
+    }
+
     this.notifyGroupsUpdated();
     return group;
   }
@@ -711,6 +720,12 @@ class TabController {
 
     if (targetTab.isSuspended) {
       this.resumeTab(tabId);
+    }
+
+    if (targetTab.view && !this.browserWindow.contentView.children.includes(targetTab.view)) {
+      try {
+        this.browserWindow.contentView.addChildView(targetTab.view);
+      } catch (e) {}
     }
 
     this.splitTabId = tabId;
@@ -1007,6 +1022,11 @@ class TabController {
       // Check for active split-screen dual view
       const splitTab = this.splitTabId ? this.getTab(this.splitTabId) : null;
       if (splitTab && splitTab.view && !splitTab.isInternal && splitTab.id !== activeTab.id) {
+        if (!this.browserWindow.contentView.children.includes(splitTab.view)) {
+          try {
+            this.browserWindow.contentView.addChildView(splitTab.view);
+          } catch (e) {}
+        }
         const halfWidth = Math.floor(availableWidth / 2);
         activeTab.view.setBounds({
           x: leftOffset,

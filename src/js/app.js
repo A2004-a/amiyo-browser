@@ -411,10 +411,12 @@ const App = {
 
     if (this.findBarActive) {
       bar.classList.remove('hidden');
+      if (IpcClient.setTopOffset) IpcClient.setTopOffset(84 + 38);
       input?.focus();
       input?.select();
     } else {
       bar.classList.add('hidden');
+      if (IpcClient.setTopOffset) IpcClient.setTopOffset(84);
       IpcClient.stopFind(State.activeTabId, 'clearSelection');
     }
   },
@@ -655,9 +657,10 @@ const App = {
     const splitBtn = document.getElementById('split-screen-btn');
 
     // If already split, close it
-    const activeSplit = IpcClient.getSplitTab ? await IpcClient.getSplitTab() : (await IpcClient.api?.tabs?.getSplitTab?.() || await IpcClient.api?.tabs?.getSplitId?.());
+    const activeSplit = IpcClient.getSplitTab ? await IpcClient.getSplitTab() : (await IpcClient.api?.tabs?.getSplit?.());
     if (activeSplit) {
-      if (IpcClient.api?.tabs?.closeSplit) await IpcClient.api.tabs.closeSplit();
+      if (IpcClient.closeSplitTab) await IpcClient.closeSplitTab();
+      else if (IpcClient.api?.tabs?.closeSplit) await IpcClient.api.tabs.closeSplit();
       splitBtn?.classList.remove('active');
       return;
     }
@@ -667,18 +670,18 @@ const App = {
     if (otherTabs.length === 0) {
       // Create a new tab to split with
       const newT = await IpcClient.createTab('https://www.google.com', { active: false });
-      if (newT && IpcClient.api?.tabs?.setSplit) {
-        await IpcClient.api.tabs.setSplit(newT.id);
+      if (newT) {
+        if (IpcClient.setSplitTab) await IpcClient.setSplitTab(newT.id);
+        else if (IpcClient.api?.tabs?.setSplit) await IpcClient.api.tabs.setSplit(newT.id);
         splitBtn?.classList.add('active');
       }
       return;
     }
 
     // Split with the most recent other tab
-    if (IpcClient.api?.tabs?.setSplit) {
-      await IpcClient.api.tabs.setSplit(otherTabs[0].id);
-      splitBtn?.classList.add('active');
-    }
+    if (IpcClient.setSplitTab) await IpcClient.setSplitTab(otherTabs[0].id);
+    else if (IpcClient.api?.tabs?.setSplit) await IpcClient.api.tabs.setSplit(otherTabs[0].id);
+    splitBtn?.classList.add('active');
   },
 
   openTabSearch() {
@@ -896,8 +899,9 @@ const App = {
         class: 'btn-primary',
         click: async () => {
           const name = document.getElementById('tab-group-name-input')?.value.trim() || 'Group';
-          if (IpcClient.api?.tabs?.createTabGroup) {
-            await IpcClient.api.tabs.createTabGroup({ name, color: selectedColor, tabIds: targetId ? [targetId] : [] });
+          const createFn = IpcClient.createTabGroup || IpcClient.api?.tabs?.createTabGroup || IpcClient.api?.tabs?.createGroup;
+          if (createFn) {
+            await createFn.call(IpcClient, { name, title: name, color: selectedColor, tabIds: targetId ? [targetId] : [] });
             const tabs = await IpcClient.getTabs();
             State.setTabs(tabs, State.activeTabId);
             TabManager.render();
@@ -1130,6 +1134,9 @@ const App = {
     closeBtn?.addEventListener('click', () => {
       panel.classList.add('hidden');
       notesBtn?.classList.remove('active');
+      if (IpcClient.setSideOffset) {
+        IpcClient.setSideOffset(0);
+      }
     });
 
     insertLinkBtn?.addEventListener('click', () => {

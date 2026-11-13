@@ -5,8 +5,11 @@ const DownloadManager = {
   init() {
     this.toolBtnEl = document.getElementById('downloads-tool-btn');
     if (this.toolBtnEl) {
-      this.toolBtnEl.innerHTML = `${Utils.icons.download}<span class="badge-counter hidden" id="dl-badge">0</span>`;
       this.badgeEl = this.toolBtnEl.querySelector('#dl-badge');
+      if (!this.badgeEl) {
+        this.toolBtnEl.innerHTML = `${Utils.icons.download}<span class="badge-counter hidden" id="dl-badge">0</span>`;
+        this.badgeEl = this.toolBtnEl.querySelector('#dl-badge');
+      }
 
       this.toolBtnEl.addEventListener('click', () => {
         IpcClient.createTab('aether://downloads');

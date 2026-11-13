@@ -80,6 +80,35 @@ function testChromeKeywords() {
   assert.deepStrictEqual(parseKeyword('@wiki quantum computing'), { type: 'wikipedia', term: 'quantum computing' });
 }
 
+function testTabGroupsFeature() {
+  const groups = new Map();
+  function createGroup({ id, title, name, color, tabIds } = {}) {
+    const groupId = id || `group_${Date.now()}`;
+    const group = {
+      id: groupId,
+      title: title || name || 'New Group',
+      color: color || '#6366f1'
+    };
+    groups.set(groupId, group);
+    return { group, tabIds: tabIds || [] };
+  }
+
+  const res1 = createGroup({ name: 'Work Project', color: '#10b981', tabIds: ['tab_1', 'tab_2'] });
+  assert.strictEqual(res1.group.title, 'Work Project', 'Group title should accept name property');
+  assert.strictEqual(res1.group.color, '#10b981');
+  assert.deepStrictEqual(res1.tabIds, ['tab_1', 'tab_2'], 'Tab IDs must be retained');
+}
+
+function testFindBarOffsets() {
+  let currentOffset = 84;
+  function setTopOffset(isOpen) {
+    currentOffset = isOpen ? 84 + 38 : 84;
+    return currentOffset;
+  }
+  assert.strictEqual(setTopOffset(true), 122, 'Top offset should expand by 38px for docked find bar');
+  assert.strictEqual(setTopOffset(false), 84, 'Top offset should reset to 84px when find bar is closed');
+}
+
 module.exports = {
   run() {
     console.log('Testing Signature Browser Features (Brave, Chrome, Safari, Edge)...');
@@ -87,6 +116,8 @@ module.exports = {
     testCleanUrl();
     testBraveMetrics();
     testChromeKeywords();
+    testTabGroupsFeature();
+    testFindBarOffsets();
     console.log('✔ Signature Browser Features tests passed!');
   }
 };

@@ -158,20 +158,21 @@
   background: var(--danger-hover);
 }
 
-/* Find in page floating bar */
+/* Find in page docked bar */
 #find-bar {
-  position: absolute;
-  top: 10px;
-  right: 20px;
-  background: var(--bg-card);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-lg);
-  padding: 6px 10px;
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 8px;
-  z-index: 400;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 4px 16px;
+  height: 38px;
+  box-sizing: border-box;
+}
+
+#find-bar.hidden {
+  display: none !important;
 }
 
 #find-input {
