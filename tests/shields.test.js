@@ -85,6 +85,22 @@ function run() {
   shields.setMode('standard');
   assert.strictEqual(shields.mode, 'standard', 'Shields mode should be standard');
 
+  // Test 12: Brave De-AMP Engine
+  const ampUrl = 'https://www.google.com/amp/s/example.com/breaking-news-story?utm_source=news';
+  const deAmped = shields.deAmpUrl(ampUrl);
+  assert.ok(deAmped.startsWith('https://example.com/breaking-news-story'), 'De-AMP should redirect directly to publisher domain');
+  assert.ok(!deAmped.includes('google.com/amp'), 'De-AMP URL must not contain Google AMP proxy');
+
+  // Test 13: Brave Cookie Notice & Annoyance Blocking
+  assert.ok(css.includes('#onetrust-consent-sdk'), 'Cosmetic CSS should hide OneTrust banner');
+  assert.ok(css.includes('#CybotCookiebotDialog'), 'Cosmetic CSS should hide Cookiebot dialog');
+  assert.ok(scriptlet.includes('unlockScroll'), 'Scriptlet should unlock body scroll on hidden modals');
+
+  // Test 14: Brave Farbling (Anti-Fingerprinting)
+  assert.ok(scriptlet.includes('UNMASKED_RENDERER_WEBGL'), 'Scriptlet should mask WebGL renderer info');
+  assert.ok(scriptlet.includes('AudioBuffer.prototype.getChannelData'), 'Scriptlet should farble AudioContext');
+  assert.ok(scriptlet.includes('hardwareConcurrency'), 'Scriptlet should standardize CPU cores');
+
   console.log('✔ ShieldsController tests passed!');
 }
 
