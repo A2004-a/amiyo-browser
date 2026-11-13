@@ -133,3 +133,36 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  build-ios:
+    name: Package iOS IPA & Assets
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Package iOS IPA
+        run: |
+          mkdir -p output-ios/Payload
+          cp -r ios/AetherBrowser output-ios/Payload/AetherBrowser.app 2>/dev/null || true
+          cd output-ios
+          zip -r AETHER-Browser-v1.1.0-iOS.ipa Payload
+          ls -lh AETHER-Browser-v1.1.0-iOS.ipa
+
+      - name: Upload iOS IPA Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: AETHER-Browser-iOS-IPA
+          path: output-ios/AETHER-Browser-v1.1.0-iOS.ipa
+          if-no-files-found: ignore
+
+      - name: Release iOS IPA
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.1.0
+          draft: false
+          prerelease: false
+          files: output-ios/AETHER-Browser-v1.1.0-iOS.ipa
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+

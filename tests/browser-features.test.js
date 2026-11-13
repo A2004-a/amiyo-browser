@@ -228,6 +228,34 @@ function testMobileAdBlocking() {
   assert(iosVc.includes("WKUserScript"), 'iOS must inject cosmetic ad blocker');
 }
 
+function testAllPlatformDownloadLinks() {
+  const fs = require('fs');
+  const path = require('path');
+
+  const readme = fs.readFileSync(path.join(__dirname, '..', 'README.md'), 'utf8');
+  const settings = fs.readFileSync(path.join(__dirname, '..', 'src', 'js', 'settings-manager.js'), 'utf8');
+
+  const platforms = [
+    { name: 'Windows EXE', pattern: 'AETHER-Browser-Setup-1.1.0-x64.exe' },
+    { name: 'Windows ZIP', pattern: 'AETHER-Browser-Setup-1.1.0-x64.zip' },
+    { name: 'macOS DMG', pattern: 'AETHER-Browser-1.1.0-mac-universal.dmg' },
+    { name: 'macOS ZIP', pattern: 'AETHER-Browser-1.1.0-mac-universal.zip' },
+    { name: 'Linux AppImage', pattern: 'AETHER-Browser-1.1.0-linux-x64.AppImage' },
+    { name: 'Linux DEB', pattern: 'AETHER-Browser-1.1.0-linux-x64.deb' },
+    { name: 'Android APK', pattern: 'AETHER-Browser-v1.1.0-Android.apk' },
+    { name: 'iOS IPA', pattern: 'AETHER-Browser-v1.1.0-iOS.ipa' }
+  ];
+
+  for (const p of platforms) {
+    assert(readme.includes(p.pattern), `README must contain download link for ${p.name}`);
+    assert(settings.includes(p.pattern), `Settings page must contain download link for ${p.name}`);
+  }
+
+  // Verify release hub link
+  assert(readme.includes('https://github.com/A2004-a/amiyo-browser/releases/tag/v1.1.0'), 'README must link to release hub');
+  assert(settings.includes('https://github.com/A2004-a/amiyo-browser/releases/tag/v1.1.0'), 'Settings must link to release hub');
+}
+
 module.exports = {
   run() {
     console.log('Testing Signature Browser Features (Brave, Chrome, Safari, Edge)...');
@@ -241,6 +269,7 @@ module.exports = {
     testTabHoverCardLifecycle();
     testCrossPlatformMac();
     testMobileAdBlocking();
+    testAllPlatformDownloadLinks();
     console.log('✔ Signature Browser Features tests passed!');
   }
 };

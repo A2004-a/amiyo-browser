@@ -500,11 +500,26 @@ const SettingsManager = {
                   <span style="font-size:20px;">🍏</span>
                   <div>
                     <div style="font-size:13px;font-weight:700;color:var(--text-primary);">iOS (iPhone &amp; iPad)</div>
-                    <div style="font-size:11px;color:var(--text-secondary);">Standalone PWA &amp; Swift</div>
+                    <div style="font-size:11px;color:var(--text-secondary);">iOS 15.0+ · IPA &amp; PWA</div>
                   </div>
                 </div>
                 <div style="display:flex;gap:6px;margin-top:4px;">
-                  <button class="btn btn-sm btn-secondary" onclick="IpcClient.navigateTab(State.activeTabId, 'https://github.com/A2004-a/amiyo-browser/tree/main/ios')" style="font-size:11px;padding:6px 10px;width:100%;">📱 iOS Setup Guide</button>
+                  <button class="btn btn-sm btn-primary" onclick="IpcClient.navigateTab(State.activeTabId, 'https://github.com/A2004-a/amiyo-browser/releases/download/v1.1.0/AETHER-Browser-v1.1.0-iOS.ipa')" style="font-size:11px;padding:6px 10px;flex:1;">⬇️ IPA</button>
+                  <button class="btn btn-sm btn-secondary" onclick="IpcClient.navigateTab(State.activeTabId, 'https://github.com/A2004-a/amiyo-browser/tree/main/ios')" style="font-size:11px;padding:6px 10px;flex:1;">📱 Guide</button>
+                </div>
+              </div>
+
+              <!-- All Platforms Release Hub -->
+              <div style="background:var(--bg-tertiary);border:1px solid var(--border-subtle);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:8px;">
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span style="font-size:20px;">📦</span>
+                  <div>
+                    <div style="font-size:13px;font-weight:700;color:var(--text-primary);">GitHub Release Hub</div>
+                    <div style="font-size:11px;color:var(--text-secondary);">All Assets, Hashes &amp; Notes</div>
+                  </div>
+                </div>
+                <div style="display:flex;gap:6px;margin-top:4px;">
+                  <button class="btn btn-sm btn-secondary" onclick="IpcClient.navigateTab(State.activeTabId, 'https://github.com/A2004-a/amiyo-browser/releases/tag/v1.1.0')" style="font-size:11px;padding:6px 10px;width:100%;">📦 View All Downloads</button>
                 </div>
               </div>
 
