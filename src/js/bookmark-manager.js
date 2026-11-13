@@ -12,9 +12,15 @@ const BookmarksBar = {
 
     if (State.settings.showBookmarksBar === false) {
       this.barEl.classList.add('hidden');
+      if (typeof App !== 'undefined' && App.updateTopOffset) {
+        setTimeout(() => App.updateTopOffset(), 10);
+      }
       return;
     }
     this.barEl.classList.remove('hidden');
+    if (typeof App !== 'undefined' && App.updateTopOffset) {
+      setTimeout(() => App.updateTopOffset(), 10);
+    }
 
     State.bookmarks.forEach(bm => {
       const item = document.createElement('div');

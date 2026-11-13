@@ -1,5 +1,5 @@
 const IpcClient = {
-  api: window.amiyoAPI,
+  api: window.aetherAPI || window.amiyoAPI,
 
   // Window
   minimize() { return this.api.window.minimize(); },
@@ -10,6 +10,8 @@ const IpcClient = {
   createPrivate() { return this.api.window.createPrivate(); },
   toggleFullscreen() { return this.api.window.toggleFullscreen(); },
   setTopOffset(offset) { return this.api.window.setTopOffset(offset); },
+  setLeftOffset(offset) { return this.api.window.setLeftOffset ? this.api.window.setLeftOffset(offset) : Promise.resolve(); },
+  print(tabId) { return this.api.window.print ? this.api.window.print(tabId) : Promise.resolve(false); },
 
   // Tabs
   createTab(url, options) { return this.api.tabs.create(url, options); },
@@ -22,6 +24,7 @@ const IpcClient = {
   restoreTab() { return this.api.tabs.restore(); },
   navigateTab(tabId, url) { return this.api.tabs.navigate(tabId, url); },
   getTabs() { return this.api.tabs.list(); },
+  setViewVisible(visible) { return this.api.tabs && this.api.tabs.setViewVisible ? this.api.tabs.setViewVisible(visible) : Promise.resolve(); },
 
   // Navigation
   goBack(tabId) { return this.api.navigation.back(tabId); },
@@ -112,6 +115,7 @@ const IpcClient = {
   setSplitTab(tabId) { return this.api.tabs ? this.api.tabs.setSplit(tabId) : Promise.resolve(true); },
   closeSplitTab() { return this.api.tabs ? this.api.tabs.closeSplit() : Promise.resolve(true); },
   getSplitTab() { return this.api.tabs ? this.api.tabs.getSplit() : Promise.resolve(null); },
+  getSplitId() { return this.getSplitTab(); },
 
   // Reading Mode
   extractArticle(tabId) { return this.api.reader ? this.api.reader.extract(tabId) : Promise.resolve({ success: false }); },

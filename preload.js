@@ -25,6 +25,8 @@ const api = {
     createPrivate: () => ipcRenderer.invoke('window:create-private'),
     toggleFullscreen: () => ipcRenderer.invoke('window:toggle-fullscreen'),
     setTopOffset: (offset) => ipcRenderer.invoke('window:set-top-offset', offset),
+    setLeftOffset: (offset) => ipcRenderer.invoke('window:set-left-offset', offset),
+    print: (tabId) => ipcRenderer.invoke('window:print', tabId),
     onMaximizedChanged: (callback) => {
       const listener = (event, val) => callback(val);
       ipcRenderer.on('window-maximized-changed', listener);
@@ -54,6 +56,7 @@ const api = {
     setSplit: (tabId) => ipcRenderer.invoke('tabs:set-split', tabId),
     closeSplit: () => ipcRenderer.invoke('tabs:close-split'),
     getSplit: () => ipcRenderer.invoke('tabs:get-split'),
+    setViewVisible: (visible) => ipcRenderer.invoke('tabs:set-view-visible', visible),
     onGroupsUpdated: (callback) => {
       const listener = (event, data) => callback(data);
       ipcRenderer.on('tab-groups-updated', listener);
@@ -228,10 +231,32 @@ const api = {
       const listener = () => callback();
       ipcRenderer.on('trigger-bookmark-current', listener);
       return () => ipcRenderer.removeListener('trigger-bookmark-current', listener);
+    },
+    onTabSearch: (callback) => {
+      const listener = () => callback();
+      ipcRenderer.on('trigger-tab-search', listener);
+      return () => ipcRenderer.removeListener('trigger-tab-search', listener);
+    },
+    onWebCapture: (callback) => {
+      const listener = () => callback();
+      ipcRenderer.on('trigger-web-capture', listener);
+      return () => ipcRenderer.removeListener('trigger-web-capture', listener);
+    },
+    onFocusOmnibox: (callback) => {
+      const listener = () => callback();
+      ipcRenderer.on('trigger-focus-omnibox', listener);
+      return () => ipcRenderer.removeListener('trigger-focus-omnibox', listener);
+    },
+    onCreateTabGroup: (callback) => {
+      const listener = (event, tabId) => callback(tabId);
+      ipcRenderer.on('trigger-create-tab-group', listener);
+      return () => ipcRenderer.removeListener('trigger-create-tab-group', listener);
     }
   }
 };
 
+contextBridge.exposeInMainWorld('aetherAPI', api);
+contextBridge.exposeInMainWorld('aetherApi', api);
 contextBridge.exposeInMainWorld('amiyoAPI', api);
 contextBridge.exposeInMainWorld('amiyoApi', api);
 

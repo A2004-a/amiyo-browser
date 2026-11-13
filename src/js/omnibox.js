@@ -178,7 +178,7 @@ const Omnibox = {
     if (!this.shieldsBadgeEl || !tab || !IpcClient.api?.shields?.getTabStats) return;
     try {
       const stats = await IpcClient.api.shields.getTabStats(tab.id);
-      const count = stats?.blockedCount || 0;
+      const count = stats?.blockedCount || stats?.total || 0;
       if (count > 0) {
         this.shieldsBadgeEl.textContent = count > 99 ? '99+' : count;
         this.shieldsBadgeEl.classList.remove('hidden');
@@ -187,6 +187,13 @@ const Omnibox = {
       }
     } catch (e) {
       this.shieldsBadgeEl.classList.add('hidden');
+    }
+  },
+
+  focus() {
+    if (this.inputEl) {
+      this.inputEl.focus();
+      this.inputEl.select();
     }
   },
 
@@ -218,7 +225,7 @@ const Omnibox = {
       if (IpcClient.api?.shields) {
         const status = await IpcClient.api.shields.getStatus();
         const tabStats = tab ? await IpcClient.api.shields.getTabStats(tab.id) : null;
-        if (blockedCountEl) blockedCountEl.textContent = tabStats?.blockedCount || 0;
+        if (blockedCountEl) blockedCountEl.textContent = tabStats?.blockedCount || tabStats?.total || 0;
         if (masterToggle) masterToggle.checked = status?.enabled !== false;
         
         const isWhitelisted = status?.whitelist?.includes(hostname);

@@ -54,6 +54,7 @@ const TabManager = {
       if (isVertical) {
         document.getElementById('app')?.classList.add('vertical-tabs-mode');
         verticalBtn.classList.add('active');
+        IpcClient.setLeftOffset?.(210);
       }
       verticalBtn.addEventListener('click', () => {
         const app = document.getElementById('app');
@@ -62,6 +63,7 @@ const TabManager = {
         const str = active ? 'true' : 'false';
         localStorage.setItem('aether_vertical_tabs', str);
         localStorage.setItem('amiyo_vertical_tabs', str);
+        IpcClient.setLeftOffset?.(active ? 210 : 0);
       });
     }
 

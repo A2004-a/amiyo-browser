@@ -73,6 +73,32 @@ function registerIpcHandlers() {
     }
   });
 
+  ipcMain.handle('window:set-left-offset', (event, offset) => {
+    if (typeof offset !== 'number' || offset < 0) return;
+    const tabCtrl = getTabControllerForSender(event);
+    if (tabCtrl) {
+      tabCtrl.setLeftOffset(offset);
+    }
+  });
+
+  ipcMain.handle('window:print', (event, tabId) => {
+    const tabCtrl = getTabControllerForSender(event);
+    if (!tabCtrl) return false;
+    const tab = tabCtrl.getTab(tabId || tabCtrl.activeTabId);
+    if (tab && tab.view && !tab.isInternal) {
+      tab.view.webContents.print();
+      return true;
+    }
+    return false;
+  });
+
+  ipcMain.handle('tabs:set-view-visible', (event, visible) => {
+    const tabCtrl = getTabControllerForSender(event);
+    if (tabCtrl) {
+      tabCtrl.setActiveViewVisible(visible);
+    }
+  });
+
   // --- Tab Management ---
   ipcMain.handle('tab:create', (event, url, options = {}) => {
     const tabCtrl = getTabControllerForSender(event);
@@ -373,6 +399,16 @@ function registerIpcHandlers() {
   });
 
   ipcMain.handle('shields:get-tab-stats', (event, tabId) => {
+    const tabCtrl = getTabControllerForSender(event);
+    if (tabCtrl) {
+      const tab = tabCtrl.getTab(tabId || tabCtrl.activeTabId);
+      if (tab && tab.view && !tab.view.webContents.isDestroyed()) {
+        const wcStats = shieldsController.getTabStats(`wc_${tab.view.webContents.id}`);
+        if (wcStats && (wcStats.total > 0 || wcStats.blockedCount > 0)) {
+          return wcStats;
+        }
+      }
+    }
     return shieldsController.getTabStats(tabId);
   });
 

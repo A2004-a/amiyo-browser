@@ -125,11 +125,29 @@ const KeyboardShortcuts = {
         return;
       }
 
-      // Ctrl + Shift + A: Toggle AETHER Intelligence Panel
+      // Ctrl + Shift + A: Tab Search
       if (isCtrlOrCmd && e.shiftKey && e.key.toLowerCase() === 'a') {
+        e.preventDefault();
+        if (typeof App !== 'undefined' && App.openTabSearch) {
+          App.openTabSearch();
+        }
+        return;
+      }
+
+      // Alt + A or Ctrl + Shift + Space: Toggle AETHER Intelligence Panel
+      if ((e.altKey && e.key.toLowerCase() === 'a') || (isCtrlOrCmd && e.shiftKey && e.key === ' ')) {
         e.preventDefault();
         if (typeof AiPanel !== 'undefined') {
           AiPanel.toggle();
+        }
+        return;
+      }
+
+      // Ctrl + P: Print
+      if (isCtrlOrCmd && !e.shiftKey && e.key.toLowerCase() === 'p') {
+        e.preventDefault();
+        if (State.activeTabId) {
+          IpcClient.print(State.activeTabId);
         }
         return;
       }
@@ -232,20 +250,6 @@ const KeyboardShortcuts = {
         return;
       }
 
-      // Ctrl + N: New Window
-      if (isCtrlOrCmd && !e.shiftKey && e.key.toLowerCase() === 'n') {
-        e.preventDefault();
-        IpcClient.createNewWindow();
-        return;
-      }
-
-      // Ctrl + Shift + N: Private Window
-      if (isCtrlOrCmd && e.shiftKey && e.key.toLowerCase() === 'n') {
-        e.preventDefault();
-        IpcClient.createPrivate();
-        return;
-      }
-
       // F11: Fullscreen
       if (e.key === 'F11') {
         e.preventDefault();
@@ -255,13 +259,18 @@ const KeyboardShortcuts = {
     });
 
     // Listen for main process triggers
-    window.amiyoAPI.triggers.onFindInPage(() => {
-      App.toggleFindBar();
-    });
+    const triggers = window.aetherAPI?.triggers || window.amiyoAPI?.triggers;
+    if (triggers?.onFindInPage) {
+      triggers.onFindInPage(() => {
+        App.toggleFindBar();
+      });
+    }
 
-    window.amiyoAPI.triggers.onBookmarkCurrent(() => {
-      Omnibox.toggleBookmarkCurrentTab();
-    });
+    if (triggers?.onBookmarkCurrent) {
+      triggers.onBookmarkCurrent(() => {
+        Omnibox.toggleBookmarkCurrentTab();
+      });
+    }
   },
 
   cycleTab(direction) {

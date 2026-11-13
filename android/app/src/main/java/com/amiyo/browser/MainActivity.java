@@ -123,7 +123,8 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public boolean onShowFileChooser(WebView webView, ValueCallback<Uri[]> filePathCallback, FileChooserParams fileChooserParams) {
+            public boolean onShowFileChooser(WebView webView, ValueCallback<Uri[]> filePathCallback,
+                    FileChooserParams fileChooserParams) {
                 if (fileUploadCallback != null) {
                     fileUploadCallback.onReceiveValue(null);
                 }
@@ -173,7 +174,8 @@ public class MainActivity extends AppCompatActivity {
         // Native DownloadManager integration
         webView.setDownloadListener(new DownloadListener() {
             @Override
-            public void onDownloadStart(String url, String userAgent, String contentDisposition, String mimeType, long contentLength) {
+            public void onDownloadStart(String url, String userAgent, String contentDisposition, String mimeType,
+                    long contentLength) {
                 try {
                     DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
                     request.setMimeType(mimeType);
@@ -203,7 +205,8 @@ public class MainActivity extends AppCompatActivity {
 
         urlInput.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_GO || actionId == EditorInfo.IME_ACTION_DONE ||
-                (event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN)) {
+                    (event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER
+                            && event.getAction() == KeyEvent.ACTION_DOWN)) {
                 String target = urlInput.getText().toString().trim();
                 loadTarget(target);
                 hideKeyboard();
@@ -214,11 +217,18 @@ public class MainActivity extends AppCompatActivity {
         });
 
         urlInput.addTextChangedListener(new TextWatcher() {
-            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
                 btnClearUrl.setVisibility(s.length() > 0 && urlInput.hasFocus() ? View.VISIBLE : View.GONE);
             }
-            @Override public void afterTextChanged(Editable s) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
         });
 
         urlInput.setOnFocusChangeListener((v, hasFocus) -> {
@@ -236,11 +246,13 @@ public class MainActivity extends AppCompatActivity {
         });
 
         btnNavBack.setOnClickListener(v -> {
-            if (webView.canGoBack()) webView.goBack();
+            if (webView.canGoBack())
+                webView.goBack();
         });
 
         btnNavForward.setOnClickListener(v -> {
-            if (webView.canGoForward()) webView.goForward();
+            if (webView.canGoForward())
+                webView.goForward();
         });
 
         btnNavHome.setOnClickListener(v -> loadHome());
@@ -269,10 +281,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void loadTarget(String input) {
-        if (input == null || input.isEmpty()) return;
+        if (input == null || input.isEmpty())
+            return;
 
         input = input.trim();
-        if (input.equals("aether://newtab") || input.equals("amiyo://newtab") || input.equalsIgnoreCase("about:blank")) {
+        if (input.equals("aether://newtab") || input.equals("amiyo://newtab")
+                || input.equalsIgnoreCase("about:blank")) {
             loadHome();
             return;
         }
@@ -304,7 +318,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateOmnibox(String url) {
-        if (url == null) return;
+        if (url == null)
+            return;
 
         if (url.equals(HOME_URL) || url.startsWith("file:///android_asset")) {
             urlInput.setText("");
@@ -409,7 +424,7 @@ public class MainActivity extends AppCompatActivity {
                 Uri[] results = null;
                 if (resultCode == RESULT_OK && data != null) {
                     if (data.getData() != null) {
-                        results = new Uri[]{ data.getData() };
+                        results = new Uri[] { data.getData() };
                     } else if (data.getClipData() != null) {
                         int count = data.getClipData().getItemCount();
                         results = new Uri[count];
@@ -426,4 +441,3 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
     }
 }
-

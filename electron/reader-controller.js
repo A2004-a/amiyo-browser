@@ -92,6 +92,7 @@ class ReaderController {
               content: contentHtml,
               wordCount,
               readingTimeMinutes,
+              readingTime: readingTimeMinutes,
               url: window.location.href,
               domain: window.location.hostname
             };

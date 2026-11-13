@@ -2,6 +2,7 @@ const { WebContentsView } = require('electron');
 const navigationController = require('./navigation-controller');
 const storageManager = require('./storage-manager');
 const menuManager = require('./menu-manager');
+const shieldsController = require('./shields-controller');
 
 class TabController {
   constructor(windowManager, browserWindow, sessionInstance, isPrivate = false) {
@@ -14,7 +15,9 @@ class TabController {
     this.activeTabId = null;
     this.recentlyClosed = [];
     this.topOffset = 84; // Header height
+    this.leftOffset = 0; // Vertical tabs sidebar offset
     this.sideOffset = 0; // AI sidebar offset
+    this.isViewVisible = true; // WebContentsView visibility flag
     this.splitTabId = null; // Split view dual display
     this.groups = new Map(); // groupId -> { id, title, color, isCollapsed }
   }
@@ -22,6 +25,40 @@ class TabController {
   setTopOffset(offset) {
     this.topOffset = offset;
     this.updateActiveViewBounds();
+  }
+
+  setLeftOffset(offset) {
+    this.leftOffset = typeof offset === 'number' && offset >= 0 ? offset : 0;
+    this.updateActiveViewBounds();
+  }
+
+  setActiveViewVisible(visible) {
+    this.isViewVisible = !!visible;
+    const activeTab = this.getActiveTab();
+    if (activeTab && activeTab.view && !activeTab.isInternal) {
+      try {
+        activeTab.view.setVisible(this.isViewVisible);
+        if (this.isViewVisible) {
+          this.updateActiveViewBounds();
+        }
+      } catch (e) {}
+    }
+    if (this.splitTabId) {
+      const splitTab = this.getTab(this.splitTabId);
+      if (splitTab && splitTab.view && !splitTab.isInternal) {
+        try {
+          splitTab.view.setVisible(this.isViewVisible);
+        } catch (e) {}
+      }
+    }
+  }
+
+  cycleTab(direction = 1) {
+    if (this.tabs.length <= 1) return;
+    const currentIndex = this.tabs.findIndex(t => t.id === this.activeTabId);
+    let nextIndex = (currentIndex + direction) % this.tabs.length;
+    if (nextIndex < 0) nextIndex = this.tabs.length - 1;
+    this.switchTab(this.tabs[nextIndex].id);
   }
 
   getTabsSummary() {
@@ -299,6 +336,180 @@ class TabController {
 
     wc.on('context-menu', (event, params) => {
       menuManager.showContextMenu(this.browserWindow, this, params);
+    });
+
+    // Cosmetic Ad-Hiding for pristine browsing
+    wc.on('dom-ready', () => {
+      if (!tab.isInternal && shieldsController.enabled && !shieldsController.isSiteWhitelisted(tab.url)) {
+        wc.insertCSS(`
+          .ad, .ads, .advertisement, ins.adsbygoogle, [id^="google_ads"], [class*="sponsored-content"], .taboola-ad, .outbrain-ad, [data-ad-unit], [data-ad-slot], .dfp-ad {
+            display: none !important;
+            visibility: hidden !important;
+            height: 0 !important;
+            max-height: 0 !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+          }
+        `).catch(() => {});
+      }
+    });
+
+    // Universal In-Page Keyboard Shortcuts (Forward events from webview)
+    wc.on('before-input-event', (event, input) => {
+      if (input.type !== 'keyDown') return;
+      const isCtrlOrCmd = input.control || input.meta;
+
+      // Ctrl + T: New Tab
+      if (isCtrlOrCmd && !input.shift && !input.alt && input.key.toLowerCase() === 't') {
+        event.preventDefault();
+        this.createTab('aether://newtab', { active: true });
+        return;
+      }
+
+      // Ctrl + Shift + T: Restore Tab
+      if (isCtrlOrCmd && input.shift && !input.alt && input.key.toLowerCase() === 't') {
+        event.preventDefault();
+        this.restoreClosedTab();
+        return;
+      }
+
+      // Ctrl + W: Close Active Tab
+      if (isCtrlOrCmd && !input.shift && !input.alt && input.key.toLowerCase() === 'w') {
+        event.preventDefault();
+        this.closeTab(tab.id);
+        return;
+      }
+
+      // Ctrl + R / F5: Reload
+      if ((isCtrlOrCmd && !input.shift && input.key.toLowerCase() === 'r') || input.key === 'F5') {
+        event.preventDefault();
+        this.reload(tab.id, false);
+        return;
+      }
+
+      // Ctrl + Shift + R: Force Reload
+      if (isCtrlOrCmd && input.shift && input.key.toLowerCase() === 'r') {
+        event.preventDefault();
+        this.reload(tab.id, true);
+        return;
+      }
+
+      // Ctrl + F: Find in Page
+      if (isCtrlOrCmd && !input.shift && input.key.toLowerCase() === 'f') {
+        event.preventDefault();
+        this.browserWindow.webContents.send('trigger-find-in-page');
+        return;
+      }
+
+      // Ctrl + L / Alt + D / F6: Focus Omnibox
+      if ((isCtrlOrCmd && input.key.toLowerCase() === 'l') || (input.alt && input.key.toLowerCase() === 'd') || input.key === 'F6') {
+        event.preventDefault();
+        this.browserWindow.webContents.send('trigger-focus-omnibox');
+        return;
+      }
+
+      // Ctrl + H: History
+      if (isCtrlOrCmd && !input.shift && input.key.toLowerCase() === 'h') {
+        event.preventDefault();
+        this.createTab('aether://history', { active: true });
+        return;
+      }
+
+      // Ctrl + J: Downloads
+      if (isCtrlOrCmd && !input.shift && input.key.toLowerCase() === 'j') {
+        event.preventDefault();
+        this.createTab('aether://downloads', { active: true });
+        return;
+      }
+
+      // Ctrl + D: Bookmark Current Tab
+      if (isCtrlOrCmd && !input.shift && input.key.toLowerCase() === 'd') {
+        event.preventDefault();
+        this.browserWindow.webContents.send('trigger-bookmark-current');
+        return;
+      }
+
+      // Ctrl + Shift + A: Search Tabs
+      if (isCtrlOrCmd && input.shift && input.key.toLowerCase() === 'a') {
+        event.preventDefault();
+        this.browserWindow.webContents.send('trigger-tab-search');
+        return;
+      }
+
+      // Ctrl + Shift + S: Web Capture
+      if (isCtrlOrCmd && input.shift && input.key.toLowerCase() === 's') {
+        event.preventDefault();
+        this.browserWindow.webContents.send('trigger-web-capture');
+        return;
+      }
+
+      // Ctrl + P: Print Page
+      if (isCtrlOrCmd && !input.shift && input.key.toLowerCase() === 'p') {
+        event.preventDefault();
+        wc.print();
+        return;
+      }
+
+      // F11: Toggle Fullscreen
+      if (input.key === 'F11') {
+        event.preventDefault();
+        this.browserWindow.setFullScreen(!this.browserWindow.isFullScreen());
+        return;
+      }
+
+      // Ctrl + Tab / Ctrl + PageDown: Next Tab
+      if (isCtrlOrCmd && !input.shift && (input.key === 'Tab' || input.key === 'PageDown')) {
+        event.preventDefault();
+        this.cycleTab(1);
+        return;
+      }
+
+      // Ctrl + Shift + Tab / Ctrl + PageUp: Prev Tab
+      if (isCtrlOrCmd && (input.shift && input.key === 'Tab' || input.key === 'PageUp')) {
+        event.preventDefault();
+        this.cycleTab(-1);
+        return;
+      }
+
+      // Ctrl + 1..8: Jump to Tab
+      if (isCtrlOrCmd && !input.shift && input.key >= '1' && input.key <= '8') {
+        const idx = parseInt(input.key, 10) - 1;
+        if (this.tabs[idx]) {
+          event.preventDefault();
+          this.switchTab(this.tabs[idx].id);
+          return;
+        }
+      }
+
+      // Ctrl + 9: Jump to Last Tab
+      if (isCtrlOrCmd && !input.shift && input.key === '9') {
+        if (this.tabs.length > 0) {
+          event.preventDefault();
+          this.switchTab(this.tabs[this.tabs.length - 1].id);
+          return;
+        }
+      }
+
+      // Ctrl + Plus / = : Zoom In
+      if (isCtrlOrCmd && (input.key === '+' || input.key === '=')) {
+        event.preventDefault();
+        this.setZoom(tab.id, Math.min(3.0, (tab.zoomFactor || 1.0) + 0.1));
+        return;
+      }
+
+      // Ctrl + - : Zoom Out
+      if (isCtrlOrCmd && input.key === '-') {
+        event.preventDefault();
+        this.setZoom(tab.id, Math.max(0.25, (tab.zoomFactor || 1.0) - 0.1));
+        return;
+      }
+
+      // Ctrl + 0 : Reset Zoom
+      if (isCtrlOrCmd && input.key === '0') {
+        event.preventDefault();
+        this.setZoom(tab.id, 1.0);
+        return;
+      }
     });
   }
 
@@ -770,8 +981,9 @@ class TabController {
     try {
       const [width, height] = this.browserWindow.getContentSize();
       const topOffset = typeof this.topOffset === 'number' && this.topOffset > 0 ? this.topOffset : 84;
+      const leftOffset = typeof this.leftOffset === 'number' && this.leftOffset > 0 ? this.leftOffset : 0;
       const sideOffset = typeof this.sideOffset === 'number' && this.sideOffset > 0 ? this.sideOffset : 0;
-      const availableWidth = Math.max(0, width - sideOffset);
+      const availableWidth = Math.max(0, width - sideOffset - leftOffset);
       const availableHeight = Math.max(0, height - topOffset);
 
       // Check for active split-screen dual view
@@ -779,30 +991,31 @@ class TabController {
       if (splitTab && splitTab.view && !splitTab.isInternal && splitTab.id !== activeTab.id) {
         const halfWidth = Math.floor(availableWidth / 2);
         activeTab.view.setBounds({
-          x: 0,
+          x: leftOffset,
           y: topOffset,
           width: halfWidth,
           height: availableHeight
         });
-        activeTab.view.setVisible(true);
+        activeTab.view.setVisible(this.isViewVisible !== false);
 
         splitTab.view.setBounds({
-          x: halfWidth,
+          x: leftOffset + halfWidth,
           y: topOffset,
           width: availableWidth - halfWidth,
           height: availableHeight
         });
-        splitTab.view.setVisible(true);
+        splitTab.view.setVisible(this.isViewVisible !== false);
         return;
       }
 
       // Single active view bounds
       activeTab.view.setBounds({
-        x: 0,
+        x: leftOffset,
         y: topOffset,
         width: availableWidth,
         height: availableHeight
       });
+      activeTab.view.setVisible(this.isViewVisible !== false);
     } catch (e) {
       console.error('Error updating view bounds:', e);
     }

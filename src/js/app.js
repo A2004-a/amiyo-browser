@@ -17,6 +17,7 @@ const App = {
       this.initChromeMenu();
       this.initModals();
       this.initReaderOverlay();
+      this.initIpcTriggers();
       this.updateTopOffset();
 
       document.getElementById('split-screen-btn')?.addEventListener('click', () => {
@@ -269,7 +270,11 @@ const App = {
 
     document.getElementById('menu-print')?.addEventListener('click', () => {
       menuEl.classList.add('hidden');
-      IpcClient.api.print?.(State.activeTabId);
+      if (IpcClient.print) {
+        IpcClient.print(State.activeTabId);
+      } else if (IpcClient.api?.print) {
+        IpcClient.api.print(State.activeTabId);
+      }
     });
 
     document.getElementById('menu-capture')?.addEventListener('click', () => {
@@ -321,7 +326,7 @@ const App = {
 
     document.getElementById('menu-zoom-full')?.addEventListener('click', () => {
       menuEl.classList.add('hidden');
-      IpcClient.maximize();
+      IpcClient.toggleFullscreen();
     });
   },
 
@@ -412,6 +417,10 @@ const App = {
     const dialog = document.getElementById('modal-dialog-content');
     if (!backdrop || !dialog) return;
 
+    if (IpcClient.setViewVisible) {
+      IpcClient.setViewVisible(false);
+    }
+
     dialog.innerHTML = `
       <div class="modal-header">
         <h3 class="modal-title">${Utils.escapeHtml(title)}</h3>
@@ -442,6 +451,9 @@ const App = {
     if (backdrop) {
       backdrop.classList.remove('active');
     }
+    if (IpcClient.setViewVisible) {
+      IpcClient.setViewVisible(true);
+    }
   },
 
   initReaderOverlay() {
@@ -455,6 +467,9 @@ const App = {
 
     closeBtn?.addEventListener('click', () => {
       overlay.classList.add('hidden');
+      if (IpcClient.setViewVisible) {
+        IpcClient.setViewVisible(true);
+      }
     });
 
     document.querySelectorAll('.reader-theme-btn').forEach(btn => {
@@ -489,6 +504,9 @@ const App = {
 
     if (!overlay.classList.contains('hidden')) {
       overlay.classList.add('hidden');
+      if (IpcClient.setViewVisible) {
+        IpcClient.setViewVisible(true);
+      }
       return;
     }
 
@@ -498,16 +516,20 @@ const App = {
     try {
       const res = await IpcClient.api.reader.extract(targetTabId);
       if (res && res.content) {
+        const readTime = res.readingTime || res.readingTimeMinutes || 1;
         article.innerHTML = `
           <h1>${Utils.escapeHtml(res.title || 'Untitled Article')}</h1>
           <div class="reader-meta">
             ${res.byline ? `<span>By ${Utils.escapeHtml(res.byline)}</span> • ` : ''}
-            <span>${res.readingTime} min read</span> • 
-            <span>${res.wordCount} words</span>
+            <span>${readTime} min read</span> • 
+            <span>${res.wordCount || 0} words</span>
           </div>
           ${res.content}
         `;
         overlay.classList.remove('hidden');
+        if (IpcClient.setViewVisible) {
+          IpcClient.setViewVisible(false);
+        }
       }
     } catch (e) {
       console.warn('Reader mode extraction failed:', e);
@@ -515,13 +537,12 @@ const App = {
   },
 
   async toggleSplitScreen() {
-    if (!IpcClient.api?.tabs?.setSplit) return;
     const splitBtn = document.getElementById('split-screen-btn');
 
     // If already split, close it
-    const activeSplit = await IpcClient.api.tabs.getSplitId?.();
+    const activeSplit = IpcClient.getSplitTab ? await IpcClient.getSplitTab() : (await IpcClient.api?.tabs?.getSplitTab?.() || await IpcClient.api?.tabs?.getSplitId?.());
     if (activeSplit) {
-      await IpcClient.api.tabs.closeSplit();
+      if (IpcClient.api?.tabs?.closeSplit) await IpcClient.api.tabs.closeSplit();
       splitBtn?.classList.remove('active');
       return;
     }
@@ -531,7 +552,7 @@ const App = {
     if (otherTabs.length === 0) {
       // Create a new tab to split with
       const newT = await IpcClient.createTab('https://www.google.com', { active: false });
-      if (newT) {
+      if (newT && IpcClient.api?.tabs?.setSplit) {
         await IpcClient.api.tabs.setSplit(newT.id);
         splitBtn?.classList.add('active');
       }
@@ -539,8 +560,10 @@ const App = {
     }
 
     // Split with the most recent other tab
-    await IpcClient.api.tabs.setSplit(otherTabs[0].id);
-    splitBtn?.classList.add('active');
+    if (IpcClient.api?.tabs?.setSplit) {
+      await IpcClient.api.tabs.setSplit(otherTabs[0].id);
+      splitBtn?.classList.add('active');
+    }
   },
 
   openTabSearch() {
@@ -691,7 +714,12 @@ const App = {
     if (!tabId || !IpcClient.api?.capture) return;
 
     try {
-      const dataUrl = await IpcClient.api.capture.viewport(tabId);
+      const res = await IpcClient.api.capture.viewport(tabId);
+      const dataUrl = (typeof res === 'object' && res?.dataUrl) ? res.dataUrl : res;
+      if (!dataUrl || typeof dataUrl !== 'string') {
+        console.warn('Capture returned empty or invalid data');
+        return;
+      }
       const bodyHtml = `
         <div style="display:flex;flex-direction:column;gap:14px;align-items:center;">
           <div style="max-height:300px;overflow:hidden;border-radius:8px;border:1px solid var(--border-subtle);box-shadow:var(--shadow-md);">
@@ -721,6 +749,80 @@ const App = {
       });
     } catch (e) {
       console.warn('Capture failed:', e);
+    }
+  },
+
+  promptCreateTabGroup(tabId) {
+    const targetId = tabId || State.activeTabId;
+    const colors = ['#35d8f2', '#ff5722', '#4caf50', '#9c27b0', '#ff9800', '#e91e63', '#2196f3'];
+    let selectedColor = colors[0];
+
+    const bodyHtml = `
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div>
+          <label style="font-size:12px;color:var(--text-secondary);font-weight:500;display:block;margin-bottom:6px;">Group Name</label>
+          <input type="text" id="tab-group-name-input" class="tab-search-input" placeholder="e.g. Work, Research, Dev" value="New Group" autofocus />
+        </div>
+        <div>
+          <label style="font-size:12px;color:var(--text-secondary);font-weight:500;display:block;margin-bottom:6px;">Group Color</label>
+          <div style="display:flex;gap:10px;" id="tab-group-color-picker">
+            ${colors.map((c, i) => `
+              <div class="color-swatch ${i === 0 ? 'selected' : ''}" data-color="${c}" style="width:26px;height:26px;border-radius:50%;background:${c};cursor:pointer;box-sizing:border-box;border:2px solid ${i === 0 ? '#fff' : 'transparent'};"></div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+    `;
+
+    this.showModal('Create Tab Group', bodyHtml, [
+      { label: 'Cancel', class: 'btn-secondary', click: () => this.closeModal() },
+      {
+        label: 'Create Group',
+        class: 'btn-primary',
+        click: async () => {
+          const name = document.getElementById('tab-group-name-input')?.value.trim() || 'Group';
+          if (IpcClient.api?.tabs?.createTabGroup) {
+            await IpcClient.api.tabs.createTabGroup({ name, color: selectedColor, tabIds: targetId ? [targetId] : [] });
+            const tabs = await IpcClient.getTabs();
+            State.setTabs(tabs, State.activeTabId);
+            TabManager.render();
+          }
+          this.closeModal();
+        }
+      }
+    ]);
+
+    const swatches = document.querySelectorAll('#tab-group-color-picker .color-swatch');
+    swatches.forEach(swatch => {
+      swatch.addEventListener('click', () => {
+        swatches.forEach(s => {
+          s.classList.remove('selected');
+          s.style.borderColor = 'transparent';
+        });
+        swatch.classList.add('selected');
+        swatch.style.borderColor = '#fff';
+        selectedColor = swatch.dataset.color;
+      });
+    });
+  },
+
+  initIpcTriggers() {
+    const winBridge = window.aetherAPI?.window || window.amiyoAPI?.window;
+    if (winBridge?.onTabSearch) {
+      winBridge.onTabSearch(() => this.openTabSearch());
+    }
+    if (winBridge?.onWebCapture) {
+      winBridge.onWebCapture(() => this.openWebCapture());
+    }
+    if (winBridge?.onFocusOmnibox) {
+      winBridge.onFocusOmnibox(() => {
+        if (typeof Omnibox !== 'undefined' && Omnibox.focus) {
+          Omnibox.focus();
+        }
+      });
+    }
+    if (winBridge?.onCreateTabGroup) {
+      winBridge.onCreateTabGroup((tabId) => this.promptCreateTabGroup(tabId));
     }
   }
 };

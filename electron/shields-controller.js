@@ -221,7 +221,11 @@ class ShieldsController {
   }
 
   getTabStats(tabId) {
-    return this.tabStats.get(tabId) || { ads: 0, trackers: 0, total: 0, blockedUrls: [] };
+    const stats = this.tabStats.get(tabId) || { ads: 0, trackers: 0, total: 0, blockedUrls: [] };
+    return {
+      ...stats,
+      blockedCount: stats.total || 0
+    };
   }
 
   clearTabStats(tabId) {
