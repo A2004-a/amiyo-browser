@@ -1,3 +1,9 @@
 {
-    "java.configuration.updateBuildConfiguration": "interactive"
+  "java.configuration.updateBuildConfiguration": "interactive",
+  "java.errors.incompleteClasspath.severity": "ignore",
+  "java.project.import.exclusions": [
+    "**/node_modules/**",
+    "**/.git/**",
+    "**/dist/**"
+  ]
 }

@@ -63,13 +63,15 @@ class WindowManager {
     });
 
     // Window events
-    win.webContents.on('console-message', (event) => {
-      const msg = event?.message || '';
-      const lvl = event?.level || 0;
-      const src = event?.sourceId || '';
-      const line = event?.lineNumber || 0;
-      console.log(`[Renderer] [${lvl}] ${msg} (${src}:${line})`);
-    });
+    if (process.env.AETHER_DEBUG) {
+      win.webContents.on('console-message', (event) => {
+        const msg = event?.message || '';
+        const lvl = event?.level || 0;
+        const src = event?.sourceId || '';
+        const line = event?.lineNumber || 0;
+        console.log(`[Renderer] [${lvl}] ${msg} (${src}:${line})`);
+      });
+    }
 
     win.webContents.on('render-process-gone', (event, details) => {
       console.error(`[Renderer Crash] Reason: ${details.reason}, exitCode: ${details.exitCode}`);

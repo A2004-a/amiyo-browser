@@ -25,6 +25,7 @@ if (typeof electron === 'string') {
 }
 
 const { app, BrowserWindow } = electron;
+process.noDeprecation = true;
 if (app && typeof app.setName === 'function') {
   app.setName('AETHER Browser');
 }

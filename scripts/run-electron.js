@@ -30,3 +30,13 @@ const child = cp.spawn(electronPath, flags, {
 child.on('exit', (code) => {
   process.exit(code || 0);
 });
+
+process.on('SIGINT', () => {
+  try { child.kill('SIGINT'); } catch (e) {}
+  process.exit(0);
+});
+
+process.on('SIGTERM', () => {
+  try { child.kill('SIGTERM'); } catch (e) {}
+  process.exit(0);
+});
