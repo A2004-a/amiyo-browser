@@ -6,15 +6,6 @@
       "type": "node-terminal",
       "request": "launch",
       "command": "npm start"
-    },
-    {
-      "name": "Debug Main Process",
-      "type": "node",
-      "request": "launch",
-      "cwd": "${workspaceFolder}",
-      "runtimeExecutable": "${workspaceFolder}/node_modules/electron/dist/electron.exe",
-      "args": ["."],
-      "outputCapture": "std"
     }
   ]
 }

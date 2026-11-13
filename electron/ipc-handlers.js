@@ -157,15 +157,10 @@ function registerIpcHandlers() {
   });
 
   ipcMain.handle('tab:navigate', (event, tabId, url) => {
-    console.log('[IPC] tab:navigate received tabId:', tabId, 'url:', url);
     if (typeof url !== 'string') return;
     const tabCtrl = getTabControllerForSender(event);
-    if (!tabCtrl) {
-      console.log('[IPC] tab:navigate - no tabCtrl found for sender!');
-      return;
-    }
+    if (!tabCtrl) return;
     const targetId = (typeof tabId === 'string' && tabId) ? tabId : tabCtrl.activeTabId;
-    console.log('[IPC] tab:navigate targetId:', targetId);
     if (targetId) {
       tabCtrl.navigateTab(targetId, url);
     } else {
