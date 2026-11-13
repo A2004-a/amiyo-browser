@@ -5,7 +5,10 @@ class NavigationController {
     this.searchEngines = {
       google: 'https://www.google.com/search?q=%s',
       bing: 'https://www.bing.com/search?q=%s',
-      duckduckgo: 'https://duckduckgo.com/?q=%s'
+      duckduckgo: 'https://duckduckgo.com/?q=%s',
+      yahoo: 'https://search.yahoo.com/search?p=%s',
+      ecosia: 'https://www.ecosia.org/search?q=%s',
+      yandex: 'https://yandex.com/search/?text=%s'
     };
   }
 
@@ -52,7 +55,7 @@ class NavigationController {
 
   buildSearchUrl(query, customEngine) {
     const settings = storageManager.getSettings();
-    const engine = customEngine || settings.searchEngine || 'google';
+    const engine = (customEngine || settings.searchEngine || 'google').toLowerCase();
 
     let template = this.searchEngines[engine];
     if (engine === 'custom' && settings.customSearchUrl) {
@@ -62,7 +65,7 @@ class NavigationController {
       template = this.searchEngines.google;
     }
 
-    return template.replace('%s', encodeURIComponent(query));
+    return template.split('%s').join(encodeURIComponent(query));
   }
 
   getSecurityStatus(url) {
@@ -156,18 +159,39 @@ class NavigationController {
     return suggestions.slice(0, 8);
   }
 
-  fetchGoogleSuggestions(query) {
+  fetchSearchSuggestions(query, engine = 'google') {
     return new Promise((resolve) => {
       const https = require('https');
-      const url = `https://suggestqueries.google.com/complete/search?client=chrome&q=${encodeURIComponent(query)}`;
-      const req = https.get(url, { headers: { 'User-Agent': 'Mozilla/5.0' }, timeout: 700 }, (res) => {
+      const normalizedEngine = (engine || 'google').toLowerCase();
+      let url = `https://suggestqueries.google.com/complete/search?client=chrome&q=${encodeURIComponent(query)}`;
+
+      if (normalizedEngine === 'duckduckgo') {
+        url = `https://duckduckgo.com/ac/?q=${encodeURIComponent(query)}&type=list`;
+      } else if (normalizedEngine === 'bing') {
+        url = `https://api.bing.com/osjson.aspx?query=${encodeURIComponent(query)}`;
+      } else if (normalizedEngine === 'yahoo') {
+        url = `https://search.yahoo.com/sugg/gossip/gossip-us-ura/?output=sd1&command=${encodeURIComponent(query)}`;
+      } else if (normalizedEngine === 'ecosia') {
+        url = `https://ac.ecosia.org/autocomplete?q=${encodeURIComponent(query)}&type=list`;
+      }
+
+      const req = https.get(url, { headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' }, timeout: 800 }, (res) => {
         let data = '';
         res.on('data', chunk => data += chunk);
         res.on('end', () => {
           try {
             const parsed = JSON.parse(data);
-            if (Array.isArray(parsed) && Array.isArray(parsed[1])) {
-              return resolve(parsed[1]);
+            if (Array.isArray(parsed)) {
+              if (Array.isArray(parsed[1])) {
+                return resolve(parsed[1].map(x => typeof x === 'string' ? x : x.phrase || x.suggestion || '').filter(Boolean));
+              }
+              // DuckDuckGo array of objects fallback
+              if (parsed.length > 0 && typeof parsed[0] === 'object' && parsed[0].phrase) {
+                return resolve(parsed.map(p => p.phrase).filter(Boolean));
+              }
+            } else if (parsed && Array.isArray(parsed.r)) {
+              // Yahoo format
+              return resolve(parsed.r.map(item => item.k).filter(Boolean));
             }
           } catch (e) {}
           resolve([]);
@@ -190,18 +214,20 @@ class NavigationController {
     }
 
     try {
-      const googleQueries = await this.fetchGoogleSuggestions(q);
-      if (googleQueries && googleQueries.length > 0) {
+      const settings = storageManager.getSettings();
+      const engine = settings.searchEngine || 'google';
+      const onlineQueries = await this.fetchSearchSuggestions(q, engine);
+      if (onlineQueries && onlineQueries.length > 0) {
         const enriched = [local[0]]; // Primary search query
-        for (const gQuery of googleQueries) {
-          if (gQuery && gQuery.toLowerCase() !== q.toLowerCase()) {
+        for (const oQuery of onlineQueries) {
+          if (oQuery && oQuery.toLowerCase() !== q.toLowerCase()) {
             enriched.push({
               type: 'search',
-              title: gQuery,
-              url: this.buildSearchUrl(gQuery),
-              query: gQuery
+              title: oQuery,
+              url: this.buildSearchUrl(oQuery),
+              query: oQuery
             });
-            if (enriched.length >= 5) break;
+            if (enriched.length >= 6) break;
           }
         }
         // Append history/bookmarks

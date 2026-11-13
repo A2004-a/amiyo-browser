@@ -56,6 +56,7 @@ const IpcClient = {
   // Settings
   getSettings() { return this.api.settings.get(); },
   saveSettings(updates) { return this.api.settings.save(updates); },
+  updateSettings(updates) { return this.api.settings.save(updates); },
   selectDownloadDir() { return this.api.settings.selectDownloadDir(); },
 
   // Permissions

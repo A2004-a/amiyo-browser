@@ -34,6 +34,10 @@ const Omnibox = {
       });
     }
 
+    if (State.settings && State.settings.searchEngine) {
+      this.updateSearchEngine(State.settings.searchEngine);
+    }
+
     if (this.bookmarkBtnEl) {
       this.bookmarkBtnEl.innerHTML = Utils.icons.star;
       this.bookmarkBtnEl.addEventListener('click', () => {
@@ -254,6 +258,20 @@ const Omnibox = {
     this.closeSuggestions();
     this.inputEl.blur();
     IpcClient.navigateTab(State.activeTabId || '', url);
+  },
+
+  updateSearchEngine(engine) {
+    if (!this.inputEl) return;
+    const engineMap = {
+      google: 'Google',
+      duckduckgo: 'DuckDuckGo',
+      bing: 'Bing',
+      yahoo: 'Yahoo',
+      ecosia: 'Ecosia',
+      yandex: 'Yandex'
+    };
+    const label = engineMap[(engine || 'google').toLowerCase()] || 'the web';
+    this.inputEl.placeholder = `Search with ${label} or enter address`;
   },
 
   closeSuggestions() {

@@ -264,7 +264,15 @@ function registerIpcHandlers() {
 
   ipcMain.handle('settings:save', (event, updates) => {
     if (typeof updates !== 'object') return null;
-    return storageManager.saveSettings(updates);
+    const newSettings = storageManager.saveSettings(updates);
+    try {
+      BrowserWindow.getAllWindows().forEach(win => {
+        if (!win.isDestroyed()) {
+          win.webContents.send('settings-updated', newSettings);
+        }
+      });
+    } catch (e) {}
+    return newSettings;
   });
 
   ipcMain.handle('settings:select-download-dir', async (event) => {

@@ -40,6 +40,31 @@ const App = {
       State.downloads = downloads || [];
       State.permissions = permissions || {};
 
+      if (typeof Omnibox !== 'undefined' && Omnibox.updateSearchEngine) {
+        Omnibox.updateSearchEngine(State.settings.searchEngine);
+      }
+      if (typeof Homepage !== 'undefined' && Homepage.updateSearchPlaceholder) {
+        Homepage.updateSearchPlaceholder(State.settings.searchEngine);
+      }
+
+      // Listen for settings updates from any window or modal
+      if (window.amiyoApi?.settings?.onUpdated) {
+        window.amiyoApi.settings.onUpdated((newSettings) => {
+          State.settings = { ...State.settings, ...newSettings };
+          if (newSettings.searchEngine) {
+            if (typeof Omnibox !== 'undefined' && Omnibox.updateSearchEngine) {
+              Omnibox.updateSearchEngine(newSettings.searchEngine);
+            }
+            if (typeof Homepage !== 'undefined' && Homepage.updateSearchPlaceholder) {
+              Homepage.updateSearchPlaceholder(newSettings.searchEngine);
+            }
+          }
+          if (newSettings.theme) {
+            ThemeManager.setTheme(newSettings.theme);
+          }
+        });
+      }
+
       // Check if private window
       const title = document.title;
       if (title.includes('Private')) {

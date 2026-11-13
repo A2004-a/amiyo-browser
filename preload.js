@@ -118,7 +118,12 @@ contextBridge.exposeInMainWorld('amiyoAPI', {
   settings: {
     get: () => ipcRenderer.invoke('settings:get'),
     save: (updates) => ipcRenderer.invoke('settings:save', updates),
-    selectDownloadDir: () => ipcRenderer.invoke('settings:select-download-dir')
+    selectDownloadDir: () => ipcRenderer.invoke('settings:select-download-dir'),
+    onUpdated: (callback) => {
+      const listener = (event, data) => callback(data);
+      ipcRenderer.on('settings-updated', listener);
+      return () => ipcRenderer.removeListener('settings-updated', listener);
+    }
   },
 
   // --- Permissions ---

@@ -277,13 +277,25 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        // Direct URL or Google Search query
+        // Direct URL or Search query
         if (input.startsWith("http://") || input.startsWith("https://") || input.startsWith("file://")) {
             webView.loadUrl(input);
         } else if (input.contains(".") && !input.contains(" ")) {
             webView.loadUrl("https://" + input);
         } else {
-            webView.loadUrl("https://www.google.com/search?q=" + Uri.encode(input));
+            android.content.SharedPreferences prefs = getSharedPreferences("amiyo_prefs", MODE_PRIVATE);
+            String engine = prefs.getString("search_engine", "google");
+            String searchBase = "https://www.google.com/search?q=";
+            if ("duckduckgo".equalsIgnoreCase(engine)) {
+                searchBase = "https://duckduckgo.com/?q=";
+            } else if ("bing".equalsIgnoreCase(engine)) {
+                searchBase = "https://www.bing.com/search?q=";
+            } else if ("yahoo".equalsIgnoreCase(engine)) {
+                searchBase = "https://search.yahoo.com/search?p=";
+            } else if ("ecosia".equalsIgnoreCase(engine)) {
+                searchBase = "https://www.ecosia.org/search?q=";
+            }
+            webView.loadUrl(searchBase + Uri.encode(input));
         }
     }
 

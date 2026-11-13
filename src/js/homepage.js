@@ -29,8 +29,18 @@ const Homepage = {
     const shortcuts = this.getShortcuts();
     const showShortcuts = this.getShortcutsVisible();
     const activeWallpaper = this.getWallpaper();
-
     const hasBg = Boolean(activeWallpaper);
+
+    const engineMap = {
+      google: 'Google',
+      duckduckgo: 'DuckDuckGo',
+      bing: 'Bing',
+      yahoo: 'Yahoo',
+      ecosia: 'Ecosia',
+      yandex: 'Yandex'
+    };
+    const currentEngine = (State.settings && State.settings.searchEngine) ? State.settings.searchEngine.toLowerCase() : 'google';
+    const engineLabel = engineMap[currentEngine] || 'the web';
 
     container.innerHTML = `
       <div class="chrome-ntp ${hasBg ? 'has-custom-wallpaper' : ''}" style="${hasBg ? `background-image: url('${activeWallpaper}');` : ''}">
@@ -128,7 +138,7 @@ const Homepage = {
               type="text" 
               class="chrome-search-input" 
               id="newtab-search-input" 
-              placeholder="Search Google or type a URL" 
+              placeholder="Search ${engineLabel} or type a URL" 
               autocomplete="off" 
               spellcheck="false" 
               autofocus 
@@ -483,9 +493,11 @@ const Homepage = {
         <div>
           <h4 style="margin:0 0 8px;font-size:14px;color:var(--text-primary);">Search Engine</h4>
           <select id="customize-search-select" class="settings-select" style="width:100%;padding:10px;border-radius:8px;background:var(--bg-input);color:var(--text-primary);border:1px solid var(--border-subtle);">
-            <option value="google" ${State.settings.searchEngine === 'google' ? 'selected' : ''}>Google (Default)</option>
+            <option value="google" ${(!State.settings.searchEngine || State.settings.searchEngine === 'google') ? 'selected' : ''}>Google (Default)</option>
             <option value="duckduckgo" ${State.settings.searchEngine === 'duckduckgo' ? 'selected' : ''}>DuckDuckGo</option>
             <option value="bing" ${State.settings.searchEngine === 'bing' ? 'selected' : ''}>Bing</option>
+            <option value="yahoo" ${State.settings.searchEngine === 'yahoo' ? 'selected' : ''}>Yahoo</option>
+            <option value="ecosia" ${State.settings.searchEngine === 'ecosia' ? 'selected' : ''}>Ecosia</option>
           </select>
         </div>
       </div>
@@ -504,15 +516,15 @@ const Homepage = {
     });
 
     // Theme clicks
-    document.getElementById('choice-theme-dark')?.addEventListener('click', () => {
+    document.getElementById('choice-theme-dark')?.addEventListener('click', async () => {
       ThemeManager.setTheme('dark');
-      IpcClient.updateSettings({ theme: 'dark' });
+      await IpcClient.saveSettings({ theme: 'dark' });
       this.render(document.getElementById('internal-page-container'));
       App.closeModal();
     });
-    document.getElementById('choice-theme-light')?.addEventListener('click', () => {
+    document.getElementById('choice-theme-light')?.addEventListener('click', async () => {
       ThemeManager.setTheme('light');
-      IpcClient.updateSettings({ theme: 'light' });
+      await IpcClient.saveSettings({ theme: 'light' });
       this.render(document.getElementById('internal-page-container'));
       App.closeModal();
     });
@@ -530,10 +542,31 @@ const Homepage = {
     });
 
     // Search Engine change
-    document.getElementById('customize-search-select')?.addEventListener('change', (e) => {
-      IpcClient.updateSettings({ searchEngine: e.target.value });
-      State.settings.searchEngine = e.target.value;
+    document.getElementById('customize-search-select')?.addEventListener('change', async (e) => {
+      const selected = e.target.value;
+      State.settings.searchEngine = selected;
+      await IpcClient.saveSettings({ searchEngine: selected });
+      if (typeof Omnibox !== 'undefined' && Omnibox.updateSearchEngine) {
+        Omnibox.updateSearchEngine(selected);
+      }
+      this.updateSearchPlaceholder(selected);
     });
+  },
+
+  updateSearchPlaceholder(engine) {
+    const engineMap = {
+      google: 'Google',
+      duckduckgo: 'DuckDuckGo',
+      bing: 'Bing',
+      yahoo: 'Yahoo',
+      ecosia: 'Ecosia',
+      yandex: 'Yandex'
+    };
+    const label = engineMap[(engine || 'google').toLowerCase()] || 'the web';
+    const input = document.getElementById('newtab-search-input');
+    if (input) {
+      input.placeholder = `Search ${label} or type a URL`;
+    }
   },
 
   getWallpaper() {

@@ -106,9 +106,11 @@ const SettingsManager = {
                 <span class="settings-card-desc">Used when entering queries into the omnibox.</span>
               </div>
               <select id="setting-search-engine" class="settings-select">
-                <option value="google" ${s.searchEngine === 'google' ? 'selected' : ''}>Google</option>
+                <option value="google" ${(!s.searchEngine || s.searchEngine === 'google') ? 'selected' : ''}>Google</option>
                 <option value="duckduckgo" ${s.searchEngine === 'duckduckgo' ? 'selected' : ''}>DuckDuckGo</option>
                 <option value="bing" ${s.searchEngine === 'bing' ? 'selected' : ''}>Bing</option>
+                <option value="yahoo" ${s.searchEngine === 'yahoo' ? 'selected' : ''}>Yahoo</option>
+                <option value="ecosia" ${s.searchEngine === 'ecosia' ? 'selected' : ''}>Ecosia</option>
                 <option value="custom" ${s.searchEngine === 'custom' ? 'selected' : ''}>Custom URL</option>
               </select>
             </div>
@@ -300,6 +302,12 @@ const SettingsManager = {
         const val = e.target.value;
         if (customCard) customCard.classList.toggle('hidden', val !== 'custom');
         State.settings = await IpcClient.saveSettings({ searchEngine: val });
+        if (typeof Omnibox !== 'undefined' && Omnibox.updateSearchEngine) {
+          Omnibox.updateSearchEngine(val);
+        }
+        if (typeof Homepage !== 'undefined' && Homepage.updateSearchPlaceholder) {
+          Homepage.updateSearchPlaceholder(val);
+        }
       });
     }
 

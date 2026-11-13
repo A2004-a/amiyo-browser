@@ -18,8 +18,20 @@ function run() {
   assert.strictEqual(navigationController.resolveUrl('127.0.0.1:8080'), 'http://127.0.0.1:8080');
 
   // 3. Search query conversion
-  const queryUrl = navigationController.resolveUrl('hello world');
-  assert.ok(queryUrl.includes('google.com/search?q=hello%20world') || queryUrl.includes('duckduckgo.com'));
+  const queryGoogle = navigationController.resolveUrl('hello world', 'google');
+  assert.strictEqual(queryGoogle, 'https://www.google.com/search?q=hello%20world');
+
+  const queryDdg = navigationController.resolveUrl('hello world', 'duckduckgo');
+  assert.strictEqual(queryDdg, 'https://duckduckgo.com/?q=hello%20world');
+
+  const queryBing = navigationController.resolveUrl('hello world', 'bing');
+  assert.strictEqual(queryBing, 'https://www.bing.com/search?q=hello%20world');
+
+  const queryYahoo = navigationController.resolveUrl('hello world', 'yahoo');
+  assert.strictEqual(queryYahoo, 'https://search.yahoo.com/search?p=hello%20world');
+
+  const queryEcosia = navigationController.resolveUrl('hello world', 'ecosia');
+  assert.strictEqual(queryEcosia, 'https://www.ecosia.org/search?q=hello%20world');
 
   // 4. Security status
   const sec1 = navigationController.getSecurityStatus('https://google.com');
