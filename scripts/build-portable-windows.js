@@ -9,49 +9,31 @@ console.log('====================================================\n');
 const rootDir = path.join(__dirname, '..');
 const distDir = path.join(rootDir, 'dist');
 const appDistDir = path.join(distDir, 'AETHER-Browser-win32-x64');
-const electronDistDir = path.join(rootDir, 'node_modules', 'electron', 'dist');
+const unpackedDir = path.join(distDir, 'win-unpacked');
 
-// 1. Ensure clean dist directory
+// 1. Pack with electron-builder if win-unpacked doesn't exist
+if (!fs.existsSync(unpackedDir) || !fs.existsSync(path.join(unpackedDir, 'AETHER Browser.exe'))) {
+  console.log('Packaging via electron-builder to apply authentic PE metadata and icon...');
+  execSync('npx electron-builder --win --dir --x64', { cwd: rootDir, stdio: 'inherit' });
+}
+
+// 2. Ensure clean portable distribution folder
 if (fs.existsSync(appDistDir)) {
-  console.log('Cleaning previous build directory...');
+  console.log('Cleaning previous portable build folder...');
   fs.rmSync(appDistDir, { recursive: true, force: true });
 }
 fs.mkdirSync(appDistDir, { recursive: true });
 
-// 2. Copy Electron binaries and resources
-console.log('Copying Chromium & Electron binaries from node_modules...');
-fs.cpSync(electronDistDir, appDistDir, { recursive: true });
+// 3. Copy from win-unpacked
+console.log('Copying patched binaries from win-unpacked...');
+fs.cpSync(unpackedDir, appDistDir, { recursive: true });
 
-// 3. Rename electron.exe to AETHER Browser.exe
-const defaultExe = path.join(appDistDir, 'electron.exe');
-const targetExe = path.join(appDistDir, 'AETHER Browser.exe');
-if (fs.existsSync(defaultExe)) {
-  fs.renameSync(defaultExe, targetExe);
-  console.log('Renamed executable to "AETHER Browser.exe"');
-}
-
-// 4. Populate resources/app
-const appDir = path.join(appDistDir, 'resources', 'app');
-fs.mkdirSync(appDir, { recursive: true });
-
-console.log('Packaging application code into resources/app...');
-const itemsToCopy = ['package.json', 'main.js', 'preload.js', 'electron', 'src', 'data', 'assets'];
-
-for (const item of itemsToCopy) {
-  const srcPath = path.join(rootDir, item);
-  const destPath = path.join(appDir, item);
-  if (fs.existsSync(srcPath)) {
-    fs.cpSync(srcPath, destPath, { recursive: true });
-    console.log(` ✔ Copied ${item}`);
-  }
-}
-
-// 5. Create a convenient Windows batch launcher in the package
+// 4. Create a convenient Windows batch launcher in the package
 const launcherPath = path.join(appDistDir, 'Launch-AETHER-Browser.bat');
 fs.writeFileSync(launcherPath, `@echo off\r\nstart "" "%~dp0AETHER Browser.exe"\r\n`);
 console.log(' ✔ Created Launch-AETHER-Browser.bat');
 
-// 6. Create portable zip archive
+// 5. Create portable zip archive
 const zipPath = path.join(distDir, 'AETHER-Browser-win32-x64.zip');
 try {
   if (fs.existsSync(zipPath)) fs.unlinkSync(zipPath);
@@ -62,9 +44,9 @@ try {
   console.warn('Zip compression note:', e.message);
 }
 
+const targetExe = path.join(appDistDir, 'AETHER Browser.exe');
 console.log('\n====================================================');
 console.log(' ✔ Portable Windows 64-bit build completed:');
 console.log(`   Folder: ${appDistDir}`);
 console.log(`   Executable: ${targetExe}`);
 console.log('====================================================\n');
-

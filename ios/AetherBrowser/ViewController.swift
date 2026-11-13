@@ -143,3 +143,4 @@ class ViewController: UIViewController, WKNavigationDelegate, UITextFieldDelegat
         webView?.removeObserver(self, forKeyPath: #keyPath(WKWebView.estimatedProgress))
     }
 }
+

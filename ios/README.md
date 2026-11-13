@@ -44,3 +44,4 @@ The `ios/AetherBrowser` directory contains the native Swift WKWebView applicatio
 - **Privacy & Shields**: Pre-configured with DuckDuckGo default anti-tracking search and Sec-GPC headers.
 - **Obsidian Dark Theme**: Pure `#0B0F14` dark palette matching AETHER desktop.
 - **Adaptive Layout**: Optimized for Dynamic Island, Notch, and iPad split-screen multitasking.
+

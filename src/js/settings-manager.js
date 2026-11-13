@@ -445,7 +445,7 @@ const SettingsManager = {
                   </div>
                 </div>
                 <div style="display:flex;gap:6px;margin-top:4px;">
-                  <button class="btn btn-sm btn-primary" onclick="IpcClient.navigateTab(State.activeTabId, 'https://github.com/A2004-a/amiyo-browser/releases/download/v1.1.0/AETHER-Browser-win32-x64.zip')" style="font-size:11px;padding:6px 10px;flex:1;">⬇️ Portable</button>
+                  <button class="btn btn-sm btn-primary" onclick="IpcClient.navigateTab(State.activeTabId, 'https://github.com/A2004-a/amiyo-browser/releases/download/v1.1.0/AETHER-Browser-Setup-1.1.0-x64.zip')" style="font-size:11px;padding:6px 10px;flex:1;">⬇️ Portable</button>
                   <button class="btn btn-sm btn-secondary" onclick="IpcClient.navigateTab(State.activeTabId, 'https://github.com/A2004-a/amiyo-browser/releases/download/v1.1.0/AETHER-Browser-Setup-1.1.0-x64.exe')" style="font-size:11px;padding:6px 10px;flex:1;">Setup.exe</button>
                 </div>
               </div>

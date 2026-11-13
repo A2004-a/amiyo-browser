@@ -35,7 +35,7 @@ Get the latest release for your operating system:
 
 | Platform | Format | Architecture | Download Link | Description |
 |:---|:---|:---|:---|:---|
-| 🪟 **Windows** | **Portable (.zip)** | `x64` (64-bit) | [⬇️ **Download Windows Portable**](https://github.com/A2004-a/amiyo-browser/releases/download/v1.1.0/AETHER-Browser-win32-x64.zip) | Standalone portable folder & executable (Zero installation) |
+| 🪟 **Windows** | **Portable (.zip)** | `x64` (64-bit) | [⬇️ **Download Windows Portable**](https://github.com/A2004-a/amiyo-browser/releases/download/v1.1.0/AETHER-Browser-Setup-1.1.0-x64.zip) | Standalone portable folder & executable (Zero installation) |
 | 🪟 **Windows** | **Installer (.exe)** | `x64` (64-bit) | [⬇️ **Download Windows Setup**](https://github.com/A2004-a/amiyo-browser/releases/download/v1.1.0/AETHER-Browser-Setup-1.1.0-x64.exe) | One-click setup with desktop & start menu shortcuts |
 | 🍎 **macOS** | **Disk Image (.dmg)** | `Universal` / `arm64` / `x64` | [⬇️ **Download macOS DMG**](https://github.com/A2004-a/amiyo-browser/releases/download/v1.1.0/AETHER-Browser-1.1.0-mac-universal.dmg) | Drag-and-drop installer for Apple Silicon & Intel Macs |
 | 🍎 **macOS** | **ZIP Archive (.zip)** | `Universal` / `arm64` / `x64` | [⬇️ **Download macOS ZIP**](https://github.com/A2004-a/amiyo-browser/releases/download/v1.1.0/AETHER-Browser-1.1.0-mac-universal.zip) | Extracted `.app` package |

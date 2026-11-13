@@ -48,6 +48,7 @@
       "output": "dist"
     },
     "win": {
+      "icon": "assets/branding/icon.ico",
       "target": [
         {
           "target": "nsis",
@@ -72,6 +73,7 @@
       "shortcutName": "AETHER Browser"
     },
     "mac": {
+      "icon": "build/icons",
       "target": [
         {
           "target": "dmg",
@@ -106,6 +108,7 @@
       ]
     },
     "linux": {
+      "icon": "build/icons",
       "target": [
         {
           "target": "AppImage",
