@@ -90,36 +90,81 @@ const Homepage = {
         <main class="chrome-ntp-center">
           <!-- Official AETHER Infinite A Emblem & Brand Mark -->
           <div class="aether-logo-container">
-            <div class="aether-brand-emblem">
-              <svg viewBox="0 0 128 128" width="68" height="68" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <div class="aether-brand-emblem" title="AETHER Browser — Explore Without Limits">
+              <svg viewBox="0 0 512 512" width="108" height="108" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <defs>
-                  <linearGradient id="aetherNtpBg" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="#0B0F14" />
-                    <stop offset="100%" stop-color="#121B2B" />
-                  </linearGradient>
-                  <linearGradient id="aetherNtpSilver" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <linearGradient id="aetherChromeLeft" x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="0%" stop-color="#FFFFFF" />
-                    <stop offset="40%" stop-color="#DCE3EB" />
-                    <stop offset="100%" stop-color="#7AAEFF" />
+                    <stop offset="25%" stop-color="#F1F5F9" />
+                    <stop offset="60%" stop-color="#CBD5E1" />
+                    <stop offset="100%" stop-color="#94A3B8" />
                   </linearGradient>
-                  <linearGradient id="aetherNtpCyan" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stop-color="#35D8F2" />
-                    <stop offset="100%" stop-color="#7AAEFF" />
+                  <linearGradient id="aetherChromeRight" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#CBD5E1" />
+                    <stop offset="30%" stop-color="#94A3B8" />
+                    <stop offset="70%" stop-color="#64748B" />
+                    <stop offset="100%" stop-color="#334155" />
                   </linearGradient>
-                  <filter id="aetherNtpGlow" x="-30%" y="-30%" width="160%" height="160%">
-                    <feGaussianBlur stdDeviation="4" result="blur" />
-                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                  <linearGradient id="aetherInnerCutLeft" x1="0%" y1="100%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#1E293B" />
+                    <stop offset="70%" stop-color="#334155" />
+                    <stop offset="100%" stop-color="#475569" />
+                  </linearGradient>
+                  <linearGradient id="aetherInnerCutRight" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#475569" />
+                    <stop offset="50%" stop-color="#64748B" />
+                    <stop offset="100%" stop-color="#1E293B" />
+                  </linearGradient>
+                  <linearGradient id="aetherOrbitGlow" x1="0%" y1="100%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#00D4FF" stop-opacity="0" />
+                    <stop offset="20%" stop-color="#00D4FF" stop-opacity="0.9" />
+                    <stop offset="50%" stop-color="#35D8F2" />
+                    <stop offset="80%" stop-color="#7AAEFF" />
+                    <stop offset="100%" stop-color="#38BDF8" />
+                  </linearGradient>
+                  <linearGradient id="aetherOrbitBlade" x1="0%" y1="50%" x2="100%" y2="50%">
+                    <stop offset="0%" stop-color="#35D8F2" stop-opacity="0.8" />
+                    <stop offset="25%" stop-color="#FFFFFF" />
+                    <stop offset="65%" stop-color="#E2E8F0" />
+                    <stop offset="100%" stop-color="#94A3B8" />
+                  </linearGradient>
+                  <radialGradient id="aetherSatelliteOrb" cx="35%" cy="35%" r="65%">
+                    <stop offset="0%" stop-color="#FFFFFF" />
+                    <stop offset="25%" stop-color="#38BDF8" />
+                    <stop offset="70%" stop-color="#0284C7" />
+                    <stop offset="100%" stop-color="#0369A1" />
+                  </radialGradient>
+                  <filter id="aetherCyanGlow" x="-50%" y="-50%" width="200%" height="200%">
+                    <feGaussianBlur stdDeviation="8" result="blur1" />
+                    <feGaussianBlur stdDeviation="16" result="blur2" />
+                    <feMerge>
+                      <feMergeNode in="blur2" />
+                      <feMergeNode in="blur1" />
+                      <feMergeNode in="SourceGraphic" />
+                    </feMerge>
                   </filter>
                 </defs>
-                <rect x="8" y="8" width="112" height="112" rx="28" fill="url(#aetherNtpBg)" stroke="#252D38" stroke-width="2"/>
-                <ellipse cx="64" cy="68" rx="46" ry="18" fill="none" stroke="url(#aetherNtpCyan)" stroke-width="2.5" opacity="0.85" filter="url(#aetherNtpGlow)" transform="rotate(-15 64 68)"/>
-                <path d="M64 22 L94 88 L78 88 L64 54 L50 88 L34 88 Z" fill="url(#aetherNtpSilver)" />
-                <path d="M42 66 L86 66 L82 74 L46 74 Z" fill="url(#aetherNtpCyan)" opacity="0.95" />
-                <circle cx="64" cy="22" r="3.5" fill="#35D8F2" filter="url(#aetherNtpGlow)" />
+                <path d="M 125 315 C 80 300 85 245 155 200 C 190 178 240 155 305 130" fill="none" stroke="url(#aetherOrbitGlow)" stroke-width="14" stroke-linecap="round" opacity="0.95" filter="url(#aetherCyanGlow)" />
+                <path d="M 125 315 C 80 300 85 245 155 200 C 190 178 240 155 305 130" fill="none" stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="round" opacity="0.8" />
+                <path d="M 256 68 L 108 340 L 168 340 L 256 168 Z" fill="url(#aetherChromeLeft)" />
+                <path d="M 256 68 L 244 88 L 128 340 L 108 340 Z" fill="#E2E8F0" opacity="0.6" />
+                <path d="M 256 68 L 256 168 L 344 340 L 404 340 Z" fill="url(#aetherChromeRight)" />
+                <path d="M 256 68 L 268 88 L 384 340 L 404 340 Z" fill="#1E293B" opacity="0.75" />
+                <path d="M 256 168 L 168 340 L 230 300 L 256 220 Z" fill="url(#aetherInnerCutLeft)" />
+                <path d="M 256 168 L 256 220 L 282 300 L 344 340 Z" fill="url(#aetherInnerCutRight)" />
+                <circle cx="256" cy="68" r="4.5" fill="#FFFFFF" filter="url(#aetherCyanGlow)" />
+                <path d="M 118 316 C 170 330 250 320 330 260 C 380 220 415 170 435 125 C 420 135 385 175 320 225 C 245 285 175 295 118 316 Z" fill="url(#aetherOrbitBlade)" />
+                <path d="M 118 316 C 170 330 250 320 330 260 C 380 220 415 170 435 125" fill="none" stroke="#FFFFFF" stroke-width="3" opacity="0.9" />
+                <path d="M 140 318 C 200 325 270 305 340 250 C 385 210 415 165 430 130" fill="none" stroke="#00D4FF" stroke-width="3" opacity="0.8" filter="url(#aetherCyanGlow)" />
+                <ellipse cx="196" cy="254" rx="32" ry="14" fill="#35D8F2" opacity="0.65" transform="rotate(-30 196 254)" filter="url(#aetherCyanGlow)" />
+                <circle cx="196" cy="254" r="6" fill="#FFFFFF" />
+                <circle cx="438" cy="122" r="24" fill="#00D4FF" opacity="0.35" filter="url(#aetherCyanGlow)" />
+                <circle cx="438" cy="122" r="14" fill="url(#aetherSatelliteOrb)" />
+                <circle cx="434" cy="118" r="4.5" fill="#FFFFFF" opacity="0.9" />
               </svg>
             </div>
             <div class="aether-brand-title">
-              <span class="aether-title-main">AETHER</span>
+              <span class="aether-title-main">Λ E T H E R</span>
               <span class="aether-title-sub">EXPLORE WITHOUT LIMITS.</span>
             </div>
           </div>
@@ -450,8 +495,8 @@ const Homepage = {
       <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;padding:8px 0;">
         <div style="width:68px;height:68px;border-radius:50%;background:linear-gradient(135deg, #4285f4, #34a853);color:#fff;font-size:28px;font-weight:700;display:flex;align-items:center;justify-content:center;">A</div>
         <div>
-          <h3 style="margin:0;font-size:16px;color:var(--text-primary);">AMIYO Browser User</h3>
-          <p style="margin:4px 0 0;font-size:13px;color:var(--text-secondary);">user@amiyo.local</p>
+          <h3 style="margin:0;font-size:16px;color:var(--text-primary);">AETHER Browser User</h3>
+          <p style="margin:4px 0 0;font-size:13px;color:var(--text-secondary);">user@aether.local</p>
         </div>
         <div style="width:100%;background:var(--bg-tertiary);border-radius:8px;padding:12px;margin-top:8px;display:flex;align-items:center;justify-content:space-between;">
           <span style="font-size:13px;color:var(--text-secondary);">Sync is on</span>
@@ -632,35 +677,43 @@ const Homepage = {
   },
 
   getWallpaper() {
-    return localStorage.getItem('amiyo_ntp_wallpaper') || '';
+    return localStorage.getItem('aether_ntp_wallpaper') || localStorage.getItem('amiyo_ntp_wallpaper') || '';
   },
 
   setWallpaper(url) {
     if (url) {
+      localStorage.setItem('aether_ntp_wallpaper', url);
       localStorage.setItem('amiyo_ntp_wallpaper', url);
     } else {
+      localStorage.removeItem('aether_ntp_wallpaper');
       localStorage.removeItem('amiyo_ntp_wallpaper');
     }
   },
 
   getShortcuts() {
     try {
-      const saved = localStorage.getItem('amiyo_shortcuts');
+      const saved = localStorage.getItem('aether_shortcuts') || localStorage.getItem('amiyo_shortcuts');
       if (saved) return JSON.parse(saved);
     } catch (e) {}
     return this.defaultShortcuts;
   },
 
   saveShortcuts(shortcuts) {
-    localStorage.setItem('amiyo_shortcuts', JSON.stringify(shortcuts));
+    const json = JSON.stringify(shortcuts);
+    localStorage.setItem('aether_shortcuts', json);
+    localStorage.setItem('amiyo_shortcuts', json);
   },
 
   getShortcutsVisible() {
+    const val = localStorage.getItem('aether_show_shortcuts');
+    if (val !== null) return val !== 'false';
     return localStorage.getItem('amiyo_show_shortcuts') !== 'false';
   },
 
   setShortcutsVisible(val) {
-    localStorage.setItem('amiyo_show_shortcuts', val ? 'true' : 'false');
+    const str = val ? 'true' : 'false';
+    localStorage.setItem('aether_show_shortcuts', str);
+    localStorage.setItem('amiyo_show_shortcuts', str);
   },
 
   promptAddShortcut() {

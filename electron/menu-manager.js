@@ -164,7 +164,7 @@ class MenuManager {
         label: 'New Tab to the Right',
         click: () => {
           const idx = tabController.tabs.findIndex(t => t.id === params.tabId);
-          tabController.createTab('amiyo://newtab', { index: idx !== -1 ? idx + 1 : undefined, active: true });
+          tabController.createTab('aether://newtab', { index: idx !== -1 ? idx + 1 : undefined, active: true });
         }
       }));
       menu.append(new MenuItem({

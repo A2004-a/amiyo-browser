@@ -1,30 +1,196 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 96" width="380" height="96">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 640" width="1000" height="640">
   <defs>
-    <linearGradient id="cyanBeamD" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#35D8F2" stop-opacity="0.3" />
-      <stop offset="50%" stop-color="#35D8F2" />
-      <stop offset="100%" stop-color="#7AAEFF" />
-    </linearGradient>
-    <linearGradient id="platStem" x1="0%" y1="0%" x2="100%" y2="100%">
+    <!-- Deep Obsidian Radial Space Backdrop -->
+    <radialGradient id="aetherBgGlow" cx="50%" cy="45%" r="70%">
+      <stop offset="0%" stop-color="#0E1A2E" />
+      <stop offset="50%" stop-color="#0B0F14" />
+      <stop offset="100%" stop-color="#05070A" />
+    </radialGradient>
+
+    <!-- Chrome Left Facet (Direct Light) -->
+    <linearGradient id="chromeLeft" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#FFFFFF" />
-      <stop offset="100%" stop-color="#CBD5E1" />
+      <stop offset="25%" stop-color="#F1F5F9" />
+      <stop offset="60%" stop-color="#CBD5E1" />
+      <stop offset="100%" stop-color="#94A3B8" />
     </linearGradient>
+
+    <!-- Chrome Right Facet (Shadow & Reflect) -->
+    <linearGradient id="chromeRight" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#CBD5E1" />
+      <stop offset="30%" stop-color="#94A3B8" />
+      <stop offset="70%" stop-color="#64748B" />
+      <stop offset="100%" stop-color="#334155" />
+    </linearGradient>
+
+    <!-- Inner Cut Facet Left (Deep Shadow) -->
+    <linearGradient id="innerCutLeft" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#1E293B" />
+      <stop offset="70%" stop-color="#334155" />
+      <stop offset="100%" stop-color="#475569" />
+    </linearGradient>
+
+    <!-- Inner Cut Facet Right (Secondary Light) -->
+    <linearGradient id="innerCutRight" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#475569" />
+      <stop offset="50%" stop-color="#64748B" />
+      <stop offset="100%" stop-color="#1E293B" />
+    </linearGradient>
+
+    <!-- Electric Cyan Orbital Neon Glow Gradient -->
+    <linearGradient id="orbitGlow" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00D4FF" stop-opacity="0" />
+      <stop offset="20%" stop-color="#00D4FF" stop-opacity="0.9" />
+      <stop offset="50%" stop-color="#35D8F2" />
+      <stop offset="80%" stop-color="#7AAEFF" />
+      <stop offset="100%" stop-color="#38BDF8" />
+    </linearGradient>
+
+    <!-- Front Silver Blade Orbit Gradient -->
+    <linearGradient id="orbitBlade" x1="0%" y1="50%" x2="100%" y2="50%">
+      <stop offset="0%" stop-color="#35D8F2" stop-opacity="0.8" />
+      <stop offset="25%" stop-color="#FFFFFF" />
+      <stop offset="65%" stop-color="#E2E8F0" />
+      <stop offset="100%" stop-color="#94A3B8" />
+    </linearGradient>
+
+    <!-- Wordmark Metallic Chrome Gradient -->
+    <linearGradient id="textChrome" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="45%" stop-color="#E2E8F0" />
+      <stop offset="55%" stop-color="#CBD5E1" />
+      <stop offset="100%" stop-color="#94A3B8" />
+    </linearGradient>
+
+    <!-- Celestial Orbiter Sphere Gradient -->
+    <radialGradient id="satelliteOrb" cx="35%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="25%" stop-color="#38BDF8" />
+      <stop offset="70%" stop-color="#0284C7" />
+      <stop offset="100%" stop-color="#0369A1" />
+    </radialGradient>
+
+    <filter id="intenseCyanGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="6" result="blur1" />
+      <feGaussianBlur stdDeviation="14" result="blur2" />
+      <feMerge>
+        <feMergeNode in="blur2" />
+        <feMergeNode in="blur1" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+
+    <filter id="horizonGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="16" result="glow" />
+      <feComposite in="SourceGraphic" in2="glow" operator="over" />
+    </filter>
   </defs>
 
-  <!-- Left Emblem (Infinite A on Obsidian) -->
-  <g transform="translate(12, 12)">
-    <rect x="0" y="0" width="72" height="72" rx="18" fill="#121B2B" stroke="#252D38" stroke-width="1.2" />
-    <path d="M36 12 L12 60 L21 60 L29 42 L36 42 Z" fill="url(#platStem)" />
-    <path d="M36 12 L36 42 L43 42 L51 60 L60 60 Z" fill="#94A3B8" />
-    <polygon points="36,12 33,20 39,20" fill="#121B2B" />
-    <polygon points="36,22 31,38 41,38" fill="#121B2B" />
-    <path d="M8 44 C20 40, 52 40, 64 44 C54 46, 22 46, 8 44 Z" fill="url(#cyanBeamD)" />
-    <circle cx="50" cy="42" r="2" fill="#35D8F2" />
+  <!-- Canvas Background -->
+  <rect width="1000" height="640" fill="url(#aetherBgGlow)" />
+
+  <!-- Planetary Horizon Arc at Bottom -->
+  <path d="M 0 580 Q 500 520 1000 580 L 1000 640 L 0 640 Z" fill="#020617" opacity="0.95" />
+  <path d="M -50 580 Q 500 520 1050 580" fill="none" stroke="#00D4FF" stroke-width="4.5" opacity="0.85" filter="url(#horizonGlow)" />
+  <ellipse cx="500" cy="535" rx="160" ry="20" fill="#38BDF8" opacity="0.5" filter="url(#intenseCyanGlow)" />
+
+  <!-- Emblem Group -->
+  <g transform="translate(250, 20) scale(0.98)">
+    <path d="M 125 315 C 80 300 85 245 155 200 C 190 178 240 155 305 130" 
+          fill="none" 
+          stroke="url(#orbitGlow)" 
+          stroke-width="12" 
+          stroke-linecap="round" 
+          opacity="0.95" 
+          filter="url(#intenseCyanGlow)" />
+
+    <path d="M 125 315 C 80 300 85 245 155 200 C 190 178 240 155 305 130" 
+          fill="none" 
+          stroke="#FFFFFF" 
+          stroke-width="3" 
+          stroke-linecap="round" 
+          opacity="0.8" />
+
+    <path d="M 256 68 L 108 340 L 168 340 L 256 168 Z" fill="url(#chromeLeft)" />
+    <path d="M 256 68 L 244 88 L 128 340 L 108 340 Z" fill="#E2E8F0" opacity="0.6" />
+    <path d="M 256 68 L 256 168 L 344 340 L 404 340 Z" fill="url(#chromeRight)" />
+    <path d="M 256 68 L 268 88 L 384 340 L 404 340 Z" fill="#1E293B" opacity="0.75" />
+
+    <path d="M 256 168 L 168 340 L 230 300 L 256 220 Z" fill="url(#innerCutLeft)" />
+    <path d="M 256 168 L 256 220 L 282 300 L 344 340 Z" fill="url(#innerCutRight)" />
+
+    <circle cx="256" cy="68" r="4.5" fill="#FFFFFF" filter="url(#intenseCyanGlow)" />
+
+    <path d="M 118 316 
+             C 170 330 250 320 330 260 
+             C 380 220 415 170 435 125 
+             C 420 135 385 175 320 225 
+             C 245 285 175 295 118 316 Z" 
+          fill="url(#orbitBlade)" />
+
+    <path d="M 118 316 
+             C 170 330 250 320 330 260 
+             C 380 220 415 170 435 125" 
+          fill="none" 
+          stroke="#FFFFFF" 
+          stroke-width="3" 
+          opacity="0.9" />
+
+    <path d="M 140 318 
+             C 200 325 270 305 340 250 
+             C 385 210 415 165 430 130" 
+          fill="none" 
+          stroke="#00D4FF" 
+          stroke-width="3" 
+          opacity="0.8" 
+          filter="url(#intenseCyanGlow)" />
+
+    <ellipse cx="196" cy="254" rx="32" ry="14" fill="#35D8F2" opacity="0.65" transform="rotate(-30 196 254)" filter="url(#intenseCyanGlow)" />
+    <circle cx="196" cy="254" r="7" fill="#FFFFFF" />
+
+    <circle cx="438" cy="122" r="24" fill="#00D4FF" opacity="0.35" filter="url(#intenseCyanGlow)" />
+    <circle cx="438" cy="122" r="14" fill="url(#satelliteOrb)" />
+    <circle cx="434" cy="118" r="4.5" fill="#FFFFFF" opacity="0.9" />
   </g>
 
-  <!-- Dark Mode Text: Platinum Silver + Electric Cyan -->
-  <g transform="translate(104, 20)">
-    <text x="0" y="38" font-family="'Space Grotesk', -apple-system, sans-serif" font-size="34" font-weight="800" letter-spacing="5" fill="#DCE3EB">AETHER</text>
-    <text x="2" y="58" font-family="'Inter', -apple-system, sans-serif" font-size="10" font-weight="700" letter-spacing="3" fill="#35D8F2">EXPLORE WITHOUT LIMITS.</text>
+  <!-- Wordmark -->
+  <g transform="translate(500, 435)" text-anchor="middle">
+    <g transform="translate(-240, -10)">
+      <path d="M 0 54 L 32 0 L 46 0 L 78 54 L 62 54 L 39 14 L 16 54 Z" fill="url(#textChrome)" />
+    </g>
+    <g transform="translate(-140, -10)">
+      <rect x="0" y="0" width="56" height="12" rx="2" fill="url(#textChrome)" />
+      <rect x="0" y="21" width="48" height="12" rx="2" fill="url(#textChrome)" />
+      <rect x="0" y="42" width="56" height="12" rx="2" fill="url(#textChrome)" />
+    </g>
+    <g transform="translate(-50, -10)">
+      <rect x="0" y="0" width="62" height="12" rx="2" fill="url(#textChrome)" />
+      <rect x="24" y="12" width="14" height="42" rx="1" fill="url(#textChrome)" />
+    </g>
+    <g transform="translate(45, -10)">
+      <rect x="0" y="0" width="14" height="54" rx="1" fill="url(#textChrome)" />
+      <rect x="14" y="21" width="30" height="12" fill="url(#textChrome)" />
+      <rect x="44" y="0" width="14" height="54" rx="1" fill="url(#textChrome)" />
+    </g>
+    <g transform="translate(135, -10)">
+      <rect x="0" y="0" width="56" height="12" rx="2" fill="url(#textChrome)" />
+      <rect x="0" y="21" width="48" height="12" rx="2" fill="url(#textChrome)" />
+      <rect x="0" y="42" width="56" height="12" rx="2" fill="url(#textChrome)" />
+    </g>
+    <g transform="translate(225, -10)">
+      <path d="M 0 0 L 36 0 C 48 0 56 6 56 16 C 56 24 50 29 40 31 L 58 54 L 42 54 L 26 33 L 14 33 L 14 54 L 0 54 Z M 14 11 L 14 22 L 32 22 C 38 22 42 19 42 16.5 C 42 13 38 11 32 11 Z" fill="url(#textChrome)" />
+    </g>
   </g>
+
+  <!-- Tagline -->
+  <text x="500" y="505" 
+        text-anchor="middle" 
+        font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" 
+        font-size="16" 
+        font-weight="700" 
+        letter-spacing="9" 
+        fill="#35D8F2" 
+        opacity="0.95">
+    EXPLORE WITHOUT LIMITS.
+  </text>
 </svg>

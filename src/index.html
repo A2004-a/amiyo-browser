@@ -3,8 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' amiyo: data: blob: https:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: http: blob:; font-src 'self' data:; connect-src 'self' https:;">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' amiyo: aether: data: blob: https:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: http: blob:; font-src 'self' data:; connect-src 'self' https:;">
   <title>AETHER Browser — Explore Without Limits</title>
+  <link rel="icon" type="image/svg+xml" href="assets/icons/logo.svg">
+  <link rel="shortcut icon" href="assets/branding/aether-official-logo.jpg">
   <link rel="stylesheet" href="styles/variables.css">
   <link rel="stylesheet" href="styles/global.css">
   <link rel="stylesheet" href="styles/browser.css">
@@ -29,10 +31,31 @@
         <div class="browser-brand" title="AETHER Browser — Explore Without Limits">
           <div class="browser-brand-logo" style="background:transparent;box-shadow:none;">
             <svg viewBox="0 0 32 32" width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <ellipse cx="16" cy="17" rx="12" ry="4.5" fill="none" stroke="#35D8F2" stroke-width="1.2" opacity="0.85" transform="rotate(-15 16 17)"/>
-              <path d="M16 5 L24 23 L20 23 L16 14 L12 23 L8 23 Z" fill="#DCE3EB" />
-              <path d="M10 17 L22 17 L21 19 L11 19 Z" fill="#35D8F2" />
-              <circle cx="16" cy="5" r="1.5" fill="#35D8F2" />
+              <defs>
+                <linearGradient id="brandChromeL" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#FFFFFF"/>
+                  <stop offset="100%" stop-color="#94A3B8"/>
+                </linearGradient>
+                <linearGradient id="brandChromeR" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#CBD5E1"/>
+                  <stop offset="100%" stop-color="#334155"/>
+                </linearGradient>
+                <linearGradient id="brandBlade" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#35D8F2"/>
+                  <stop offset="50%" stop-color="#FFFFFF"/>
+                  <stop offset="100%" stop-color="#94A3B8"/>
+                </linearGradient>
+              </defs>
+              <path d="M 8 20 C 5 19 5 15 10 12 C 12 11 15 9 19 8" fill="none" stroke="#00D4FF" stroke-width="1.6" opacity="0.9" stroke-linecap="round"/>
+              <path d="M 16 4 L 7 21 L 11 21 L 16 10 Z" fill="url(#brandChromeL)"/>
+              <path d="M 16 4 L 16 10 L 21 21 L 25 21 Z" fill="url(#brandChromeR)"/>
+              <polygon points="16,10 11,21 15,18 16,13" fill="#1E293B"/>
+              <polygon points="16,10 16,13 17,18 21,21" fill="#475569"/>
+              <circle cx="16" cy="4" r="1" fill="#FFFFFF"/>
+              <path d="M 7 20 C 11 21 16 20 21 16 C 24 14 26 11 27 8 C 26 9 24 11 20 14 C 15 18 11 19 7 20 Z" fill="url(#brandBlade)"/>
+              <path d="M 7 20 C 11 21 16 20 21 16 C 24 14 26 11 27 8" fill="none" stroke="#FFFFFF" stroke-width="0.7" opacity="0.9"/>
+              <circle cx="27.2" cy="7.8" r="1.8" fill="#00D4FF"/>
+              <circle cx="26.8" cy="7.4" r="0.7" fill="#FFFFFF"/>
             </svg>
           </div>
         </div>

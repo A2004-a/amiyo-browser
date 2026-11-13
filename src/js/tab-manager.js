@@ -9,7 +9,7 @@ const TabManager = {
     if (newTabBtn) {
       newTabBtn.innerHTML = Utils.icons.plus;
       newTabBtn.addEventListener('click', () => {
-        IpcClient.createTab('amiyo://newtab');
+        IpcClient.createTab('aether://newtab');
       });
     }
 
@@ -50,7 +50,7 @@ const TabManager = {
     // Toggle Vertical Tabs button
     const verticalBtn = document.getElementById('toggle-vertical-tabs-btn');
     if (verticalBtn) {
-      const isVertical = localStorage.getItem('amiyo_vertical_tabs') === 'true';
+      const isVertical = (localStorage.getItem('aether_vertical_tabs') || localStorage.getItem('amiyo_vertical_tabs')) === 'true';
       if (isVertical) {
         document.getElementById('app')?.classList.add('vertical-tabs-mode');
         verticalBtn.classList.add('active');
@@ -59,7 +59,9 @@ const TabManager = {
         const app = document.getElementById('app');
         const active = app.classList.toggle('vertical-tabs-mode');
         verticalBtn.classList.toggle('active', active);
-        localStorage.setItem('amiyo_vertical_tabs', active ? 'true' : 'false');
+        const str = active ? 'true' : 'false';
+        localStorage.setItem('aether_vertical_tabs', str);
+        localStorage.setItem('amiyo_vertical_tabs', str);
       });
     }
 
@@ -216,7 +218,7 @@ const TabManager = {
     }
 
     if (tab.id === State.activeTabId && !tab.isInternal) {
-      document.title = `${tab.title || 'AMIYO Browser'} - AMIYO Browser`;
+      document.title = `${tab.title || 'AETHER Browser'} - AETHER Browser`;
     }
   }
 };

@@ -6,7 +6,7 @@ const KeyboardShortcuts = {
       // Ctrl + T: New Tab
       if (isCtrlOrCmd && !e.shiftKey && e.key.toLowerCase() === 't') {
         e.preventDefault();
-        IpcClient.createTab('amiyo://newtab');
+        IpcClient.createTab('aether://newtab');
         return;
       }
 
@@ -86,7 +86,7 @@ const KeyboardShortcuts = {
       // Ctrl + Shift + O: Show All Bookmarks
       if (isCtrlOrCmd && e.shiftKey && e.key.toLowerCase() === 'o') {
         e.preventDefault();
-        IpcClient.createTab('amiyo://bookmarks');
+        IpcClient.createTab('aether://bookmarks');
         return;
       }
 
@@ -125,7 +125,7 @@ const KeyboardShortcuts = {
         return;
       }
 
-      // Ctrl + Shift + A: Toggle AMIYO AI Assistant
+      // Ctrl + Shift + A: Toggle AETHER Intelligence Panel
       if (isCtrlOrCmd && e.shiftKey && e.key.toLowerCase() === 'a') {
         e.preventDefault();
         if (typeof AiPanel !== 'undefined') {
@@ -151,14 +151,14 @@ const KeyboardShortcuts = {
       // Ctrl + H: History
       if (isCtrlOrCmd && e.key.toLowerCase() === 'h') {
         e.preventDefault();
-        IpcClient.createTab('amiyo://history');
+        IpcClient.createTab('aether://history');
         return;
       }
 
       // Ctrl + J: Downloads
       if (isCtrlOrCmd && e.key.toLowerCase() === 'j') {
         e.preventDefault();
-        IpcClient.createTab('amiyo://downloads');
+        IpcClient.createTab('aether://downloads');
         return;
       }
 

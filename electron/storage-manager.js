@@ -27,7 +27,7 @@ class StorageManager {
       theme: 'dark',
       searchEngine: 'google', // 'google' | 'bing' | 'duckduckgo' | 'custom'
       customSearchUrl: 'https://duckduckgo.com/?q=%s',
-      homepage: 'amiyo://newtab',
+      homepage: 'aether://newtab',
       showBookmarksBar: true,
       restoreTabsOnStartup: false,
       searchSuggestions: true,
@@ -288,7 +288,7 @@ class StorageManager {
   }
 
   addHistory(entry) {
-    if (!entry.url || entry.url.startsWith('amiyo://') || entry.isPrivate) {
+    if (!entry.url || entry.url.startsWith('amiyo://') || entry.url.startsWith('aether://') || entry.isPrivate) {
       return null;
     }
     const item = {
@@ -371,7 +371,7 @@ class StorageManager {
   saveSession(tabs) {
     if (!Array.isArray(tabs)) return false;
     const sessionData = tabs
-      .filter(t => t.url && t.url !== 'amiyo://newtab')
+      .filter(t => t.url && t.url !== 'amiyo://newtab' && t.url !== 'aether://newtab')
       .map(t => ({
         url: t.url,
         title: t.title || 'Tab',

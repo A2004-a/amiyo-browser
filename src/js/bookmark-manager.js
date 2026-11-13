@@ -155,7 +155,7 @@ const BookmarkManager = {
       const blob = new Blob([json], { type: 'application/json' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
-      a.download = `amiyo-bookmarks-${new Date().toISOString().slice(0, 10)}.json`;
+      a.download = `aether-bookmarks-${new Date().toISOString().slice(0, 10)}.json`;
       a.click();
     });
   },
@@ -219,7 +219,8 @@ const BookmarkManager = {
           BookmarksBar.render();
           App.closeModal();
           const internalContainer = document.getElementById('internal-page-container');
-          if (State.getActiveTab()?.url === 'amiyo://bookmarks') {
+          const activeUrl = State.getActiveTab()?.url;
+          if (activeUrl === 'aether://bookmarks' || activeUrl === 'amiyo://bookmarks') {
             this.render(internalContainer);
           }
         }
@@ -236,7 +237,8 @@ const BookmarkManager = {
             BookmarksBar.render();
             App.closeModal();
             const internalContainer = document.getElementById('internal-page-container');
-            if (State.getActiveTab()?.url === 'amiyo://bookmarks') {
+            const activeUrl = State.getActiveTab()?.url;
+            if (activeUrl === 'aether://bookmarks' || activeUrl === 'amiyo://bookmarks') {
               this.render(internalContainer);
             }
           }

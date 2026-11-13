@@ -41,7 +41,7 @@ const Navigation = {
     if (this.homeBtn) {
       this.homeBtn.innerHTML = Utils.icons.home;
       this.homeBtn.addEventListener('click', () => {
-        const homepage = State.settings.homepage || 'amiyo://newtab';
+        const homepage = State.settings.homepage || 'aether://newtab';
         IpcClient.navigateTab(State.activeTabId, homepage);
       });
     }

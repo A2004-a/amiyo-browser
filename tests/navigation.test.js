@@ -5,6 +5,8 @@ function run() {
   console.log('Testing NavigationController...');
 
   // 1. Internal URL detection
+  assert.strictEqual(navigationController.isInternalUrl('aether://newtab'), true);
+  assert.strictEqual(navigationController.isInternalUrl('aether://settings'), true);
   assert.strictEqual(navigationController.isInternalUrl('amiyo://newtab'), true);
   assert.strictEqual(navigationController.isInternalUrl('amiyo://settings'), true);
   assert.strictEqual(navigationController.isInternalUrl('https://google.com'), false);
@@ -42,9 +44,13 @@ function run() {
   assert.strictEqual(sec2.isSecure, false);
   assert.strictEqual(sec2.type, 'insecure');
 
-  const sec3 = navigationController.getSecurityStatus('amiyo://newtab');
+  const sec3 = navigationController.getSecurityStatus('aether://newtab');
   assert.strictEqual(sec3.isSecure, true);
   assert.strictEqual(sec3.type, 'internal');
+
+  const sec4 = navigationController.getSecurityStatus('amiyo://newtab');
+  assert.strictEqual(sec4.isSecure, true);
+  assert.strictEqual(sec4.type, 'internal');
 
   // 5. Suggestions
   const suggestions = navigationController.getOmniboxSuggestions('new');

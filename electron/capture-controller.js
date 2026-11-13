@@ -38,7 +38,7 @@ class CaptureController {
     }
   }
 
-  async saveToFile(browserWindow, webContents, defaultFilename = 'amiyo-capture.png') {
+  async saveToFile(browserWindow, webContents, defaultFilename = 'aether-capture.png') {
     if (!webContents || webContents.isDestroyed()) return false;
     try {
       const image = await webContents.capturePage();

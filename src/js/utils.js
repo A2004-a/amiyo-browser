@@ -59,7 +59,7 @@ const Utils = {
     if (providedFavicon && !providedFavicon.startsWith('data:image/svg+xml')) {
       return providedFavicon;
     }
-    if (!url || url.startsWith('amiyo://')) {
+    if (!url || url.startsWith('amiyo://') || url.startsWith('aether://')) {
       return '';
     }
     try {

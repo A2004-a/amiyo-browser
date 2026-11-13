@@ -93,7 +93,7 @@ const App = {
         this.handleInternalPage(initialTabs[0]);
       } else {
         console.log('[App] No initial tabs found, requesting new tab creation...');
-        const created = await IpcClient.createTab('amiyo://newtab');
+        const created = await IpcClient.createTab('aether://newtab');
         if (created) {
           State.setTabs([created], created.id);
           TabManager.render();
@@ -127,15 +127,15 @@ const App = {
 
     container.classList.remove('hidden');
 
-    if (tab.url === 'amiyo://newtab') {
+    if (tab.url === 'aether://newtab' || tab.url === 'amiyo://newtab') {
       Homepage.render(container);
-    } else if (tab.url === 'amiyo://bookmarks') {
+    } else if (tab.url === 'aether://bookmarks' || tab.url === 'amiyo://bookmarks') {
       BookmarkManager.render(container);
-    } else if (tab.url === 'amiyo://history') {
+    } else if (tab.url === 'aether://history' || tab.url === 'amiyo://history') {
       HistoryManager.render(container);
-    } else if (tab.url === 'amiyo://downloads') {
+    } else if (tab.url === 'aether://downloads' || tab.url === 'amiyo://downloads') {
       DownloadManager.render(container);
-    } else if (tab.url === 'amiyo://settings') {
+    } else if (tab.url === 'aether://settings' || tab.url === 'amiyo://settings') {
       SettingsManager.render(container);
     } else {
       Homepage.render(container);
@@ -166,7 +166,7 @@ const App = {
       closeBtn.addEventListener('click', () => {
         if (State.tabs.length > 1) {
           this.showModal('Close Browser?', `
-            <p style="font-size:14px;color:var(--text-secondary);line-height:1.5;">You have <strong>${State.tabs.length} tabs</strong> open. Are you sure you want to close AMIYO Browser?</p>
+            <p style="font-size:14px;color:var(--text-secondary);line-height:1.5;">You have <strong>${State.tabs.length} tabs</strong> open. Are you sure you want to close AETHER Browser?</p>
           `, [
             { label: 'Cancel', class: 'btn-secondary', click: () => this.closeModal() },
             {
@@ -192,17 +192,17 @@ const App = {
 
     // History button in toolbar
     document.getElementById('history-tool-btn')?.addEventListener('click', () => {
-      IpcClient.createTab('amiyo://history');
+      IpcClient.createTab('aether://history');
     });
 
     // Bookmarks button in toolbar
     document.getElementById('bookmarks-tool-btn')?.addEventListener('click', () => {
-      IpcClient.createTab('amiyo://bookmarks');
+      IpcClient.createTab('aether://bookmarks');
     });
 
     // Settings button in toolbar
     document.getElementById('settings-tool-btn')?.addEventListener('click', () => {
-      IpcClient.createTab('amiyo://settings');
+      IpcClient.createTab('aether://settings');
     });
   },
 
@@ -234,7 +234,7 @@ const App = {
 
     document.getElementById('menu-new-tab')?.addEventListener('click', () => {
       menuEl.classList.add('hidden');
-      IpcClient.createTab('amiyo://newtab');
+      IpcClient.createTab('aether://newtab');
     });
 
     document.getElementById('menu-new-window')?.addEventListener('click', () => {
@@ -249,17 +249,17 @@ const App = {
 
     document.getElementById('menu-bookmarks')?.addEventListener('click', () => {
       menuEl.classList.add('hidden');
-      IpcClient.createTab('amiyo://bookmarks');
+      IpcClient.createTab('aether://bookmarks');
     });
 
     document.getElementById('menu-history')?.addEventListener('click', () => {
       menuEl.classList.add('hidden');
-      IpcClient.createTab('amiyo://history');
+      IpcClient.createTab('aether://history');
     });
 
     document.getElementById('menu-downloads')?.addEventListener('click', () => {
       menuEl.classList.add('hidden');
-      IpcClient.createTab('amiyo://downloads');
+      IpcClient.createTab('aether://downloads');
     });
 
     document.getElementById('menu-find')?.addEventListener('click', () => {
@@ -289,7 +289,7 @@ const App = {
 
     document.getElementById('menu-settings')?.addEventListener('click', () => {
       menuEl.classList.add('hidden');
-      IpcClient.createTab('amiyo://settings');
+      IpcClient.createTab('aether://settings');
     });
 
     document.getElementById('menu-exit')?.addEventListener('click', () => {
@@ -715,7 +715,7 @@ const App = {
       });
 
       document.getElementById('cap-save-btn')?.addEventListener('click', async () => {
-        await IpcClient.api.capture.save(tabId, `amiyo-capture-${Date.now()}.png`);
+        await IpcClient.api.capture.save(tabId, `aether-capture-${Date.now()}.png`);
         const b = document.getElementById('cap-save-btn');
         if (b) b.textContent = '✔ Saved!';
       });

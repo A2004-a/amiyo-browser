@@ -77,7 +77,7 @@ function registerIpcHandlers() {
   ipcMain.handle('tab:create', (event, url, options = {}) => {
     const tabCtrl = getTabControllerForSender(event);
     if (!tabCtrl) return null;
-    const safeUrl = typeof url === 'string' ? url : 'amiyo://newtab';
+    const safeUrl = typeof url === 'string' ? url : 'aether://newtab';
     const tab = tabCtrl.createTab(safeUrl, options);
     return {
       id: tab.id,

@@ -51,7 +51,7 @@ class TabController {
     return this.getTab(this.activeTabId);
   }
 
-  createTab(inputUrl = 'amiyo://newtab', options = {}) {
+  createTab(inputUrl = 'aether://newtab', options = {}) {
     const tabId = `tab_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
     const resolvedUrl = navigationController.resolveUrl(inputUrl);
     const isInternal = navigationController.isInternalUrl(resolvedUrl);
@@ -257,7 +257,7 @@ class TabController {
     wc.on('will-navigate', (event, targetUrl) => {
       if (!targetUrl) return;
       const lower = targetUrl.toLowerCase();
-      if (lower.startsWith('amiyo://') || lower.startsWith('file://') || lower.startsWith('javascript:')) {
+      if (lower.startsWith('aether://') || lower.startsWith('amiyo://') || lower.startsWith('file://') || lower.startsWith('javascript:')) {
         console.warn(`[Security] Blocked unauthorized will-navigate to ${targetUrl} from tab ${tab.id}`);
         event.preventDefault();
         return;
@@ -267,7 +267,7 @@ class TabController {
     wc.on('will-redirect', (event, targetUrl) => {
       if (!targetUrl) return;
       const lower = targetUrl.toLowerCase();
-      if (lower.startsWith('amiyo://') || lower.startsWith('file://') || lower.startsWith('javascript:')) {
+      if (lower.startsWith('aether://') || lower.startsWith('amiyo://') || lower.startsWith('file://') || lower.startsWith('javascript:')) {
         console.warn(`[Security] Blocked unauthorized will-redirect to ${targetUrl} from tab ${tab.id}`);
         event.preventDefault();
         return;
@@ -277,7 +277,7 @@ class TabController {
     wc.setWindowOpenHandler(({ url }) => {
       if (!url) return { action: 'deny' };
       const lower = url.toLowerCase();
-      if (lower.startsWith('amiyo://') || lower.startsWith('file://') || lower.startsWith('javascript:')) {
+      if (lower.startsWith('aether://') || lower.startsWith('amiyo://') || lower.startsWith('file://') || lower.startsWith('javascript:')) {
         console.warn(`[Security] Blocked window.open attempt to ${url}`);
         return { action: 'deny' };
       }
@@ -555,7 +555,7 @@ class TabController {
 
     // If no tabs left, open a new tab
     if (this.tabs.length === 0) {
-      this.createTab('amiyo://newtab');
+      this.createTab('aether://newtab');
       return;
     }
 

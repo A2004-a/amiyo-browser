@@ -27,6 +27,7 @@ class WindowManager {
       titleBarStyle: 'hidden',
       title: isPrivate ? 'AETHER Browser (Private)' : 'AETHER Browser',
       backgroundColor: '#0B0F14',
+      icon: path.join(__dirname, '..', 'assets', 'branding', 'aether-official-logo.jpg'),
       webPreferences: {
         nodeIntegration: false,
         contextIsolation: true,
@@ -48,10 +49,10 @@ class WindowManager {
           tabController.createTab(t.url, { isPinned: t.isPinned, active: idx === 0 });
         });
       } else {
-        tabController.createTab('amiyo://newtab');
+        tabController.createTab('aether://newtab');
       }
     } else {
-      tabController.createTab('amiyo://newtab');
+      tabController.createTab('aether://newtab');
     }
 
     this.windows.set(winId, {
@@ -150,7 +151,7 @@ class WindowManager {
 
     switch (action) {
       case 'new-tab':
-        tabController.createTab(payload.url || 'amiyo://newtab');
+        tabController.createTab(payload.url || 'aether://newtab');
         break;
       case 'close-tab':
         tabController.closeTab(payload.tabId || tabController.activeTabId);
@@ -183,10 +184,10 @@ class WindowManager {
         break;
       }
       case 'open-history':
-        tabController.createTab('amiyo://history');
+        tabController.createTab('aether://history');
         break;
       case 'open-bookmarks':
-        tabController.createTab('amiyo://bookmarks');
+        tabController.createTab('aether://bookmarks');
         break;
       case 'bookmark-current-tab':
         window.webContents.send('trigger-bookmark-current');

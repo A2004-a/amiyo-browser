@@ -63,7 +63,7 @@ const SettingsManager = {
                 <span class="settings-card-title">Homepage URL</span>
                 <span class="settings-card-desc">The page opened when clicking the Home button.</span>
               </div>
-              <input type="text" id="setting-homepage" class="settings-input" value="${Utils.escapeHtml(s.homepage || 'amiyo://newtab')}" />
+              <input type="text" id="setting-homepage" class="settings-input" value="${Utils.escapeHtml(s.homepage || 'aether://newtab')}" />
             </div>
 
             <div class="settings-card">

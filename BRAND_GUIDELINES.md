@@ -71,3 +71,4 @@ Direct bang shortcuts supported in the address bar:
 - `!w <query>` → Instant Wikipedia search
 - `!y <query>` → Instant YouTube search
 - `!e <query>` → Instant Ecosia search
+

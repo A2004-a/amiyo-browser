@@ -103,11 +103,11 @@ class NavigationController {
 
     // 1. Check internal pages
     const internalPages = [
-      { title: 'New Tab', url: 'amiyo://newtab' },
-      { title: 'History', url: 'amiyo://history' },
-      { title: 'Bookmarks', url: 'amiyo://bookmarks' },
-      { title: 'Downloads', url: 'amiyo://downloads' },
-      { title: 'Settings', url: 'amiyo://settings' }
+      { title: 'New Tab', url: 'aether://newtab' },
+      { title: 'History', url: 'aether://history' },
+      { title: 'Bookmarks', url: 'aether://bookmarks' },
+      { title: 'Downloads', url: 'aether://downloads' },
+      { title: 'Settings', url: 'aether://settings' }
     ];
     for (const page of internalPages) {
       if (page.title.toLowerCase().includes(q) || page.url.toLowerCase().includes(q)) {

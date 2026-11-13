@@ -272,7 +272,7 @@ const Omnibox = {
     } else if (status.type === 'internal') {
       this.securityBadgeEl.classList.add('internal');
       this.securityBadgeEl.innerHTML = Utils.icons.lock;
-      this.securityBadgeEl.title = 'AMIYO System Page';
+      this.securityBadgeEl.title = 'AETHER System Page';
     } else {
       this.securityBadgeEl.innerHTML = Utils.icons.globe;
       this.securityBadgeEl.title = 'Web Page';
@@ -312,7 +312,7 @@ const Omnibox = {
     if (isAiQuery) {
       this.currentSuggestions.unshift({
         type: 'ai',
-        title: aiPrompt ? `✨ Ask AMIYO AI: "${aiPrompt}"` : '✨ Ask AMIYO AI (Type your question)',
+        title: aiPrompt ? `✨ Ask AETHER Intelligence: "${aiPrompt}"` : '✨ Ask AETHER Intelligence (Type your question)',
         url: `@ai ${aiPrompt}`,
         prompt: aiPrompt
       });

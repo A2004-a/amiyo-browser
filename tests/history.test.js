@@ -16,9 +16,10 @@ function run() {
   // 2. Ignore internal pages
   const internalEntry = storageManager.addHistory({
     title: 'Internal',
-    url: 'amiyo://newtab'
+    url: 'aether://newtab'
   });
   assert.strictEqual(internalEntry, null);
+  assert.strictEqual(storageManager.addHistory({ url: 'amiyo://newtab' }), null);
 
   // 3. Ignore private browsing
   const privateEntry = storageManager.addHistory({

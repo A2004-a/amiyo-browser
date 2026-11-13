@@ -9,7 +9,7 @@ const DownloadManager = {
       this.badgeEl = this.toolBtnEl.querySelector('#dl-badge');
 
       this.toolBtnEl.addEventListener('click', () => {
-        IpcClient.createTab('amiyo://downloads');
+        IpcClient.createTab('aether://downloads');
       });
     }
 
@@ -39,7 +39,7 @@ const DownloadManager = {
 
     // If active tab is on downloads page, re-render
     const activeTab = State.getActiveTab();
-    if (activeTab?.url === 'amiyo://downloads') {
+    if (activeTab?.url === 'aether://downloads' || activeTab?.url === 'amiyo://downloads') {
       const container = document.getElementById('internal-page-container');
       if (container) {
         this.render(container);

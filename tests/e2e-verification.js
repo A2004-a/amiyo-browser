@@ -6,7 +6,7 @@ const navigationController = require('../electron/navigation-controller');
 const { registerIpcHandlers } = require('../electron/ipc-handlers');
 
 console.log('====================================================');
-console.log('    AMIYO Browser — Step-by-Step E2E Test Suite    ');
+console.log('    AETHER Browser — Step-by-Step E2E Test Suite    ');
 console.log('====================================================\n');
 
 let passedTests = 0;
@@ -50,7 +50,7 @@ app.whenReady().then(async () => {
     const tabCtrl = winInfo.tabController;
     const initialTabs = tabCtrl.getTabsSummary();
     reportTest('Initial tab created automatically on startup', initialTabs.length >= 1);
-    reportTest('Initial tab URL is amiyo://newtab', initialTabs[0].url === 'amiyo://newtab');
+    reportTest('Initial tab URL is aether://newtab', initialTabs[0].url === 'aether://newtab');
     reportTest('Initial tab is marked isInternal: true', initialTabs[0].isInternal === true);
 
     // ----------------------------------------------------
@@ -83,24 +83,24 @@ app.whenReady().then(async () => {
     // ----------------------------------------------------
     // TEST 6: Internal Page Navigation & View Hiding
     // ----------------------------------------------------
-    tabCtrl.navigateTab(initialTabs[0].id, 'amiyo://settings');
+    tabCtrl.navigateTab(initialTabs[0].id, 'aether://settings');
     const tabAfterSettings = tabCtrl.getActiveTab();
-    reportTest('Tab navigates to amiyo://settings', tabAfterSettings.url === 'amiyo://settings');
+    reportTest('Tab navigates to aether://settings', tabAfterSettings.url === 'aether://settings');
     reportTest('Tab isInternal is true for internal pages', tabAfterSettings.isInternal === true);
     reportTest('WebContentsView is hidden for internal pages so HTML shell renders', tabAfterSettings.view.getVisible() === false);
 
     // ----------------------------------------------------
     // TEST 7: Multi-Tab Operations (Create, Switch, Close, Duplicate)
     // ----------------------------------------------------
-    const tab2 = tabCtrl.createTab('amiyo://history', { active: true });
-    reportTest('Second tab created (amiyo://history)', tabCtrl.tabs.length === 2);
+    const tab2 = tabCtrl.createTab('aether://history', { active: true });
+    reportTest('Second tab created (aether://history)', tabCtrl.tabs.length === 2);
     reportTest('Second tab becomes active', tabCtrl.activeTabId === tab2.id);
 
     tabCtrl.switchTab(initialTabs[0].id);
     reportTest('Switch back to first tab', tabCtrl.activeTabId === initialTabs[0].id);
 
     const dupTab = tabCtrl.duplicateTab(initialTabs[0].id);
-    reportTest('Duplicate active tab', tabCtrl.tabs.length === 3 && dupTab.url === 'amiyo://settings');
+    reportTest('Duplicate active tab', tabCtrl.tabs.length === 3 && dupTab.url === 'aether://settings');
 
     tabCtrl.closeTab(dupTab.id);
     reportTest('Close duplicated tab', tabCtrl.tabs.length === 2);
