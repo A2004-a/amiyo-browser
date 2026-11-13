@@ -87,3 +87,4 @@ All IPC communication flows through `preload.js` via `contextBridge.exposeInMain
 | **Capture** | `amiyoAPI.capture.*` | Internal buffer conversion; zero file path leak |
 | **Reader** | `amiyoAPI.reader.extract` | In-memory text extraction; XSS sanitization |
 | **Settings** | `amiyoAPI.settings.*` | Key allowlisting; atomic persistence |
+

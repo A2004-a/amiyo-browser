@@ -38,3 +38,4 @@
 ### B. Chromium Sync Engine (Google Account Sync)
 - **Constraint:** Chromium's built-in Google Account Sync relies on private Google API keys and proprietary Google OAuth endpoints restricted exclusively to official Google Chrome builds.
 - **Architectural Solution:** Local atomic JSON storage (`data/bookmarks.json`, `data/history.json`, `data/settings.json`) ensures zero reliance on third-party cloud infrastructure.
+

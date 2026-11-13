@@ -46,3 +46,4 @@
 - **Automated Tests:** `npm test`
 - **Portable Distribution:** `npm run build:portable`
 - **Full Packaging:** `npm run dist:win`
+

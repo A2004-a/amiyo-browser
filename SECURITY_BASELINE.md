@@ -49,3 +49,4 @@
 - Automatic HTTPS upgrades on all unencrypted web traffic.
 - Active blocking of 50+ known tracking and telemetry networks.
 - Injection of `Sec-GPC: 1` (Global Privacy Control) and `DNT: 1` (Do Not Track) on every request.
+

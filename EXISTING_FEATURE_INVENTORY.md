@@ -24,3 +24,4 @@
 | **Find in Page** | Text Search Floating Bar | Shortcut (`Ctrl+F`) | Chromium native find-in-page API | **PASS** |
 | **Zoom Controls** | Page Zoom In / Out / Reset | Omnibox Badge (`Ctrl+`, `Ctrl-`, `0`)| `webContents.setZoomFactor` | **PASS** |
 | **Themes** | Dark, Light, & Custom Wallpapers| Settings / Customize Modal | CSS variables + localStorage persistence | **PASS** |
+

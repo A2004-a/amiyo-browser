@@ -30,3 +30,4 @@
 ## 4. Hardware & Feature Permissions
 - **Device Access:** Camera, microphone, geolocation, and push notification access are denied by default via `session.setPermissionRequestHandler`.
 - **Explicit Grants:** Only origins explicitly whitelisted by the user in Settings can access recording devices.
+

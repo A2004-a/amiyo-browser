@@ -21,3 +21,4 @@
 - **Status:** Missing External Backend Service.
 - **Description:** Synchronizing bookmarks and settings across separate physical computers requires a hosted backend database and user authentication service.
 - **Mitigation:** All data is stored in human-readable, atomic JSON files in the `data/` folder, enabling easy backup and migration.
+

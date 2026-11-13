@@ -58,3 +58,4 @@ A comprehensive security review was conducted across the main process, preload b
 - [x] Private browsing isolated to in-memory partitions with zero disk retention
 - [x] Automated HTTPS upgrades active across all sessions
 - [x] Anti-fingerprinting headers (`Sec-GPC`, `DNT`) injected into outbound traffic
+

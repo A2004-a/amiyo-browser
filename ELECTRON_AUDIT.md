@@ -47,3 +47,4 @@
 - **EnableEmbeddedAsarIntegrityValidation:** Enforced in production packaging.
 - **OnlyLoadAppFromAsar:** Supported in release builds.
 - **Sandbox:** Mandatory sandbox flag set to `true` on all browser window instances.
+

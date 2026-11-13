@@ -40,3 +40,4 @@
 | **AMIYO Shields Filter** | < 0.1% | < 0.4 ms per HTTP request |
 | **Task Manager Polling** | 0.3% (active) | N/A (Local OS process metrics) |
 | **Reader Mode Extractor**| 0.0% (on-demand)| < 15 ms extraction latency |
+
