@@ -26,6 +26,13 @@ if (typeof electron === 'string') {
 
 const { app, BrowserWindow } = electron;
 process.noDeprecation = true;
+
+// Suppress internal Chromium DirectX/DirectComposition overlay notices
+if (app && app.commandLine) {
+  app.commandLine.appendSwitch('log-level', '3');
+  app.commandLine.appendSwitch('disable-logging');
+}
+
 if (app && typeof app.setName === 'function') {
   app.setName('AETHER Browser');
 }

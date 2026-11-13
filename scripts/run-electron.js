@@ -16,7 +16,7 @@ const target = hasTarget ? [] : ['.'];
 const flags = [
   '--no-sandbox',
   '--disable-gpu',
-  ...(verbose ? ['--enable-logging'] : []),
+  ...(verbose ? ['--enable-logging'] : ['--log-level=3']),
   ...target,
   ...extraArgs.filter(a => a !== '--verbose')
 ];
