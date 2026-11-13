@@ -1,10 +1,28 @@
 const TabManager = {
   stripEl: null,
   draggedIndex: null,
+  hoverTimer: null,
+  hoveredTabId: null,
+
+  hideHoverCard() {
+    if (this.hoverTimer) {
+      clearTimeout(this.hoverTimer);
+      this.hoverTimer = null;
+    }
+    this.hoveredTabId = null;
+    const card = document.getElementById('tab-hover-card');
+    card?.classList.add('hidden');
+  },
 
   init() {
     this.stripEl = document.getElementById('tabs-strip');
     const newTabBtn = document.getElementById('new-tab-btn');
+
+    // Global dismiss for tab hover preview card
+    this.stripEl?.addEventListener('mouseleave', () => this.hideHoverCard());
+    document.addEventListener('mousedown', () => this.hideHoverCard());
+    window.addEventListener('blur', () => this.hideHoverCard());
+    window.addEventListener('resize', () => this.hideHoverCard());
 
     if (newTabBtn) {
       newTabBtn.innerHTML = Utils.icons.plus;
@@ -104,6 +122,7 @@ const TabManager = {
   },
 
   render() {
+    this.hideHoverCard();
     if (!this.stripEl) return;
     this.stripEl.innerHTML = '';
 
@@ -153,6 +172,7 @@ const TabManager = {
 
       // Event handlers
       tabEl.addEventListener('click', (e) => {
+        this.hideHoverCard();
         if (!e.target.closest('.tab-close-btn') && !e.target.closest('.tab-audio-btn')) {
           IpcClient.switchTab(tab.id);
         }
@@ -162,6 +182,7 @@ const TabManager = {
       tabEl.addEventListener('auxclick', (e) => {
         if (e.button === 1) { // Middle click
           e.preventDefault();
+          this.hideHoverCard();
           IpcClient.closeTab(tab.id);
         }
       });
@@ -171,6 +192,7 @@ const TabManager = {
       if (closeBtn) {
         closeBtn.addEventListener('click', (e) => {
           e.stopPropagation();
+          this.hideHoverCard();
           IpcClient.closeTab(tab.id);
         });
       }
@@ -185,9 +207,11 @@ const TabManager = {
       }
 
       // Chrome Tab Hover Preview Card
-      let hoverTimer = null;
       tabEl.addEventListener('mouseenter', () => {
-        hoverTimer = setTimeout(() => {
+        if (this.hoverTimer) clearTimeout(this.hoverTimer);
+        this.hoveredTabId = tab.id;
+        this.hoverTimer = setTimeout(() => {
+          if (this.hoveredTabId !== tab.id) return;
           const card = document.getElementById('tab-hover-card');
           if (!card) return;
           const titleEl = document.getElementById('tab-hover-title');
@@ -206,11 +230,14 @@ const TabManager = {
           if (domainEl) domainEl.textContent = domain;
           if (badgeEl) {
             if (tab.isSuspended) {
-              badgeEl.textContent = '💤 Sleeping (Edge Efficiency Mode)';
-              badgeEl.style.color = 'var(--text-muted)';
+              badgeEl.textContent = '💤 Sleeping (Memory Saved)';
+              badgeEl.className = 'tab-hover-badge sleeping';
+            } else if (tab.id === State.activeTabId) {
+              badgeEl.textContent = '● Active Tab';
+              badgeEl.className = 'tab-hover-badge active';
             } else {
-              badgeEl.textContent = tab.id === State.activeTabId ? 'Active Tab' : 'Background Tab';
-              badgeEl.style.color = 'var(--accent)';
+              badgeEl.textContent = 'Background Tab';
+              badgeEl.className = 'tab-hover-badge background';
             }
           }
           if (favEl) {
@@ -223,13 +250,13 @@ const TabManager = {
           card.style.left = `${Math.max(12, Math.min(window.innerWidth - 270, rect.left))}px`;
           card.style.top = `${rect.bottom + 6}px`;
           card.classList.remove('hidden');
-        }, 300);
+        }, 220);
       });
 
       tabEl.addEventListener('mouseleave', () => {
-        if (hoverTimer) clearTimeout(hoverTimer);
-        const card = document.getElementById('tab-hover-card');
-        card?.classList.add('hidden');
+        if (this.hoveredTabId === tab.id) {
+          this.hideHoverCard();
+        }
       });
 
       // Context menu for tab (duplicate, pin, mute, close)

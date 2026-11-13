@@ -633,17 +633,24 @@
   position: fixed;
   z-index: 9999;
   width: 250px;
-  background: rgba(12, 17, 30, 0.96);
-  border: 1px solid var(--border-subtle);
-  border-radius: 8px;
+  background: rgba(14, 20, 36, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
   padding: 10px 12px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(14px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(16px);
   pointer-events: none;
-  transition: opacity 0.15s ease;
+  transition: opacity 0.15s ease, transform 0.15s ease;
   display: flex;
   flex-direction: column;
   gap: 4px;
+  transform: translateY(0);
+}
+
+.tab-hover-card.hidden {
+  display: none !important;
+  opacity: 0 !important;
+  transform: translateY(-4px) !important;
 }
 
 .tab-hover-header {
@@ -688,6 +695,24 @@
   background: rgba(13, 242, 201, 0.1);
   padding: 2px 6px;
   border-radius: 4px;
+}
+
+.tab-hover-badge.active {
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+.tab-hover-badge.sleeping {
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+}
+
+.tab-hover-badge.background {
+  color: #60a5fa;
+  background: rgba(96, 165, 250, 0.12);
+  border: 1px solid rgba(96, 165, 250, 0.25);
 }
 
 /* ========================================================

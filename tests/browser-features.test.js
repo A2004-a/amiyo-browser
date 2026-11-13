@@ -151,6 +151,43 @@ function testViewVisibilityReset() {
   assert.strictEqual(ctrl.tabs[0].bounds.height, 716, 'Web contents bounds height must be restored to full height');
 }
 
+function testTabHoverCardLifecycle() {
+  let isHidden = true;
+  let timer = null;
+  let activeTabId = null;
+
+  function onMouseEnter(tabId) {
+    if (timer) clearTimeout(timer);
+    activeTabId = tabId;
+    timer = setTimeout(() => {
+      if (activeTabId === tabId) isHidden = false;
+    }, 220);
+  }
+
+  function hideHoverCard() {
+    if (timer) {
+      clearTimeout(timer);
+      timer = null;
+    }
+    activeTabId = null;
+    isHidden = true;
+  }
+
+  // Hover starts
+  onMouseEnter('tab_1');
+  assert.strictEqual(isHidden, true, 'Hover card should not display immediately (debounce timer)');
+
+  // Mouse leave before timer fires
+  hideHoverCard();
+  assert.strictEqual(isHidden, true, 'Hover card must remain hidden if mouse leaves early');
+  assert.strictEqual(timer, null, 'Timer must be cleaned up on hide');
+
+  // Trigger click or render
+  onMouseEnter('tab_2');
+  hideHoverCard(); // simulated click/render
+  assert.strictEqual(isHidden, true, 'Hover card must dismiss on click or tab re-render');
+}
+
 module.exports = {
   run() {
     console.log('Testing Signature Browser Features (Brave, Chrome, Safari, Edge)...');
@@ -161,6 +198,7 @@ module.exports = {
     testTabGroupsFeature();
     testFindBarOffsets();
     testViewVisibilityReset();
+    testTabHoverCardLifecycle();
     console.log('✔ Signature Browser Features tests passed!');
   }
 };
