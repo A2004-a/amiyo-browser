@@ -53,6 +53,26 @@ const Omnibox = {
       });
     }
 
+    this.shieldsBtnEl = document.getElementById('shields-tool-btn');
+    this.shieldsBadgeEl = document.getElementById('shields-badge');
+    this.shieldsPopoverEl = document.getElementById('shields-popover');
+    this.readerBtnEl = document.getElementById('reader-tool-btn');
+
+    if (this.shieldsBtnEl) {
+      this.shieldsBtnEl.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.toggleShieldsPopover();
+      });
+    }
+
+    if (this.readerBtnEl) {
+      this.readerBtnEl.addEventListener('click', () => {
+        if (typeof App !== 'undefined' && App.toggleReaderMode) {
+          App.toggleReaderMode(State.activeTabId);
+        }
+      });
+    }
+
     if (this.inputEl) {
       // Auto select text on focus
       this.inputEl.addEventListener('focus', () => {
@@ -133,6 +153,97 @@ const Omnibox = {
         this.zoomBadgeEl.classList.add('hidden');
       }
     }
+
+    // Update Reader Mode button visibility
+    if (this.readerBtnEl) {
+      const isWeb = tab && !tab.isInternal && tab.url && tab.url.startsWith('http');
+      this.readerBtnEl.classList.toggle('hidden', !isWeb);
+    }
+
+    // Update Shields badge
+    this.updateShieldsBadge(tab);
+  },
+
+  async updateShieldsBadge(tab) {
+    if (!this.shieldsBadgeEl || !tab || !IpcClient.api?.shields?.getTabStats) return;
+    try {
+      const stats = await IpcClient.api.shields.getTabStats(tab.id);
+      const count = stats?.blockedCount || 0;
+      if (count > 0) {
+        this.shieldsBadgeEl.textContent = count > 99 ? '99+' : count;
+        this.shieldsBadgeEl.classList.remove('hidden');
+      } else {
+        this.shieldsBadgeEl.classList.add('hidden');
+      }
+    } catch (e) {
+      this.shieldsBadgeEl.classList.add('hidden');
+    }
+  },
+
+  async toggleShieldsPopover() {
+    if (!this.shieldsPopoverEl) return;
+    const isHidden = this.shieldsPopoverEl.classList.contains('hidden');
+    if (!isHidden) {
+      this.shieldsPopoverEl.classList.add('hidden');
+      return;
+    }
+
+    // Populate data
+    const tab = State.getActiveTab();
+    let hostname = 'this site';
+    if (tab && tab.url && tab.url.startsWith('http')) {
+      try {
+        hostname = new URL(tab.url).hostname;
+      } catch (e) {}
+    }
+
+    const domainEl = document.getElementById('shields-site-domain');
+    const blockedCountEl = document.getElementById('shields-blocked-count');
+    const masterToggle = document.getElementById('shields-master-toggle');
+    const siteBtn = document.getElementById('shields-toggle-site-btn');
+
+    if (domainEl) domainEl.textContent = hostname;
+
+    try {
+      if (IpcClient.api?.shields) {
+        const status = await IpcClient.api.shields.getStatus();
+        const tabStats = tab ? await IpcClient.api.shields.getTabStats(tab.id) : null;
+        if (blockedCountEl) blockedCountEl.textContent = tabStats?.blockedCount || 0;
+        if (masterToggle) masterToggle.checked = status?.enabled !== false;
+        
+        const isWhitelisted = status?.whitelist?.includes(hostname);
+        if (siteBtn) {
+          siteBtn.textContent = isWhitelisted ? `Turn Shields ON for ${hostname}` : `Turn Shields OFF for ${hostname}`;
+        }
+
+        // Attach listeners once
+        masterToggle.onchange = async () => {
+          await IpcClient.api.shields.toggle(masterToggle.checked);
+          this.shieldsBtnEl?.classList.toggle('shields-off', !masterToggle.checked);
+        };
+
+        if (siteBtn) {
+          siteBtn.onclick = async () => {
+            const nextAllow = !isWhitelisted;
+            await IpcClient.api.shields.toggleWhitelist(hostname, nextAllow);
+            this.toggleShieldsPopover(); // close
+          };
+        }
+      }
+    } catch (e) {
+      console.warn('Shields popover error:', e);
+    }
+
+    this.shieldsPopoverEl.classList.remove('hidden');
+
+    // Close on click outside
+    const closeListener = (e) => {
+      if (!this.shieldsPopoverEl.contains(e.target) && !this.shieldsBtnEl.contains(e.target)) {
+        this.shieldsPopoverEl.classList.add('hidden');
+        document.removeEventListener('click', closeListener);
+      }
+    };
+    setTimeout(() => document.addEventListener('click', closeListener), 0);
   },
 
   async updateSecurityBadge(url) {

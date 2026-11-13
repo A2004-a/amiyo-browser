@@ -184,6 +184,64 @@ class MenuManager {
         label: isMuted ? 'Unmute Site' : 'Mute Site',
         click: () => tabController.muteTab(params.tabId, !isMuted)
       }));
+      menu.append(new MenuItem({
+        label: tabController.splitTabId === params.tabId ? '◫ Exit Split Screen' : '◫ View in Split Screen',
+        click: () => {
+          if (tabController.splitTabId === params.tabId) {
+            tabController.closeSplitTab();
+          } else {
+            tabController.setSplitTab(params.tabId);
+          }
+        }
+      }));
+
+      // Sleeping Tab / Tab Suspension
+      if (tab && !tab.isInternal && tab.id !== tabController.activeTabId) {
+        menu.append(new MenuItem({
+          label: tab.isSuspended ? '⚡ Wake Up Tab' : '💤 Put Tab to Sleep (Free Memory)',
+          click: () => {
+            if (tab.isSuspended) {
+              tabController.resumeTab(params.tabId);
+            } else {
+              tabController.suspendTab(params.tabId);
+            }
+          }
+        }));
+      }
+
+      // Tab Groups
+      const groupsSubmenu = new Menu();
+      groupsSubmenu.append(new MenuItem({
+        label: 'New Group...',
+        click: () => {
+          browserWindow.webContents.send('trigger-create-tab-group', params.tabId);
+        }
+      }));
+
+      const existingGroups = tabController.getGroups();
+      if (existingGroups.length > 0) {
+        groupsSubmenu.append(new MenuItem({ type: 'separator' }));
+        existingGroups.forEach(grp => {
+          groupsSubmenu.append(new MenuItem({
+            label: grp.title,
+            click: () => tabController.setTabGroup(params.tabId, grp.id)
+          }));
+        });
+      }
+
+      if (tab?.groupId) {
+        groupsSubmenu.append(new MenuItem({ type: 'separator' }));
+        groupsSubmenu.append(new MenuItem({
+          label: 'Remove from Group',
+          click: () => tabController.setTabGroup(params.tabId, null)
+        }));
+      }
+
+      menu.append(new MenuItem({
+        label: 'Tab Groups',
+        submenu: groupsSubmenu
+      }));
+
       menu.append(new MenuItem({ type: 'separator' }));
       menu.append(new MenuItem({
         label: 'Close Tab',
@@ -270,6 +328,19 @@ class MenuManager {
       label: '✨ Summarize Page with AMIYO AI',
       click: () => {
         browserWindow.webContents.send('ai:trigger-summarize');
+      }
+    }));
+    menu.append(new MenuItem({
+      label: '📖 Open in Reader Mode',
+      click: () => {
+        browserWindow.webContents.send('trigger-reading-mode');
+      }
+    }));
+    menu.append(new MenuItem({
+      label: '📷 Capture Page (Screenshot)',
+      accelerator: 'CmdOrCtrl+Shift+S',
+      click: () => {
+        browserWindow.webContents.send('trigger-web-capture');
       }
     }));
     menu.append(new MenuItem({ type: 'separator' }));

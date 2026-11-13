@@ -14,7 +14,7 @@ const validChannels = [
   'trigger-bookmark-current'
 ];
 
-contextBridge.exposeInMainWorld('amiyoAPI', {
+const api = {
   // --- Window ---
   window: {
     minimize: () => ipcRenderer.invoke('window:minimize'),
@@ -44,6 +44,26 @@ contextBridge.exposeInMainWorld('amiyoAPI', {
     restore: () => ipcRenderer.invoke('tab:restore'),
     navigate: (tabId, url) => ipcRenderer.invoke('tab:navigate', tabId, url),
     list: () => ipcRenderer.invoke('tab:list'),
+    suspend: (tabId) => ipcRenderer.invoke('tabs:suspend', tabId),
+    resume: (tabId) => ipcRenderer.invoke('tabs:resume', tabId),
+    createGroup: (data) => ipcRenderer.invoke('tabs:create-group', data),
+    updateGroup: (groupId, updates) => ipcRenderer.invoke('tabs:update-group', groupId, updates),
+    deleteGroup: (groupId) => ipcRenderer.invoke('tabs:delete-group', groupId),
+    setGroup: (tabId, groupId) => ipcRenderer.invoke('tabs:set-group', tabId, groupId),
+    getGroups: () => ipcRenderer.invoke('tabs:get-groups'),
+    setSplit: (tabId) => ipcRenderer.invoke('tabs:set-split', tabId),
+    closeSplit: () => ipcRenderer.invoke('tabs:close-split'),
+    getSplit: () => ipcRenderer.invoke('tabs:get-split'),
+    onGroupsUpdated: (callback) => {
+      const listener = (event, data) => callback(data);
+      ipcRenderer.on('tab-groups-updated', listener);
+      return () => ipcRenderer.removeListener('tab-groups-updated', listener);
+    },
+    onSplitViewChanged: (callback) => {
+      const listener = (event, data) => callback(data);
+      ipcRenderer.on('split-view-changed', listener);
+      return () => ipcRenderer.removeListener('split-view-changed', listener);
+    },
     onUpdated: (callback) => {
       const listener = (event, data) => callback(data);
       ipcRenderer.on('tab-updated', listener);
@@ -171,6 +191,32 @@ contextBridge.exposeInMainWorld('amiyoAPI', {
     }
   },
 
+  // --- AMIYO Shields ---
+  shields: {
+    getStatus: () => ipcRenderer.invoke('shields:get-status'),
+    toggle: (enabled) => ipcRenderer.invoke('shields:toggle', enabled),
+    getTabStats: (tabId) => ipcRenderer.invoke('shields:get-tab-stats', tabId),
+    toggleWhitelist: (domain, allow) => ipcRenderer.invoke('shields:toggle-whitelist', domain, allow)
+  },
+
+  // --- Reader Mode ---
+  reader: {
+    extract: (tabId) => ipcRenderer.invoke('reader:extract', tabId)
+  },
+
+  // --- Web Capture / Screenshot ---
+  capture: {
+    viewport: (tabId) => ipcRenderer.invoke('capture:viewport', tabId),
+    clipboard: (tabId) => ipcRenderer.invoke('capture:clipboard', tabId),
+    save: (tabId, defaultName) => ipcRenderer.invoke('capture:save', tabId, defaultName)
+  },
+
+  // --- Task Manager ---
+  system: {
+    getTasks: () => ipcRenderer.invoke('system:get-tasks'),
+    killProcess: (pid, tabId) => ipcRenderer.invoke('system:kill-process', pid, tabId)
+  },
+
   // --- Triggers ---
   triggers: {
     onFindInPage: (callback) => {
@@ -184,5 +230,9 @@ contextBridge.exposeInMainWorld('amiyoAPI', {
       return () => ipcRenderer.removeListener('trigger-bookmark-current', listener);
     }
   }
-});
+};
+
+contextBridge.exposeInMainWorld('amiyoAPI', api);
+contextBridge.exposeInMainWorld('amiyoApi', api);
+
 

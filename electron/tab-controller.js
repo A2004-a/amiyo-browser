@@ -15,6 +15,8 @@ class TabController {
     this.recentlyClosed = [];
     this.topOffset = 84; // Header height
     this.sideOffset = 0; // AI sidebar offset
+    this.splitTabId = null; // Split view dual display
+    this.groups = new Map(); // groupId -> { id, title, color, isCollapsed }
   }
 
   setTopOffset(offset) {
@@ -34,7 +36,10 @@ class TabController {
       isPinned: t.isPinned,
       isMuted: t.isMuted,
       isInternal: t.isInternal,
-      zoomFactor: t.zoomFactor
+      zoomFactor: t.zoomFactor,
+      groupId: t.groupId || null,
+      isSuspended: !!t.isSuspended,
+      lastAccessed: t.lastAccessed || Date.now()
     }));
   }
 
@@ -76,11 +81,49 @@ class TabController {
       isMuted: false,
       isPlayingAudio: false,
       isInternal: isInternal,
-      zoomFactor: 1.0
+      zoomFactor: 1.0,
+      groupId: options.groupId || null,
+      isSuspended: false,
+      lastAccessed: Date.now()
     };
 
     // Attach event listeners to WebContents
-    const wc = view.webContents;
+    this.setupTabListeners(tab, view.webContents);
+
+    // Add view to window's contentView
+    try {
+      this.browserWindow.contentView.addChildView(view);
+      view.setVisible(false);
+    } catch (e) {
+      console.error('Failed to attach child view:', e);
+    }
+
+    // Insert tab in list
+    if (options.index !== undefined && options.index >= 0) {
+      this.tabs.splice(options.index, 0, tab);
+    } else {
+      this.tabs.push(tab);
+    }
+
+    // Load initial URL if external
+    if (!isInternal) {
+      view.webContents.loadURL(resolvedUrl).catch(err => {
+        console.warn(`Initial load failed for ${resolvedUrl}:`, err.message);
+      });
+    }
+
+    // Switch to tab if requested or if first tab
+    if (options.active !== false || this.tabs.length === 1) {
+      this.switchTab(tabId);
+    } else {
+      this.notifyTabsList();
+    }
+
+    return tab;
+  }
+
+  setupTabListeners(tab, wc) {
+    if (!wc || !tab) return;
 
     wc.on('console-message', (event, level, message, line, sourceId) => {
       console.log(`[Tab ${tab.id}] [${level}] ${message} (${sourceId}:${line})`);
@@ -92,6 +135,7 @@ class TabController {
 
     wc.on('did-start-loading', () => {
       tab.isLoading = true;
+      tab.lastAccessed = Date.now();
       this.notifyTabUpdated(tab);
     });
 
@@ -123,6 +167,7 @@ class TabController {
       tab.isInternal = navigationController.isInternalUrl(navigatedUrl);
       tab.canGoBack = this.canGoBack(wc);
       tab.canGoForward = this.canGoForward(wc);
+      tab.lastAccessed = Date.now();
       if (!tab.isInternal && !this.isPrivate) {
         storageManager.addHistory({
           title: tab.title || navigatedUrl,
@@ -138,6 +183,7 @@ class TabController {
       tab.url = navigatedUrl;
       tab.canGoBack = this.canGoBack(wc);
       tab.canGoForward = this.canGoForward(wc);
+      tab.lastAccessed = Date.now();
       this.notifyTabUpdated(tab);
     });
 
@@ -154,7 +200,7 @@ class TabController {
     });
 
     wc.on('did-fail-load', (event, errorCode, errorDescription, validatedURL) => {
-      if (errorCode === -3) return; // ABORTED (e.g. redirected)
+      if (errorCode === -3) return; // ABORTED
       tab.isLoading = false;
       tab.title = 'Page could not load';
       if (validatedURL && !validatedURL.startsWith('data:')) {
@@ -171,68 +217,27 @@ class TabController {
           <title>Page could not load</title>
           <style>
             body {
-              margin: 0;
-              padding: 0;
+              margin: 0; padding: 0;
               font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-              background-color: #121316;
-              color: #f3f4f6;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              height: 100vh;
-              user-select: none;
+              background-color: #121316; color: #f3f4f6;
+              display: flex; align-items: center; justify-content: center;
+              height: 100vh; user-select: none;
             }
             .error-card {
-              max-width: 480px;
-              text-align: center;
-              padding: 36px;
-              background: #18191d;
-              border: 1px solid #292c34;
-              border-radius: 12px;
+              max-width: 480px; text-align: center; padding: 36px;
+              background: #18191d; border: 1px solid #292c34; border-radius: 12px;
               box-shadow: 0 10px 25px rgba(0,0,0,0.5);
             }
-            .error-icon {
-              width: 48px;
-              height: 48px;
-              margin: 0 auto 16px;
-              fill: #ef4444;
-            }
-            h1 {
-              font-size: 18px;
-              margin: 0 0 10px 0;
-              color: #f3f4f6;
-            }
-            p {
-              font-size: 13px;
-              color: #9ca3af;
-              line-height: 1.5;
-              margin: 0 0 24px 0;
-            }
-            .btn {
-              background: #6366f1;
-              color: #fff;
-              border: none;
-              padding: 9px 20px;
-              border-radius: 6px;
-              font-size: 13px;
-              cursor: pointer;
-              font-weight: 500;
-            }
-            .btn:hover {
-              background: #4f46e5;
-            }
-            .error-code {
-              margin-top: 18px;
-              font-size: 11px;
-              color: #6b7280;
-            }
+            .error-icon { width: 48px; height: 48px; margin: 0 auto 16px; fill: #ef4444; }
+            h1 { font-size: 18px; margin: 0 0 10px 0; color: #f3f4f6; }
+            p { font-size: 13px; color: #9ca3af; line-height: 1.5; margin: 0 0 24px 0; }
+            .btn { background: #6366f1; color: #fff; border: none; padding: 9px 20px; border-radius: 6px; font-size: 13px; cursor: pointer; font-weight: 500; }
+            .error-code { margin-top: 18px; font-size: 11px; color: #6b7280; }
           </style>
         </head>
         <body>
           <div class="error-card">
-            <svg class="error-icon" viewBox="0 0 24 24">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
-            </svg>
+            <svg class="error-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
             <h1>This site can’t be reached</h1>
             <p>AMIYO Browser could not connect to <strong>${safeUrl}</strong>.<br>Please check your connection and try again.</p>
             <button class="btn" onclick="window.location.href='${safeUrl}'">Try Again</button>
@@ -249,13 +254,11 @@ class TabController {
       });
     });
 
-    // Handle new-window / target="_blank"
     wc.setWindowOpenHandler(({ url }) => {
       this.createTab(url, { active: true });
       return { action: 'deny' };
     });
 
-    // Handle Find in Page
     wc.on('found-in-page', (event, result) => {
       this.windowManager.broadcast('found-in-page-result', {
         tabId: tab.id,
@@ -266,41 +269,9 @@ class TabController {
       });
     });
 
-    // Handle Context Menu on Web Content
     wc.on('context-menu', (event, params) => {
       menuManager.showContextMenu(this.browserWindow, this, params);
     });
-
-    // Add view to window's contentView
-    try {
-      this.browserWindow.contentView.addChildView(view);
-      view.setVisible(false);
-    } catch (e) {
-      console.error('Failed to attach child view:', e);
-    }
-
-    // Insert tab in list
-    if (options.index !== undefined && options.index >= 0) {
-      this.tabs.splice(options.index, 0, tab);
-    } else {
-      this.tabs.push(tab);
-    }
-
-    // Load initial URL if external
-    if (!isInternal) {
-      wc.loadURL(resolvedUrl).catch(err => {
-        console.warn(`Initial load failed for ${resolvedUrl}:`, err.message);
-      });
-    }
-
-    // Switch to tab if requested or if first tab
-    if (options.active !== false || this.tabs.length === 1) {
-      this.switchTab(tabId);
-    } else {
-      this.notifyTabsList();
-    }
-
-    return tab;
   }
 
   getInternalTitle(url) {
@@ -316,9 +287,16 @@ class TabController {
     const targetTab = this.getTab(tabId);
     if (!targetTab) return;
 
-    // Hide all other views
+    targetTab.lastAccessed = Date.now();
+
+    // If tab is suspended, automatically restore it
+    if (targetTab.isSuspended) {
+      this.resumeTab(tabId);
+    }
+
+    // Hide all other views except split tab
     for (const t of this.tabs) {
-      if (t.id !== tabId && t.view) {
+      if (t.id !== tabId && t.id !== this.splitTabId && t.view) {
         try {
           t.view.setVisible(false);
         } catch (e) {}
@@ -329,9 +307,9 @@ class TabController {
 
     if (targetTab.isInternal) {
       try {
-        targetTab.view.setVisible(false);
+        if (targetTab.view) targetTab.view.setVisible(false);
       } catch (e) {}
-    } else {
+    } else if (targetTab.view) {
       try {
         if (!this.browserWindow.contentView.children.includes(targetTab.view)) {
           this.browserWindow.contentView.addChildView(targetTab.view);
@@ -354,16 +332,176 @@ class TabController {
         isPinned: targetTab.isPinned,
         isMuted: targetTab.isMuted,
         isInternal: targetTab.isInternal,
-        zoomFactor: targetTab.zoomFactor
+        zoomFactor: targetTab.zoomFactor,
+        groupId: targetTab.groupId || null,
+        isSuspended: !!targetTab.isSuspended
       }
     });
 
     this.notifyTabsList();
   }
 
+  suspendTab(tabId) {
+    const tab = this.getTab(tabId);
+    if (!tab || tab.isSuspended || tab.isInternal || tab.isPinned || tab.isPlayingAudio) {
+      return false;
+    }
+    if (tab.id === this.activeTabId || tab.id === this.splitTabId) {
+      return false;
+    }
+
+    if (tab.view) {
+      try {
+        this.browserWindow.contentView.removeChildView(tab.view);
+        tab.view.webContents.close();
+      } catch (e) {}
+      tab.view = null;
+    }
+
+    tab.isSuspended = true;
+    this.notifyTabUpdated(tab);
+    this.notifyTabsList();
+    return true;
+  }
+
+  resumeTab(tabId) {
+    const tab = this.getTab(tabId);
+    if (!tab || !tab.isSuspended) return;
+
+    const view = new WebContentsView({
+      webPreferences: {
+        nodeIntegration: false,
+        contextIsolation: true,
+        sandbox: true,
+        webSecurity: true,
+        session: this.session,
+        backgroundThrottling: false
+      }
+    });
+
+    tab.view = view;
+    tab.isSuspended = false;
+    tab.isLoading = !tab.isInternal;
+    tab.lastAccessed = Date.now();
+
+    this.setupTabListeners(tab, view.webContents);
+
+    try {
+      this.browserWindow.contentView.addChildView(view);
+      view.setVisible(tab.id === this.activeTabId || tab.id === this.splitTabId);
+    } catch (e) {}
+
+    if (!tab.isInternal) {
+      view.webContents.loadURL(tab.url).catch(() => {});
+    }
+
+    this.notifyTabUpdated(tab);
+    this.notifyTabsList();
+    this.updateActiveViewBounds();
+  }
+
+  // --- Tab Groups ---
+  createGroup({ id, title, color } = {}) {
+    const groupId = id || `group_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`;
+    const group = {
+      id: groupId,
+      title: title || 'New Group',
+      color: color || '#6366f1',
+      isCollapsed: false
+    };
+    this.groups.set(groupId, group);
+    this.notifyGroupsUpdated();
+    return group;
+  }
+
+  updateGroup(groupId, updates = {}) {
+    const group = this.groups.get(groupId);
+    if (!group) return null;
+    if (updates.title !== undefined) group.title = updates.title;
+    if (updates.color !== undefined) group.color = updates.color;
+    if (updates.isCollapsed !== undefined) group.isCollapsed = !!updates.isCollapsed;
+    this.notifyGroupsUpdated();
+    return group;
+  }
+
+  deleteGroup(groupId) {
+    this.groups.delete(groupId);
+    for (const t of this.tabs) {
+      if (t.groupId === groupId) {
+        t.groupId = null;
+      }
+    }
+    this.notifyGroupsUpdated();
+    this.notifyTabsList();
+    return true;
+  }
+
+  setTabGroup(tabId, groupId) {
+    const tab = this.getTab(tabId);
+    if (!tab) return false;
+    tab.groupId = groupId || null;
+    this.notifyTabUpdated(tab);
+    this.notifyTabsList();
+    return true;
+  }
+
+  getGroups() {
+    return Array.from(this.groups.values());
+  }
+
+  notifyGroupsUpdated() {
+    this.windowManager.broadcast('tab-groups-updated', {
+      groups: this.getGroups()
+    });
+  }
+
+  // --- Split Screen Dual View ---
+  setSplitTab(tabId) {
+    if (!tabId || tabId === this.activeTabId) {
+      this.closeSplitTab();
+      return;
+    }
+    const targetTab = this.getTab(tabId);
+    if (!targetTab) return;
+
+    if (targetTab.isSuspended) {
+      this.resumeTab(tabId);
+    }
+
+    this.splitTabId = tabId;
+    this.updateActiveViewBounds();
+    this.windowManager.broadcast('split-view-changed', {
+      splitTabId: this.splitTabId
+    });
+  }
+
+  closeSplitTab() {
+    if (!this.splitTabId) return;
+    const oldSplit = this.getTab(this.splitTabId);
+    if (oldSplit && oldSplit.view && oldSplit.id !== this.activeTabId) {
+      try {
+        oldSplit.view.setVisible(false);
+      } catch (e) {}
+    }
+    this.splitTabId = null;
+    this.updateActiveViewBounds();
+    this.windowManager.broadcast('split-view-changed', {
+      splitTabId: null
+    });
+  }
+
+  getSplitTabId() {
+    return this.splitTabId;
+  }
+
   closeTab(tabId) {
     const index = this.tabs.findIndex(t => t.id === tabId);
     if (index === -1) return;
+
+    if (this.splitTabId === tabId) {
+      this.splitTabId = null;
+      this.windowManager.broadcast('split-view-changed', { splitTabId: null });
+    }
 
     const [closedTab] = this.tabs.splice(index, 1);
 
@@ -605,13 +743,38 @@ class TabController {
       const [width, height] = this.browserWindow.getContentSize();
       const topOffset = typeof this.topOffset === 'number' && this.topOffset > 0 ? this.topOffset : 84;
       const sideOffset = typeof this.sideOffset === 'number' && this.sideOffset > 0 ? this.sideOffset : 0;
-      const viewBounds = {
+      const availableWidth = Math.max(0, width - sideOffset);
+      const availableHeight = Math.max(0, height - topOffset);
+
+      // Check for active split-screen dual view
+      const splitTab = this.splitTabId ? this.getTab(this.splitTabId) : null;
+      if (splitTab && splitTab.view && !splitTab.isInternal && splitTab.id !== activeTab.id) {
+        const halfWidth = Math.floor(availableWidth / 2);
+        activeTab.view.setBounds({
+          x: 0,
+          y: topOffset,
+          width: halfWidth,
+          height: availableHeight
+        });
+        activeTab.view.setVisible(true);
+
+        splitTab.view.setBounds({
+          x: halfWidth,
+          y: topOffset,
+          width: availableWidth - halfWidth,
+          height: availableHeight
+        });
+        splitTab.view.setVisible(true);
+        return;
+      }
+
+      // Single active view bounds
+      activeTab.view.setBounds({
         x: 0,
         y: topOffset,
-        width: Math.max(0, width - sideOffset),
-        height: Math.max(0, height - topOffset)
-      };
-      activeTab.view.setBounds(viewBounds);
+        width: availableWidth,
+        height: availableHeight
+      });
     } catch (e) {
       console.error('Error updating view bounds:', e);
     }
@@ -620,7 +783,9 @@ class TabController {
   notifyTabsList() {
     this.windowManager.broadcast('tabs-updated', {
       tabs: this.getTabsSummary(),
-      activeTabId: this.activeTabId
+      activeTabId: this.activeTabId,
+      groups: this.getGroups(),
+      splitTabId: this.splitTabId
     });
   }
 
@@ -636,7 +801,10 @@ class TabController {
       isPinned: tab.isPinned,
       isMuted: tab.isMuted,
       isInternal: tab.isInternal,
-      zoomFactor: tab.zoomFactor
+      zoomFactor: tab.zoomFactor,
+      groupId: tab.groupId || null,
+      isSuspended: !!tab.isSuspended,
+      lastAccessed: tab.lastAccessed || Date.now()
     });
   }
 

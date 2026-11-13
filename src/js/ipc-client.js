@@ -89,6 +89,40 @@ const IpcClient = {
       return this.api.ai.onTriggerSummarize(callback);
     }
     return () => {};
-  }
+  },
+
+  // AMIYO Shields
+  getShieldsStatus() { return this.api.shields ? this.api.shields.getStatus() : Promise.resolve({ enabled: true, totalBlocked: 0 }); },
+  toggleShields(enabled) { return this.api.shields ? this.api.shields.toggle(enabled) : Promise.resolve(true); },
+  getShieldsTabStats(tabId) { return this.api.shields ? this.api.shields.getTabStats(tabId) : Promise.resolve({ total: 0 }); },
+  toggleShieldsWhitelist(domain, allow) { return this.api.shields ? this.api.shields.toggleWhitelist(domain, allow) : Promise.resolve(false); },
+
+  // Tab Suspension & Memory Saver
+  suspendTab(tabId) { return this.api.tabs ? this.api.tabs.suspend(tabId) : Promise.resolve(false); },
+  resumeTab(tabId) { return this.api.tabs ? this.api.tabs.resume(tabId) : Promise.resolve(true); },
+
+  // Tab Groups
+  createTabGroup(data) { return this.api.tabs ? this.api.tabs.createGroup(data) : Promise.resolve(null); },
+  updateTabGroup(id, updates) { return this.api.tabs ? this.api.tabs.updateGroup(id, updates) : Promise.resolve(null); },
+  deleteTabGroup(id) { return this.api.tabs ? this.api.tabs.deleteGroup(id) : Promise.resolve(false); },
+  setTabGroup(tabId, groupId) { return this.api.tabs ? this.api.tabs.setGroup(tabId, groupId) : Promise.resolve(false); },
+  getTabGroups() { return this.api.tabs ? this.api.tabs.getGroups() : Promise.resolve([]); },
+
+  // Split-Screen Dual View
+  setSplitTab(tabId) { return this.api.tabs ? this.api.tabs.setSplit(tabId) : Promise.resolve(true); },
+  closeSplitTab() { return this.api.tabs ? this.api.tabs.closeSplit() : Promise.resolve(true); },
+  getSplitTab() { return this.api.tabs ? this.api.tabs.getSplit() : Promise.resolve(null); },
+
+  // Reading Mode
+  extractArticle(tabId) { return this.api.reader ? this.api.reader.extract(tabId) : Promise.resolve({ success: false }); },
+
+  // Web Capture / Screenshot
+  captureViewport(tabId) { return this.api.capture ? this.api.capture.viewport(tabId) : Promise.resolve({ success: false }); },
+  captureClipboard(tabId) { return this.api.capture ? this.api.capture.clipboard(tabId) : Promise.resolve(false); },
+  captureSave(tabId, name) { return this.api.capture ? this.api.capture.save(tabId, name) : Promise.resolve(false); },
+
+  // Task Manager
+  getSystemTasks() { return this.api.system ? this.api.system.getTasks() : Promise.resolve([]); },
+  killSystemProcess(pid, tabId) { return this.api.system ? this.api.system.killProcess(pid, tabId) : Promise.resolve(false); }
 };
 

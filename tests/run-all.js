@@ -4,6 +4,10 @@ const histTests = require('./history.test');
 const setTests = require('./settings.test');
 const tabTests = require('./tabs.test');
 const aiTests = require('./ai.test');
+const shieldsTests = require('./shields.test');
+const groupTests = require('./tab-groups.test');
+const memoryTests = require('./memory-saver.test');
+const readerTests = require('./reader-mode.test');
 
 console.log('========================================');
 console.log('       AMIYO Browser Test Suite        ');
@@ -16,9 +20,13 @@ try {
   setTests.run();
   tabTests.run();
   aiTests.run();
+  shieldsTests.run();
+  groupTests.run();
+  memoryTests.run();
+  readerTests.run();
 
   console.log('\n========================================');
-  console.log('  ALL UNIT TEST SUITES PASSED (6/6)!    ');
+  console.log('  ALL UNIT TEST SUITES PASSED (10/10)!  ');
   console.log('========================================');
 } catch (err) {
   console.error('\n❌ Test failure:', err);

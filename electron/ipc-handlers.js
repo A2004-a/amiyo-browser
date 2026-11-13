@@ -1,4 +1,4 @@
-const { ipcMain, dialog, BrowserWindow } = require('electron');
+const { ipcMain, dialog, BrowserWindow, app } = require('electron');
 const windowManager = require('./window-manager');
 const storageManager = require('./storage-manager');
 const navigationController = require('./navigation-controller');
@@ -6,6 +6,9 @@ const downloadController = require('./download-controller');
 const permissionController = require('./permission-controller');
 const menuManager = require('./menu-manager');
 const aiController = require('./ai-controller');
+const shieldsController = require('./shields-controller');
+const readerController = require('./reader-controller');
+const captureController = require('./capture-controller');
 
 function getTabControllerForSender(event) {
   const win = BrowserWindow.fromWebContents(event.sender);
@@ -353,6 +356,166 @@ function registerIpcHandlers() {
     const tabCtrl = getTabControllerForSender(event);
     if (!tabCtrl) return { title: '', url: '', text: '' };
     return await tabCtrl.getActiveTabContent(tabId);
+  });
+
+  // --- AMIYO Shields ---
+  ipcMain.handle('shields:get-status', () => {
+    return shieldsController.getStats();
+  });
+
+  ipcMain.handle('shields:toggle', (event, enabled) => {
+    return shieldsController.toggle(enabled);
+  });
+
+  ipcMain.handle('shields:get-tab-stats', (event, tabId) => {
+    return shieldsController.getTabStats(tabId);
+  });
+
+  ipcMain.handle('shields:toggle-whitelist', (event, domain, allow) => {
+    return shieldsController.toggleSiteWhitelist(domain, allow);
+  });
+
+  // --- Tab Suspension / Memory Saver ---
+  ipcMain.handle('tabs:suspend', (event, tabId) => {
+    const tabCtrl = getTabControllerForSender(event);
+    return tabCtrl ? tabCtrl.suspendTab(tabId) : false;
+  });
+
+  ipcMain.handle('tabs:resume', (event, tabId) => {
+    const tabCtrl = getTabControllerForSender(event);
+    if (tabCtrl) tabCtrl.resumeTab(tabId);
+    return true;
+  });
+
+  // --- Tab Groups ---
+  ipcMain.handle('tabs:create-group', (event, data) => {
+    const tabCtrl = getTabControllerForSender(event);
+    return tabCtrl ? tabCtrl.createGroup(data) : null;
+  });
+
+  ipcMain.handle('tabs:update-group', (event, groupId, updates) => {
+    const tabCtrl = getTabControllerForSender(event);
+    return tabCtrl ? tabCtrl.updateGroup(groupId, updates) : null;
+  });
+
+  ipcMain.handle('tabs:delete-group', (event, groupId) => {
+    const tabCtrl = getTabControllerForSender(event);
+    return tabCtrl ? tabCtrl.deleteGroup(groupId) : false;
+  });
+
+  ipcMain.handle('tabs:set-group', (event, tabId, groupId) => {
+    const tabCtrl = getTabControllerForSender(event);
+    return tabCtrl ? tabCtrl.setTabGroup(tabId, groupId) : false;
+  });
+
+  ipcMain.handle('tabs:get-groups', (event) => {
+    const tabCtrl = getTabControllerForSender(event);
+    return tabCtrl ? tabCtrl.getGroups() : [];
+  });
+
+  // --- Split Screen Dual View ---
+  ipcMain.handle('tabs:set-split', (event, tabId) => {
+    const tabCtrl = getTabControllerForSender(event);
+    if (tabCtrl) tabCtrl.setSplitTab(tabId);
+    return true;
+  });
+
+  ipcMain.handle('tabs:close-split', (event) => {
+    const tabCtrl = getTabControllerForSender(event);
+    if (tabCtrl) tabCtrl.closeSplitTab();
+    return true;
+  });
+
+  ipcMain.handle('tabs:get-split', (event) => {
+    const tabCtrl = getTabControllerForSender(event);
+    return tabCtrl ? tabCtrl.getSplitTabId() : null;
+  });
+
+  // --- Reading Mode ---
+  ipcMain.handle('reader:extract', async (event, tabId) => {
+    const tabCtrl = getTabControllerForSender(event);
+    if (!tabCtrl) return { success: false, error: 'Tab controller not found' };
+    const tab = tabCtrl.getTab(tabId || tabCtrl.activeTabId);
+    if (!tab || !tab.view) return { success: false, error: 'Tab not found' };
+    return await readerController.extractArticle(tab.view.webContents);
+  });
+
+  // --- Web Capture / Screenshot ---
+  ipcMain.handle('capture:viewport', async (event, tabId) => {
+    const tabCtrl = getTabControllerForSender(event);
+    if (!tabCtrl) return { success: false, error: 'Tab controller not found' };
+    const tab = tabCtrl.getTab(tabId || tabCtrl.activeTabId);
+    if (!tab || !tab.view) return { success: false, error: 'Tab not found' };
+    return await captureController.captureViewport(tab.view.webContents);
+  });
+
+  ipcMain.handle('capture:clipboard', async (event, tabId) => {
+    const tabCtrl = getTabControllerForSender(event);
+    if (!tabCtrl) return false;
+    const tab = tabCtrl.getTab(tabId || tabCtrl.activeTabId);
+    if (!tab || !tab.view) return false;
+    return await captureController.copyToClipboard(tab.view.webContents);
+  });
+
+  ipcMain.handle('capture:save', async (event, tabId, defaultName) => {
+    const win = BrowserWindow.fromWebContents(event.sender);
+    const tabCtrl = getTabControllerForSender(event);
+    if (!win || !tabCtrl) return false;
+    const tab = tabCtrl.getTab(tabId || tabCtrl.activeTabId);
+    if (!tab || !tab.view) return false;
+    return await captureController.saveToFile(win, tab.view.webContents, defaultName);
+  });
+
+  // --- Browser Task Manager ---
+  ipcMain.handle('system:get-tasks', (event) => {
+    const tabCtrl = getTabControllerForSender(event);
+    const metrics = app.getAppMetrics ? app.getAppMetrics() : [];
+    const tabs = tabCtrl ? tabCtrl.tabs : [];
+
+    return metrics.map(m => {
+      let name = m.type;
+      let tabId = null;
+
+      if (m.type === 'Tab' || m.type === 'Renderer') {
+        const matchingTab = tabs.find(t => t.view && !t.view.webContents.isDestroyed() && t.view.webContents.getOSProcessId() === m.pid);
+        if (matchingTab) {
+          name = `Tab: ${matchingTab.title || matchingTab.url}`;
+          tabId = matchingTab.id;
+        } else {
+          name = 'Renderer (Browser Shell)';
+        }
+      } else if (m.type === 'Browser') {
+        name = 'AMIYO Browser (Main Process)';
+      } else if (m.type === 'GPU') {
+        name = 'GPU Process';
+      }
+
+      return {
+        pid: m.pid,
+        type: m.type,
+        name,
+        tabId,
+        cpu: (m.cpu && m.cpu.percentCPUUsage) ? m.cpu.percentCPUUsage.toFixed(1) : '0.0',
+        memoryMB: m.memory ? (m.memory.workingSetSize / 1024).toFixed(1) : '0.0'
+      };
+    });
+  });
+
+  ipcMain.handle('system:kill-process', (event, pid, tabId) => {
+    const tabCtrl = getTabControllerForSender(event);
+    if (tabId && tabCtrl) {
+      tabCtrl.closeTab(tabId);
+      return true;
+    }
+    if (pid && pid !== process.pid) {
+      try {
+        process.kill(pid);
+        return true;
+      } catch (e) {
+        return false;
+      }
+    }
+    return false;
   });
 }
 

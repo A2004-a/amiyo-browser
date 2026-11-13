@@ -23,12 +23,18 @@
     <header id="browser-header">
       <!-- Row 1: Window Caption & Tab Strip -->
       <div id="tab-bar-container">
+        <button class="vertical-tabs-btn" id="toggle-vertical-tabs-btn" title="Toggle Vertical Tabs (Ctrl+Shift+V)">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M3 3h18v18H3V3zm16 16V5H9v14h10zM7 5H5v14h2V5z"/></svg>
+        </button>
         <div class="browser-brand">
           <div class="browser-brand-logo">A</div>
         </div>
         <div id="tabs-strip"></div>
         <button id="new-tab-btn" title="New Tab (Ctrl+T)">
           <svg class="icon" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+        </button>
+        <button id="tab-search-btn" class="nav-btn-sm" title="Search Tabs (Ctrl+Shift+A)">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
         </button>
         <div id="window-controls">
           <button class="window-btn" id="window-min-btn" title="Minimize">
@@ -68,16 +74,78 @@
             <svg class="icon" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
           </button>
           <div class="zoom-badge hidden" id="zoom-badge" title="Reset zoom (Ctrl+0)">100%</div>
+          <button class="omnibox-action-btn hidden" id="reader-tool-btn" title="Toggle Reader Mode (Ctrl+Alt+R)">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M19 2H5c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 16H6V4h12v14zM8 6h8v2H8V6zm0 3h8v2H8V9zm0 3h5v2H8v-2z"/></svg>
+          </button>
+          <button class="omnibox-action-btn" id="shields-tool-btn" title="AMIYO Shields (Ad &amp; Tracker Blocker)">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
+            <span class="shields-badge hidden" id="shields-badge">0</span>
+          </button>
           <button class="omnibox-action-btn" id="bookmark-tool-btn" title="Bookmark this tab (Ctrl+D)">
             <svg class="icon" viewBox="0 0 24 24"><path d="M22 9.24l-7.19-.62L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21 12 17.27 18.18 21l-1.63-7.03L22 9.24zM12 15.4l-3.76 2.27 1-4.28-3.32-2.88 4.38-.38L12 6.1l1.71 4.04 4.38.38-3.32 2.88 1 4.28L12 15.4z"/></svg>
           </button>
 
           <!-- Omnibox Suggestions Dropdown -->
           <div id="omnibox-suggestions" class="hidden"></div>
+
+          <!-- AMIYO Shields Dropdown Popover -->
+          <div id="shields-popover" class="shields-popover hidden">
+            <div class="shields-header">
+              <div class="shields-brand">
+                <div class="shields-emblem">
+                  <svg class="icon" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
+                </div>
+                <div>
+                  <div class="shields-title">AMIYO Shields</div>
+                  <div class="shields-subtitle" id="shields-site-domain">Protection active</div>
+                </div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="shields-master-toggle" checked />
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div class="shields-stat-box">
+              <div class="shields-stat-info">
+                <div class="shields-stat-count" id="shields-blocked-count">0</div>
+                <div class="shields-stat-label">Trackers &amp; Ads blocked on this site</div>
+              </div>
+              <div style="font-size:24px;">🛡️</div>
+            </div>
+            <div class="shields-options">
+              <div class="shields-toggle-row">
+                <div>
+                  <div>Block Trackers &amp; Ads</div>
+                  <div class="shields-toggle-desc">Stop cross-site trackers &amp; aggressive ads</div>
+                </div>
+                <span class="shields-status-tag" id="shields-tag-ads">ACTIVE</span>
+              </div>
+              <div class="shields-toggle-row">
+                <div>
+                  <div>HTTPS Upgrades</div>
+                  <div class="shields-toggle-desc">Automatically upgrade insecure HTTP requests</div>
+                </div>
+                <span class="shields-status-tag" id="shields-tag-https">ENFORCED</span>
+              </div>
+              <div class="shields-toggle-row">
+                <div>
+                  <div>Anti-Fingerprinting</div>
+                  <div class="shields-toggle-desc">Sec-GPC &amp; DNT protection enabled</div>
+                </div>
+                <span class="shields-status-tag" id="shields-tag-fp">PROTECTED</span>
+              </div>
+            </div>
+            <div class="shields-footer">
+              <button class="shields-site-btn" id="shields-toggle-site-btn">Turn Shields Off for this site</button>
+            </div>
+          </div>
         </div>
 
         <!-- Toolbar Right Actions -->
         <div class="toolbar-actions">
+          <button class="nav-btn" id="split-screen-btn" title="Toggle Split Screen dual view">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M3 5v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2zm8 14H5V5h6v14zm8 0h-6V5h6v14z"/></svg>
+          </button>
           <button class="nav-btn ai-sparkle-btn" id="ai-tool-btn" title="AMIYO AI Assistant (Ctrl+Shift+A)">
             <svg class="icon" viewBox="0 0 24 24"><path d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5zM19 15l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 19l-2.75-1.25L19 15z"/></svg>
           </button>
@@ -141,6 +209,17 @@
             <span class="menu-label">Print...</span>
             <span class="menu-shortcut">Ctrl+P</span>
           </div>
+          <div class="chrome-menu-item" id="menu-capture">
+            <span class="menu-label">📸 Web Capture / Screenshot</span>
+            <span class="menu-shortcut">Ctrl+Shift+S</span>
+          </div>
+          <div class="chrome-menu-item" id="menu-split">
+            <span class="menu-label">🪟 Split screen dual view</span>
+          </div>
+          <div class="chrome-menu-item" id="menu-task-manager">
+            <span class="menu-label">⚙️ Browser Task Manager</span>
+            <span class="menu-shortcut">Shift+Esc</span>
+          </div>
           <div class="chrome-menu-divider"></div>
           <div class="chrome-menu-item" id="menu-settings">
             <span class="menu-label">Settings</span>
@@ -177,6 +256,30 @@
 
       <!-- Internal Pages Container (New Tab, History, Settings, etc.) -->
       <div id="internal-page-container"></div>
+
+      <!-- Distraction-Free Reader Mode Overlay -->
+      <div id="reader-mode-overlay" class="reader-overlay hidden">
+        <div class="reader-topbar">
+          <div class="reader-brand">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M19 2H5c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 16H6V4h12v14zM8 6h8v2H8V6zm0 3h8v2H8V9zm0 3h5v2H8v-2z"/></svg>
+            <span>Reader View</span>
+          </div>
+          <div class="reader-controls">
+            <button class="reader-btn" id="reader-font-smaller" title="Decrease font size">A−</button>
+            <button class="reader-btn" id="reader-font-larger" title="Increase font size">A+</button>
+            <button class="reader-btn" id="reader-font-family" title="Toggle font family">Font</button>
+            <div class="reader-theme-group">
+              <button class="reader-theme-btn dark" data-reader-theme="dark" title="Dark theme"></button>
+              <button class="reader-theme-btn sepia" data-reader-theme="sepia" title="Sepia theme"></button>
+              <button class="reader-theme-btn light" data-reader-theme="light" title="Light theme"></button>
+            </div>
+            <button class="reader-btn close-reader-btn" id="reader-close-btn" title="Exit Reader View">✕ Close</button>
+          </div>
+        </div>
+        <div class="reader-scroll-container">
+          <article class="reader-article" id="reader-article-content"></article>
+        </div>
+      </div>
 
       <!-- AMIYO AI Assistant Side Panel -->
       <aside id="ai-side-panel" class="ai-panel hidden">

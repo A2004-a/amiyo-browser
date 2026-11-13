@@ -10,6 +10,8 @@ const SettingsManager = {
           <div class="settings-nav-item ${this.activeSection === 'general' ? 'active' : ''}" data-sec="general">General</div>
           <div class="settings-nav-item ${this.activeSection === 'appearance' ? 'active' : ''}" data-sec="appearance">Appearance</div>
           <div class="settings-nav-item ${this.activeSection === 'search' ? 'active' : ''}" data-sec="search">Search Engine</div>
+          <div class="settings-nav-item ${this.activeSection === 'shields' ? 'active' : ''}" data-sec="shields">🛡️ AMIYO Shields</div>
+          <div class="settings-nav-item ${this.activeSection === 'performance' ? 'active' : ''}" data-sec="performance">⚡ Performance &amp; Memory</div>
           <div class="settings-nav-item ${this.activeSection === 'ai' ? 'active' : ''}" data-sec="ai">✨ AI Assistant</div>
           <div class="settings-nav-item ${this.activeSection === 'privacy' ? 'active' : ''}" data-sec="privacy">Privacy & Security</div>
           <div class="settings-nav-item ${this.activeSection === 'downloads' ? 'active' : ''}" data-sec="downloads">Downloads</div>
@@ -133,6 +135,91 @@ const SettingsManager = {
                 <input type="checkbox" id="setting-search-suggestions" ${s.searchSuggestions !== false ? 'checked' : ''} />
                 <span class="toggle-slider"></span>
               </label>
+            </div>
+          </div>
+        `;
+
+      case 'shields':
+        return `
+          <div class="settings-section">
+            <h3 class="settings-section-title">🛡️ AMIYO Shields (Ad &amp; Tracker Protection)</h3>
+            <p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;">
+              AMIYO Shields protects your privacy by blocking third-party trackers, deceptive advertising networks, and fingerprinting scripts automatically.
+            </p>
+
+            <div class="settings-card">
+              <div class="settings-card-info">
+                <span class="settings-card-title">Enable AMIYO Shields</span>
+                <span class="settings-card-desc">Master switch to block malicious advertising scripts and trackers.</span>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="setting-shields-enabled" ${s.shieldsEnabled !== false ? 'checked' : ''} />
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <div class="settings-card">
+              <div class="settings-card-info">
+                <span class="settings-card-title">Automatic HTTPS Upgrades</span>
+                <span class="settings-card-desc">Automatically rewrite and upgrade insecure HTTP connections to encrypted HTTPS.</span>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="setting-shields-https" ${s.httpsUpgrades !== false ? 'checked' : ''} />
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <div class="settings-card">
+              <div class="settings-card-info">
+                <span class="settings-card-title">Anti-Fingerprinting Headers</span>
+                <span class="settings-card-desc">Inject Sec-GPC (Global Privacy Control) and DNT signals on all outbound web requests.</span>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="setting-shields-fp" checked disabled />
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+        `;
+
+      case 'performance':
+        return `
+          <div class="settings-section">
+            <h3 class="settings-section-title">⚡ Performance &amp; Memory Saver</h3>
+            <p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;">
+              Keep your PC fast and responsive by putting inactive tabs to sleep and managing background resources.
+            </p>
+
+            <div class="settings-card">
+              <div class="settings-card-info">
+                <span class="settings-card-title">Memory Saver (Sleeping Tabs)</span>
+                <span class="settings-card-desc">Frees memory from inactive tabs so active pages stay smooth and snappy.</span>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="setting-memory-saver" ${s.memorySaver !== false ? 'checked' : ''} />
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <div class="settings-card">
+              <div class="settings-card-info">
+                <span class="settings-card-title">Put Inactive Tabs to Sleep After</span>
+                <span class="settings-card-desc">Time before an inactive background tab is suspended.</span>
+              </div>
+              <select id="setting-sleep-timeout" class="settings-select">
+                <option value="15" ${s.sleepTimeout === '15' ? 'selected' : ''}>15 minutes</option>
+                <option value="30" ${(!s.sleepTimeout || s.sleepTimeout === '30') ? 'selected' : ''}>30 minutes (Recommended)</option>
+                <option value="60" ${s.sleepTimeout === '60' ? 'selected' : ''}>1 hour</option>
+                <option value="120" ${s.sleepTimeout === '120' ? 'selected' : ''}>2 hours</option>
+              </select>
+            </div>
+
+            <div class="settings-card">
+              <div class="settings-card-info">
+                <span class="settings-card-title">Browser Task Manager</span>
+                <span class="settings-card-desc">Monitor live CPU, memory consumption, and process PIDs across all tabs.</span>
+              </div>
+              <button class="btn-secondary" id="setting-open-task-manager">Open Task Manager (Shift+Esc)</button>
             </div>
           </div>
         `;
@@ -462,6 +549,48 @@ const SettingsManager = {
     if (clearBtn) {
       clearBtn.addEventListener('click', () => {
         HistoryManager.showClearHistoryDialog();
+      });
+    }
+
+    // Shields Settings
+    const shieldsEnabledToggle = pane.querySelector('#setting-shields-enabled');
+    if (shieldsEnabledToggle) {
+      shieldsEnabledToggle.addEventListener('change', async (e) => {
+        State.settings = await IpcClient.saveSettings({ shieldsEnabled: e.target.checked });
+        if (IpcClient.api?.shields?.toggle) {
+          await IpcClient.api.shields.toggle(e.target.checked);
+        }
+      });
+    }
+
+    const shieldsHttpsToggle = pane.querySelector('#setting-shields-https');
+    if (shieldsHttpsToggle) {
+      shieldsHttpsToggle.addEventListener('change', async (e) => {
+        State.settings = await IpcClient.saveSettings({ httpsUpgrades: e.target.checked });
+      });
+    }
+
+    // Performance & Memory Saver
+    const memorySaverToggle = pane.querySelector('#setting-memory-saver');
+    if (memorySaverToggle) {
+      memorySaverToggle.addEventListener('change', async (e) => {
+        State.settings = await IpcClient.saveSettings({ memorySaver: e.target.checked });
+      });
+    }
+
+    const sleepTimeoutSelect = pane.querySelector('#setting-sleep-timeout');
+    if (sleepTimeoutSelect) {
+      sleepTimeoutSelect.addEventListener('change', async (e) => {
+        State.settings = await IpcClient.saveSettings({ sleepTimeout: e.target.value });
+      });
+    }
+
+    const openTaskManagerBtn = pane.querySelector('#setting-open-task-manager');
+    if (openTaskManagerBtn) {
+      openTaskManagerBtn.addEventListener('click', () => {
+        if (typeof App !== 'undefined' && App.openTaskManager) {
+          App.openTaskManager();
+        }
       });
     }
   }

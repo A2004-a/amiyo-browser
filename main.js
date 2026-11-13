@@ -15,13 +15,19 @@ app.whenReady().then(() => {
 
   // If in automated test mode, verify and exit cleanly
   if (process.argv.includes('--test-mode')) {
-    mainWin.webContents.once('did-finish-load', () => {
+    const handleLoaded = () => {
       console.log('✔ [TEST MODE] Browser window and shell loaded successfully!');
       setTimeout(() => {
         console.log('✔ [TEST MODE] Closing browser cleanly...');
         app.quit();
-      }, 1000);
-    });
+      }, 500);
+    };
+
+    if (mainWin.webContents.isLoading()) {
+      mainWin.webContents.once('did-finish-load', handleLoaded);
+    } else {
+      handleLoaded();
+    }
   }
 
   app.on('activate', () => {

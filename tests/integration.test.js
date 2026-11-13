@@ -10,6 +10,7 @@ delete env.ELECTRON_RUN_AS_NODE;
 const flags = [
   '--no-sandbox',
   '--disable-gpu',
+  `--user-data-dir=${path.join(__dirname, '..', '.tmp_test_data')}`,
   path.join(__dirname, '..'),
   '--test-mode'
 ];

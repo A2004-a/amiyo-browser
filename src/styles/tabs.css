@@ -229,3 +229,130 @@
   color: #ffffff;
 }
 
+/* Vertical tabs button & search tabs button in tab bar */
+.vertical-tabs-btn,
+.nav-btn-sm {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  -webkit-app-region: no-drag;
+  margin-right: 4px;
+}
+
+.vertical-tabs-btn:hover,
+.nav-btn-sm:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.vertical-tabs-btn.active {
+  color: var(--accent);
+  background: var(--accent-light);
+}
+
+/* Tab Suspended State (Memory Saver) */
+.browser-tab.suspended {
+  opacity: 0.7;
+}
+
+.browser-tab.suspended:hover {
+  opacity: 0.95;
+}
+
+.tab-sleep-badge {
+  font-size: 11px;
+  margin-left: 2px;
+  color: #818cf8;
+}
+
+/* Tab Group Header Pill */
+.tab-group-pill {
+  height: 26px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+  border-radius: 13px;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  font-size: 11px;
+  font-weight: 600;
+  margin-bottom: 5px;
+  cursor: pointer;
+  border: 1px solid var(--border-subtle);
+  user-select: none;
+  flex-shrink: 0;
+  transition: all var(--transition-fast);
+}
+
+.tab-group-pill:hover {
+  border-color: var(--border-hover);
+  background: var(--bg-hover);
+}
+
+.tab-group-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Tab Group Color Indicator along bottom of tabs */
+.browser-tab[data-group-color]::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 4px;
+  right: 4px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--tab-group-color, var(--accent));
+}
+
+/* Vertical Tabs Mode Layout */
+#app.vertical-tabs-mode {
+  display: flex;
+  flex-direction: column;
+}
+
+#app.vertical-tabs-mode #tabs-strip {
+  position: absolute;
+  top: 80px;
+  left: 0;
+  bottom: 0;
+  width: 210px;
+  height: auto;
+  flex-direction: column;
+  align-items: stretch;
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border-subtle);
+  padding: 8px 6px;
+  gap: 4px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  z-index: 120;
+}
+
+#app.vertical-tabs-mode #view-container {
+  margin-left: 210px;
+  width: calc(100% - 210px);
+}
+
+#app.vertical-tabs-mode .browser-tab {
+  height: 36px;
+  max-width: 100%;
+  border-radius: 6px;
+  border-bottom: 1px solid transparent;
+}
+
+#app.vertical-tabs-mode .browser-tab.active {
+  background: var(--bg-card);
+  border-color: var(--border-subtle);
+}
+
+

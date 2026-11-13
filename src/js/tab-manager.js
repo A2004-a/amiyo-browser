@@ -40,6 +40,39 @@ const TabManager = {
       App.handleInternalPage(State.getActiveTab());
     });
 
+    if (window.amiyoAPI?.tabs?.onGroupsUpdated) {
+      window.amiyoAPI.tabs.onGroupsUpdated((groups) => {
+        State.tabGroups = groups || [];
+        this.render();
+      });
+    }
+
+    // Toggle Vertical Tabs button
+    const verticalBtn = document.getElementById('toggle-vertical-tabs-btn');
+    if (verticalBtn) {
+      const isVertical = localStorage.getItem('amiyo_vertical_tabs') === 'true';
+      if (isVertical) {
+        document.getElementById('app')?.classList.add('vertical-tabs-mode');
+        verticalBtn.classList.add('active');
+      }
+      verticalBtn.addEventListener('click', () => {
+        const app = document.getElementById('app');
+        const active = app.classList.toggle('vertical-tabs-mode');
+        verticalBtn.classList.toggle('active', active);
+        localStorage.setItem('amiyo_vertical_tabs', active ? 'true' : 'false');
+      });
+    }
+
+    // Tab Search button
+    const tabSearchBtn = document.getElementById('tab-search-btn');
+    if (tabSearchBtn) {
+      tabSearchBtn.addEventListener('click', () => {
+        if (typeof App !== 'undefined' && App.openTabSearch) {
+          App.openTabSearch();
+        }
+      });
+    }
+
     window.amiyoAPI.tabs.onUpdated((tabData) => {
       State.updateTab(tabData);
       this.updateSingleTabElement(tabData);
@@ -72,10 +105,19 @@ const TabManager = {
 
     State.tabs.forEach((tab, index) => {
       const tabEl = document.createElement('div');
-      tabEl.className = `browser-tab ${tab.id === State.activeTabId ? 'active' : ''} ${tab.isPinned ? 'pinned' : ''}`;
+      tabEl.className = `browser-tab ${tab.id === State.activeTabId ? 'active' : ''} ${tab.isPinned ? 'pinned' : ''} ${tab.isSuspended ? 'suspended' : ''}`;
       tabEl.dataset.tabId = tab.id;
       tabEl.dataset.index = index;
       tabEl.draggable = true;
+
+      // Group styling
+      if (tab.groupId && State.tabGroups) {
+        const grp = State.tabGroups.find(g => g.id === tab.groupId);
+        if (grp) {
+          tabEl.dataset.groupColor = grp.color;
+          tabEl.style.setProperty('--tab-group-color', grp.color);
+        }
+      }
 
       // Favicon or Spinner
       let iconHtml = '';
@@ -95,9 +137,12 @@ const TabManager = {
         audioHtml = `<button class="tab-audio-btn playing" title="Mute tab">${Utils.icons.audio}</button>`;
       }
 
+      const sleepBadge = tab.isSuspended ? `<span class="tab-sleep-badge" title="Sleeping tab (Memory Saved)">💤</span>` : '';
+
       tabEl.innerHTML = `
         ${iconHtml}
         <span class="tab-title">${Utils.escapeHtml(tab.title || 'New Tab')}</span>
+        ${sleepBadge}
         ${audioHtml}
         <button class="tab-close-btn" title="Close tab">${Utils.icons.close}</button>
       `;

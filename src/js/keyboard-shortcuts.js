@@ -90,6 +90,41 @@ const KeyboardShortcuts = {
         return;
       }
 
+      // Shift + Escape: Browser Task Manager
+      if (e.shiftKey && (e.key === 'Escape' || e.keyCode === 27)) {
+        e.preventDefault();
+        if (typeof App !== 'undefined' && App.openTaskManager) {
+          App.openTaskManager();
+        }
+        return;
+      }
+
+      // Ctrl + Shift + S: Web Capture / Screenshot
+      if (isCtrlOrCmd && e.shiftKey && e.key.toLowerCase() === 's') {
+        e.preventDefault();
+        if (typeof App !== 'undefined' && App.openWebCapture) {
+          App.openWebCapture();
+        }
+        return;
+      }
+
+      // Ctrl + Shift + V: Toggle Vertical Tabs
+      if (isCtrlOrCmd && e.shiftKey && e.key.toLowerCase() === 'v') {
+        e.preventDefault();
+        const btn = document.getElementById('toggle-vertical-tabs-btn');
+        if (btn) btn.click();
+        return;
+      }
+
+      // Ctrl + Alt + R: Toggle Reader Mode
+      if (isCtrlOrCmd && e.altKey && e.key.toLowerCase() === 'r') {
+        e.preventDefault();
+        if (typeof App !== 'undefined' && App.toggleReaderMode) {
+          App.toggleReaderMode(State.activeTabId);
+        }
+        return;
+      }
+
       // Ctrl + Shift + A: Toggle AMIYO AI Assistant
       if (isCtrlOrCmd && e.shiftKey && e.key.toLowerCase() === 'a') {
         e.preventDefault();
