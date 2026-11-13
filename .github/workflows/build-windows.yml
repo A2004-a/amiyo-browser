@@ -40,7 +40,7 @@ jobs:
           if-no-files-found: error
 
       - name: Create or Update GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: v1.1.0
           name: "AETHER Browser v1.1.0 (Windows 64-bit)"

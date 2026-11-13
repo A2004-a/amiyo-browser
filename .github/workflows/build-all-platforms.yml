@@ -70,7 +70,7 @@ jobs:
           if-no-files-found: ignore
 
       - name: Release Desktop Assets
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: v1.1.0
           name: "AETHER Browser v1.1.0 (Windows, Mac, Linux, Android, iOS)"
@@ -124,7 +124,7 @@ jobs:
           if-no-files-found: error
 
       - name: Release Android APK
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: v1.1.0
           draft: false
@@ -156,7 +156,7 @@ jobs:
           if-no-files-found: ignore
 
       - name: Release iOS IPA
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: v1.1.0
           draft: false
