@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">AMIYO Browser</string>
+    <string name="app_name">AETHER Browser</string>
     <string name="search_hint">Search or type URL</string>
     <string name="action_home">Home</string>
     <string name="action_reload">Reload</string>

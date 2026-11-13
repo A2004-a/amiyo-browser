@@ -51,6 +51,17 @@ const launcherPath = path.join(appDistDir, 'Launch-AETHER-Browser.bat');
 fs.writeFileSync(launcherPath, `@echo off\r\nstart "" "%~dp0AETHER Browser.exe"\r\n`);
 console.log(' ✔ Created Launch-AETHER-Browser.bat');
 
+// 6. Create portable zip archive
+const zipPath = path.join(distDir, 'AETHER-Browser-win32-x64.zip');
+try {
+  if (fs.existsSync(zipPath)) fs.unlinkSync(zipPath);
+  console.log('Compressing portable distribution to ZIP archive...');
+  execSync(`powershell.exe -NoProfile -Command "$ProgressPreference = 'SilentlyContinue'; Compress-Archive -Path '${appDistDir}\\*' -DestinationPath '${zipPath}' -Force"`, { stdio: 'inherit' });
+  console.log(` ✔ Created portable zip: ${zipPath}`);
+} catch (e) {
+  console.warn('Zip compression note:', e.message);
+}
+
 console.log('\n====================================================');
 console.log(' ✔ Portable Windows 64-bit build completed:');
 console.log(`   Folder: ${appDistDir}`);

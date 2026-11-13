@@ -104,7 +104,7 @@ public class MainActivity extends AppCompatActivity {
         settings.setMediaPlaybackRequiresUserGesture(false);
 
         // Standard modern mobile Chrome User-Agent
-        String customUA = settings.getUserAgentString() + " AMIYOBrowser/1.0.0";
+        String customUA = settings.getUserAgentString() + " AETHERBrowser/1.1.0";
         settings.setUserAgentString(customUA);
 
         CookieManager.getInstance().setAcceptCookie(true);
@@ -272,7 +272,7 @@ public class MainActivity extends AppCompatActivity {
         if (input == null || input.isEmpty()) return;
 
         input = input.trim();
-        if (input.equals("amiyo://newtab") || input.equalsIgnoreCase("about:blank")) {
+        if (input.equals("aether://newtab") || input.equals("amiyo://newtab") || input.equalsIgnoreCase("about:blank")) {
             loadHome();
             return;
         }
@@ -358,7 +358,7 @@ public class MainActivity extends AppCompatActivity {
                     toggleDesktopSite();
                     return true;
                 case 9:
-                    Toast.makeText(this, "AMIYO Browser v1.0.0 (Android)", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "AETHER Browser v1.1.0 (Android)", Toast.LENGTH_SHORT).show();
                     return true;
                 default:
                     return false;

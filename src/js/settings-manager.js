@@ -386,32 +386,128 @@ const SettingsManager = {
           <div class="settings-section">
             <h3 class="settings-section-title">About AETHER Browser</h3>
             
-            <div class="settings-card" style="align-items:flex-start;">
-              <div class="settings-card-info" style="gap:12px;">
-                <div style="display:flex;align-items:center;gap:12px;">
-                  <div style="width:44px;height:44px;background:#121B2B;border:1px solid #252D38;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;">
-                    <svg viewBox="0 0 32 32" width="26" height="26" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <ellipse cx="16" cy="17" rx="12" ry="4.5" fill="none" stroke="#35D8F2" stroke-width="1.2" opacity="0.85" transform="rotate(-15 16 17)"/>
-                      <path d="M16 5 L24 23 L20 23 L16 14 L12 23 L8 23 Z" fill="#DCE3EB" />
-                      <path d="M10 17 L22 17 L21 19 L11 19 Z" fill="#35D8F2" />
-                      <circle cx="16" cy="5" r="1.5" fill="#35D8F2" />
+            <div class="settings-card" style="align-items:flex-start;margin-bottom:16px;">
+              <div class="settings-card-info" style="gap:12px;width:100%;">
+                <div style="display:flex;align-items:center;gap:14px;">
+                  <div style="width:48px;height:48px;background:#121B2B;border:1px solid #252D38;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(53,216,242,0.2);">
+                    <svg viewBox="0 0 32 32" width="28" height="28" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <defs>
+                        <linearGradient id="abtChromeL" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stop-color="#FFFFFF"/>
+                          <stop offset="100%" stop-color="#94A3B8"/>
+                        </linearGradient>
+                        <linearGradient id="abtChromeR" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stop-color="#CBD5E1"/>
+                          <stop offset="100%" stop-color="#334155"/>
+                        </linearGradient>
+                        <linearGradient id="abtBlade" x1="0%" y1="0%" x2="100%" y2="0%">
+                          <stop offset="0%" stop-color="#35D8F2"/>
+                          <stop offset="50%" stop-color="#FFFFFF"/>
+                          <stop offset="100%" stop-color="#94A3B8"/>
+                        </linearGradient>
+                      </defs>
+                      <path d="M 8 20 C 5 19 5 15 10 12 C 12 11 15 9 19 8" fill="none" stroke="#00D4FF" stroke-width="1.6" opacity="0.9" stroke-linecap="round"/>
+                      <path d="M 16 4 L 7 21 L 11 21 L 16 10 Z" fill="url(#abtChromeL)"/>
+                      <path d="M 16 4 L 16 10 L 21 21 L 25 21 Z" fill="url(#abtChromeR)"/>
+                      <circle cx="16" cy="4" r="1" fill="#FFFFFF"/>
+                      <path d="M 7 20 C 11 21 16 20 21 16 C 24 14 26 11 27 8 C 26 9 24 11 20 14 C 15 18 11 19 7 20 Z" fill="url(#abtBlade)"/>
+                      <circle cx="27.2" cy="7.8" r="1.8" fill="#00D4FF"/>
                     </svg>
                   </div>
                   <div>
-                    <h4 style="font-size:16px;font-weight:700;color:var(--text-primary);letter-spacing:1px;">AETHER Browser</h4>
-                    <p style="font-size:12px;color:var(--cyan-accent);font-weight:500;">Explore Without Limits &bull; Version 1.0.0</p>
+                    <h4 style="font-size:18px;font-weight:800;color:var(--text-primary);letter-spacing:1px;">AETHER Browser</h4>
+                    <p style="font-size:12px;color:var(--cyan-accent);font-weight:600;">Explore Without Limits &bull; Version 1.1.0 (Latest Release)</p>
                   </div>
                 </div>
                 <p style="font-size:13px;color:var(--text-secondary);line-height:1.5;">
-                  A premium, high-performance desktop browser engineered with pure modern standards, zero telemetry, autonomous AI intelligence, and multi-process Chromium WebContentsView architecture.
+                  A premium, next-generation browser built on Chromium 156 with native AETHER Shields ad/tracker protection, AETHER Intelligence sidebar, Tab Groups, and zero telemetry.
                 </p>
-                <div style="font-size:12px;color:var(--text-muted);display:flex;flex-direction:column;gap:4px;">
-                  <div>Engine: Chromium 156.0.8078.96</div>
-                  <div>Runtime: Electron 45.3.0 &amp; Node.js</div>
-                  <div>Brand: AETHER (The Infinite A)</div>
-                  <div>Status: Up to date</div>
+                <div style="font-size:12px;color:var(--text-muted);display:grid;grid-template-columns:repeat(2, 1fr);gap:6px;background:var(--bg-tertiary);padding:10px;border-radius:8px;">
+                  <div><strong>Engine:</strong> Chromium 156.0.8078.96</div>
+                  <div><strong>Runtime:</strong> Electron 45.3.0 &amp; Node.js</div>
+                  <div><strong>Platform:</strong> Windows, macOS, Linux, Android, iOS</div>
+                  <div><strong>Shields:</strong> Active &amp; Up to date</div>
                 </div>
               </div>
+            </div>
+
+            <!-- Download Official Apps for All Platforms -->
+            <h4 style="margin:16px 0 10px;font-size:14px;color:var(--text-primary);font-weight:600;">Download AETHER Browser v1.1.0 for All Platforms</h4>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:12px;">
+              
+              <!-- Windows -->
+              <div style="background:var(--bg-tertiary);border:1px solid var(--border-subtle);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:8px;">
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span style="font-size:20px;">🪟</span>
+                  <div>
+                    <div style="font-size:13px;font-weight:700;color:var(--text-primary);">Windows (x64)</div>
+                    <div style="font-size:11px;color:var(--text-secondary);">Windows 10 / 11</div>
+                  </div>
+                </div>
+                <div style="display:flex;gap:6px;margin-top:4px;">
+                  <button class="btn btn-sm btn-primary" onclick="IpcClient.navigateTab(State.activeTabId, 'https://github.com/A2004-a/amiyo-browser/releases/download/v1.1.0/AETHER-Browser-win32-x64.zip')" style="font-size:11px;padding:6px 10px;flex:1;">⬇️ Portable</button>
+                  <button class="btn btn-sm btn-secondary" onclick="IpcClient.navigateTab(State.activeTabId, 'https://github.com/A2004-a/amiyo-browser/releases/download/v1.1.0/AETHER-Browser-Setup-1.1.0-x64.exe')" style="font-size:11px;padding:6px 10px;flex:1;">Setup.exe</button>
+                </div>
+              </div>
+
+              <!-- Linux -->
+              <div style="background:var(--bg-tertiary);border:1px solid var(--border-subtle);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:8px;">
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span style="font-size:20px;">🐧</span>
+                  <div>
+                    <div style="font-size:13px;font-weight:700;color:var(--text-primary);">Linux (x64)</div>
+                    <div style="font-size:11px;color:var(--text-secondary);">Ubuntu, Debian, Fedora</div>
+                  </div>
+                </div>
+                <div style="display:flex;gap:6px;margin-top:4px;">
+                  <button class="btn btn-sm btn-primary" onclick="IpcClient.navigateTab(State.activeTabId, 'https://github.com/A2004-a/amiyo-browser/releases/download/v1.1.0/AETHER-Browser-1.1.0-linux-x64.AppImage')" style="font-size:11px;padding:6px 10px;flex:1;">AppImage</button>
+                  <button class="btn btn-sm btn-secondary" onclick="IpcClient.navigateTab(State.activeTabId, 'https://github.com/A2004-a/amiyo-browser/releases/download/v1.1.0/AETHER-Browser-1.1.0-linux-x64.deb')" style="font-size:11px;padding:6px 10px;flex:1;">.deb</button>
+                </div>
+              </div>
+
+              <!-- macOS -->
+              <div style="background:var(--bg-tertiary);border:1px solid var(--border-subtle);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:8px;">
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span style="font-size:20px;">🍎</span>
+                  <div>
+                    <div style="font-size:13px;font-weight:700;color:var(--text-primary);">macOS (Universal)</div>
+                    <div style="font-size:11px;color:var(--text-secondary);">Apple Silicon &amp; Intel</div>
+                  </div>
+                </div>
+                <div style="display:flex;gap:6px;margin-top:4px;">
+                  <button class="btn btn-sm btn-primary" onclick="IpcClient.navigateTab(State.activeTabId, 'https://github.com/A2004-a/amiyo-browser/releases/download/v1.1.0/AETHER-Browser-1.1.0-mac-universal.dmg')" style="font-size:11px;padding:6px 10px;flex:1;">DMG</button>
+                  <button class="btn btn-sm btn-secondary" onclick="IpcClient.navigateTab(State.activeTabId, 'https://github.com/A2004-a/amiyo-browser/releases/download/v1.1.0/AETHER-Browser-1.1.0-mac-universal.zip')" style="font-size:11px;padding:6px 10px;flex:1;">.zip</button>
+                </div>
+              </div>
+
+              <!-- Android -->
+              <div style="background:var(--bg-tertiary);border:1px solid var(--border-subtle);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:8px;">
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span style="font-size:20px;">🤖</span>
+                  <div>
+                    <div style="font-size:13px;font-weight:700;color:var(--text-primary);">Android APK</div>
+                    <div style="font-size:11px;color:var(--text-secondary);">Android 7.0 to 14+</div>
+                  </div>
+                </div>
+                <div style="display:flex;gap:6px;margin-top:4px;">
+                  <button class="btn btn-sm btn-primary" onclick="IpcClient.navigateTab(State.activeTabId, 'https://github.com/A2004-a/amiyo-browser/releases/download/v1.1.0/AETHER-Browser-v1.1.0-Android.apk')" style="font-size:11px;padding:6px 10px;width:100%;">⬇️ Download APK</button>
+                </div>
+              </div>
+
+              <!-- iOS -->
+              <div style="background:var(--bg-tertiary);border:1px solid var(--border-subtle);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:8px;">
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span style="font-size:20px;">🍏</span>
+                  <div>
+                    <div style="font-size:13px;font-weight:700;color:var(--text-primary);">iOS (iPhone &amp; iPad)</div>
+                    <div style="font-size:11px;color:var(--text-secondary);">Standalone PWA &amp; Swift</div>
+                  </div>
+                </div>
+                <div style="display:flex;gap:6px;margin-top:4px;">
+                  <button class="btn btn-sm btn-secondary" onclick="IpcClient.navigateTab(State.activeTabId, 'https://github.com/A2004-a/amiyo-browser/tree/main/ios')" style="font-size:11px;padding:6px 10px;width:100%;">📱 iOS Setup Guide</button>
+                </div>
+              </div>
+
             </div>
           </div>
         `;

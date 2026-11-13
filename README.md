@@ -29,20 +29,21 @@ Positioned to compete with modern desktop browsers like Google Chrome, Brave, an
 
 ---
 
-## 💾 Cross-Platform Downloads (Windows, Mac, Linux, Android)
+## 💾 Cross-Platform Downloads (Windows, Mac, Linux, Android, iOS) — v1.1.0
 
 Get the latest release for your operating system:
 
 | Platform | Format | Architecture | Download Link | Description |
 |:---|:---|:---|:---|:---|
-| 🪟 **Windows** | **Portable (.exe)** | `x64` (64-bit) | [⬇️ **Download Portable EXE**](https://github.com/A2004-a/amiyo-browser/releases/download/v1.0.0/AETHER-Browser-win32-x64.zip) | Standalone portable executable (No installation required) |
-| 🪟 **Windows** | **Installer (.exe)** | `x64` (64-bit) | [⬇️ **Download Windows Setup**](https://github.com/A2004-a/amiyo-browser/releases/download/v1.0.0/AETHER-Browser-Setup-1.0.0-x64.exe) | One-click setup with desktop & start menu shortcuts |
-| 🍎 **macOS** | **Disk Image (.dmg)** | `Universal` / `arm64` / `x64` | [⬇️ **Download DMG (.dmg)**](https://github.com/A2004-a/amiyo-browser/releases/download/v1.0.0/AETHER-Browser-1.0.0-mac-universal.dmg) | Drag-and-drop installer for Apple Silicon & Intel Macs |
-| 🍎 **macOS** | **ZIP Archive (.zip)** | `Universal` / `arm64` / `x64` | [⬇️ **Download macOS (.zip)**](https://github.com/A2004-a/amiyo-browser/releases/download/v1.0.0/AETHER-Browser-1.0.0-mac-universal.zip) | Extracted `.app` package |
-| 🐧 **Linux** | **AppImage (.AppImage)** | `x64` | [⬇️ **Download AppImage**](https://github.com/A2004-a/amiyo-browser/releases/download/v1.0.0/AETHER-Browser-1.0.0-linux-x64.AppImage) | Universal single-file executable for all Linux distributions |
-| 🐧 **Linux** | **Debian (.deb)** | `x64` | [⬇️ **Download DEB Package**](https://github.com/A2004-a/amiyo-browser/releases/download/v1.0.0/AETHER-Browser-1.0.0-linux-x64.deb) | Native package for Ubuntu, Debian, Mint |
-| 🤖 **Android** | **Android APK (.apk)** | `arm64-v8a` / `armeabi-v7a` | [⬇️ **Download Android APK**](https://github.com/A2004-a/amiyo-browser/releases/download/v1.0.0/AETHER-Browser-v1.0.0-Android.apk) | Native Android browser package |
-| 📦 **All Platforms** | **Release Hub** | All Platforms | [📦 **View GitHub Releases**](https://github.com/A2004-a/amiyo-browser/releases/tag/v1.0.0) | All release assets, changelogs, and checksums |
+| 🪟 **Windows** | **Portable (.zip)** | `x64` (64-bit) | [⬇️ **Download Windows Portable**](https://github.com/A2004-a/amiyo-browser/releases/download/v1.1.0/AETHER-Browser-win32-x64.zip) | Standalone portable folder & executable (Zero installation) |
+| 🪟 **Windows** | **Installer (.exe)** | `x64` (64-bit) | [⬇️ **Download Windows Setup**](https://github.com/A2004-a/amiyo-browser/releases/download/v1.1.0/AETHER-Browser-Setup-1.1.0-x64.exe) | One-click setup with desktop & start menu shortcuts |
+| 🍎 **macOS** | **Disk Image (.dmg)** | `Universal` / `arm64` / `x64` | [⬇️ **Download macOS DMG**](https://github.com/A2004-a/amiyo-browser/releases/download/v1.1.0/AETHER-Browser-1.1.0-mac-universal.dmg) | Drag-and-drop installer for Apple Silicon & Intel Macs |
+| 🍎 **macOS** | **ZIP Archive (.zip)** | `Universal` / `arm64` / `x64` | [⬇️ **Download macOS ZIP**](https://github.com/A2004-a/amiyo-browser/releases/download/v1.1.0/AETHER-Browser-1.1.0-mac-universal.zip) | Extracted `.app` package |
+| 🐧 **Linux** | **AppImage (.AppImage)** | `x64` | [⬇️ **Download AppImage**](https://github.com/A2004-a/amiyo-browser/releases/download/v1.1.0/AETHER-Browser-1.1.0-linux-x64.AppImage) | Universal single-file executable for all Linux distributions |
+| 🐧 **Linux** | **Debian (.deb)** | `x64` | [⬇️ **Download DEB Package**](https://github.com/A2004-a/amiyo-browser/releases/download/v1.1.0/AETHER-Browser-1.1.0-linux-x64.deb) | Native package for Ubuntu, Debian, Mint |
+| 🤖 **Android** | **Android APK (.apk)** | `arm64-v8a` / `armeabi-v7a` | [⬇️ **Download Android APK**](https://github.com/A2004-a/amiyo-browser/releases/download/v1.1.0/AETHER-Browser-v1.1.0-Android.apk) | Native Android browser package |
+| 🍏 **iOS** | **PWA / Swift Native** | `iOS 15.0+` (iPhone / iPad) | [📱 **iOS Setup & Installation**](ios/README.md) | Full-screen PWA standalone app + Swift WKWebView project |
+| 📦 **All Platforms** | **Release Hub** | All Platforms | [📦 **View GitHub Releases**](https://github.com/A2004-a/amiyo-browser/releases/tag/v1.1.0) | All release assets, changelogs, and checksums |
 
 ---
 
