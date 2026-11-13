@@ -1,4 +1,4 @@
-const { ipcMain, dialog, BrowserWindow, app } = require('electron');
+const { ipcMain, dialog, BrowserWindow, app, session } = require('electron');
 const windowManager = require('./window-manager');
 const storageManager = require('./storage-manager');
 const navigationController = require('./navigation-controller');
@@ -254,6 +254,25 @@ function registerIpcHandlers() {
 
   ipcMain.handle('history:clear', (event, range) => {
     return storageManager.clearHistory(range || 'all');
+  });
+
+  ipcMain.handle('session:clear-data', async (event, options = {}) => {
+    try {
+      const storages = [];
+      if (options.cookies) storages.push('cookies');
+      if (options.cache) storages.push('cache', 'shadercache');
+      if (options.storage) storages.push('localstorage', 'indexdb', 'websql', 'serviceworkers');
+      if (storages.length > 0) {
+        await session.defaultSession.clearStorageData({ storages });
+      }
+      if (options.cache) {
+        await session.defaultSession.clearCache();
+      }
+      return { success: true };
+    } catch (e) {
+      console.warn('clear-data error:', e);
+      return { success: false, error: e.message };
+    }
   });
 
   // --- Downloads ---

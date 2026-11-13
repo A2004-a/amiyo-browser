@@ -108,7 +108,8 @@ const api = {
   history: {
     get: () => ipcRenderer.invoke('history:get'),
     delete: (id) => ipcRenderer.invoke('history:delete', id),
-    clear: (range) => ipcRenderer.invoke('history:clear', range)
+    clear: (range) => ipcRenderer.invoke('history:clear', range),
+    clearData: (options) => ipcRenderer.invoke('session:clear-data', options)
   },
 
   // --- Downloads ---

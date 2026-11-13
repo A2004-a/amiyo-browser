@@ -445,15 +445,56 @@
   justify-content: space-between;
 }
 
+.shields-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.shields-stat-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 8px 6px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
 .shields-stat-count {
-  font-size: 22px;
+  font-size: 16px;
   font-weight: 800;
   color: var(--accent);
 }
 
 .shields-stat-label {
-  font-size: 11px;
+  font-size: 10px;
   color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+.toggle-switch.small {
+  width: 32px;
+  height: 18px;
+}
+
+.toggle-switch.small .toggle-slider:before {
+  height: 14px;
+  width: 14px;
+  left: 2px;
+  bottom: 2px;
+}
+
+.toggle-switch.small input:checked + .toggle-slider:before {
+  transform: translateX(14px);
+}
+
+#notes-tool-btn.active {
+  color: var(--accent);
+  background: var(--accent-light);
 }
 
 .shields-options {

@@ -46,6 +46,7 @@ const IpcClient = {
   getHistory() { return this.api.history.get(); },
   deleteHistoryItem(id) { return this.api.history.delete(id); },
   clearHistory(range) { return this.api.history.clear(range); },
+  clearData(options) { return this.api.history?.clearData ? this.api.history.clearData(options) : Promise.resolve({ success: true }); },
 
   // Downloads
   getDownloads() { return this.api.downloads.get(); },

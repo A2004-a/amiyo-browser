@@ -250,6 +250,33 @@ const KeyboardShortcuts = {
         return;
       }
 
+      // Ctrl + Shift + Delete: Chrome Clear Browsing Data
+      if (isCtrlOrCmd && e.shiftKey && (e.key === 'Delete' || e.key === 'Del')) {
+        e.preventDefault();
+        if (typeof App !== 'undefined' && App.showClearBrowsingDataDialog) {
+          App.showClearBrowsingDataDialog();
+        }
+        return;
+      }
+
+      // Ctrl + Alt + N: Edge Quick Notes / Scratchpad
+      if (isCtrlOrCmd && e.altKey && e.key.toLowerCase() === 'n') {
+        e.preventDefault();
+        if (typeof App !== 'undefined' && App.toggleQuickNotes) {
+          App.toggleQuickNotes();
+        }
+        return;
+      }
+
+      // Ctrl + Shift + U: Edge Read Aloud
+      if (isCtrlOrCmd && e.shiftKey && e.key.toLowerCase() === 'u') {
+        e.preventDefault();
+        if (typeof SpeechEngine !== 'undefined') {
+          SpeechEngine.togglePlayPause();
+        }
+        return;
+      }
+
       // F11: Fullscreen
       if (e.key === 'F11') {
         e.preventDefault();

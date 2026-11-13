@@ -225,12 +225,38 @@ const Omnibox = {
       if (IpcClient.api?.shields) {
         const status = await IpcClient.api.shields.getStatus();
         const tabStats = tab ? await IpcClient.api.shields.getTabStats(tab.id) : null;
-        if (blockedCountEl) blockedCountEl.textContent = tabStats?.blockedCount || tabStats?.total || 0;
+        const count = tabStats?.blockedCount || tabStats?.total || 0;
+        if (blockedCountEl) blockedCountEl.textContent = count;
+        const bwEl = document.getElementById('shields-bandwidth-saved');
+        if (bwEl) {
+          bwEl.textContent = count < 8 ? `${Math.round(count * 128)} KB` : `${(count * 128 / 1024).toFixed(1)} MB`;
+        }
+        const timeEl = document.getElementById('shields-time-saved');
+        if (timeEl) {
+          timeEl.textContent = `${(count * 0.055).toFixed(1)} s`;
+        }
         if (masterToggle) masterToggle.checked = status?.enabled !== false;
         
         const isWhitelisted = status?.whitelist?.includes(hostname);
         if (siteBtn) {
           siteBtn.textContent = isWhitelisted ? `Turn Shields ON for ${hostname}` : `Turn Shields OFF for ${hostname}`;
+        }
+
+        // Script Blocker per-site
+        const scriptToggle = document.getElementById('shields-script-toggle');
+        if (scriptToggle) {
+          const blockedScripts = State.settings?.blockedScriptsDomains || [];
+          scriptToggle.checked = blockedScripts.includes(hostname);
+          scriptToggle.onchange = async () => {
+            let list = [...(State.settings?.blockedScriptsDomains || [])];
+            if (scriptToggle.checked) {
+              if (!list.includes(hostname)) list.push(hostname);
+            } else {
+              list = list.filter(h => h !== hostname);
+            }
+            if (State.settings) State.settings.blockedScriptsDomains = list;
+            await IpcClient.saveSettings({ blockedScriptsDomains: list });
+          };
         }
 
         // Attach listeners once
@@ -307,6 +333,103 @@ const Omnibox = {
     }
 
     const trimmed = query.trim();
+
+    // Chrome Search Engine Keywords: @, @bookmarks, @history, @tabs, @yt, @wiki, @ai
+    if (trimmed === '@') {
+      this.currentSuggestions = [
+        { type: 'keyword', title: '@bookmarks — Search Vault bookmarks', url: '@bookmarks ' },
+        { type: 'keyword', title: '@history — Search browsing history', url: '@history ' },
+        { type: 'keyword', title: '@tabs — Search and switch open tabs', url: '@tabs ' },
+        { type: 'keyword', title: '@yt — Search YouTube directly', url: '@yt ' },
+        { type: 'keyword', title: '@wiki — Search Wikipedia directly', url: '@wiki ' },
+        { type: 'ai', title: '@ai — Ask AETHER Intelligence', url: '@ai ' }
+      ];
+      this.selectedIndex = 0;
+      this.renderSuggestions();
+      return;
+    }
+
+    if (trimmed.startsWith('@bookmarks') || trimmed.startsWith('@b ')) {
+      const q = trimmed.replace(/^@(bookmarks|b)\s*/i, '').trim().toLowerCase();
+      const matches = (State.bookmarks || []).filter(b => 
+        !q || (b.title && b.title.toLowerCase().includes(q)) || (b.url && b.url.toLowerCase().includes(q))
+      );
+      this.currentSuggestions = matches.slice(0, 8).map(b => ({
+        type: 'bookmark',
+        title: b.title || b.url,
+        url: b.url
+      }));
+      if (this.currentSuggestions.length === 0) {
+        this.currentSuggestions = [{ type: 'bookmark', title: `No bookmarks matching "${q}"`, url: '' }];
+      }
+      this.selectedIndex = 0;
+      this.renderSuggestions();
+      return;
+    }
+
+    if (trimmed.startsWith('@history') || trimmed.startsWith('@h ')) {
+      const q = trimmed.replace(/^@(history|h)\s*/i, '').trim().toLowerCase();
+      const matches = (State.history || []).filter(h => 
+        !q || (h.title && h.title.toLowerCase().includes(q)) || (h.url && h.url.toLowerCase().includes(q))
+      );
+      this.currentSuggestions = matches.slice(0, 8).map(h => ({
+        type: 'history',
+        title: h.title || h.url,
+        url: h.url
+      }));
+      if (this.currentSuggestions.length === 0) {
+        this.currentSuggestions = [{ type: 'history', title: `No history matching "${q}"`, url: '' }];
+      }
+      this.selectedIndex = 0;
+      this.renderSuggestions();
+      return;
+    }
+
+    if (trimmed.startsWith('@tabs') || trimmed.startsWith('@t ')) {
+      const q = trimmed.replace(/^@(tabs|t)\s*/i, '').trim().toLowerCase();
+      const matches = (State.tabs || []).filter(t => 
+        !q || (t.title && t.title.toLowerCase().includes(q)) || (t.url && t.url.toLowerCase().includes(q))
+      );
+      this.currentSuggestions = matches.slice(0, 8).map(t => ({
+        type: 'tab',
+        title: `Switch to: ${t.title || 'Tab'}`,
+        url: t.url,
+        tabId: t.id
+      }));
+      if (this.currentSuggestions.length === 0) {
+        this.currentSuggestions = [{ type: 'tab', title: `No open tabs matching "${q}"`, url: '' }];
+      }
+      this.selectedIndex = 0;
+      this.renderSuggestions();
+      return;
+    }
+
+    if (trimmed.startsWith('@yt')) {
+      const q = trimmed.replace(/^@yt\s*/i, '').trim();
+      this.currentSuggestions = [{
+        type: 'search',
+        engine: 'youtube',
+        title: q ? `▶ Search YouTube for "${q}"` : '▶ Search YouTube (Type search term)',
+        url: q ? `https://www.youtube.com/results?search_query=${encodeURIComponent(q)}` : 'https://www.youtube.com'
+      }];
+      this.selectedIndex = 0;
+      this.renderSuggestions();
+      return;
+    }
+
+    if (trimmed.startsWith('@wiki')) {
+      const q = trimmed.replace(/^@wiki\s*/i, '').trim();
+      this.currentSuggestions = [{
+        type: 'search',
+        engine: 'wikipedia',
+        title: q ? `📚 Search Wikipedia for "${q}"` : '📚 Search Wikipedia (Type search term)',
+        url: q ? `https://en.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(q)}` : 'https://en.wikipedia.org'
+      }];
+      this.selectedIndex = 0;
+      this.renderSuggestions();
+      return;
+    }
+
     const isAiQuery = trimmed.startsWith('@ai') || trimmed.startsWith('@gemini');
     let aiPrompt = '';
     if (isAiQuery) {
@@ -347,6 +470,8 @@ const Omnibox = {
       if (item.type === 'ai') iconHtml = Utils.icons.sparkle;
       else if (item.type === 'bookmark') iconHtml = Utils.icons.bookmark;
       else if (item.type === 'history') iconHtml = Utils.icons.history;
+      else if (item.type === 'tab') iconHtml = `<span style="font-size:14px;line-height:1;">📑</span>`;
+      else if (item.type === 'keyword') iconHtml = `<span style="font-size:14px;line-height:1;">⚡</span>`;
       else if (item.type === 'internal') iconHtml = Utils.icons.globe;
       else if (item.type === 'search') {
         const engineIcons = {
@@ -354,7 +479,9 @@ const Omnibox = {
           bing: '🔷',
           ecosia: '🌿',
           yahoo: '🟣',
-          google: '🌐'
+          google: '🌐',
+          youtube: '▶️',
+          wikipedia: '📚'
         };
         const activeEngine = (item.engine || (State.settings && State.settings.searchEngine) || 'google').toLowerCase();
         const iconEmoji = engineIcons[activeEngine];
@@ -373,7 +500,7 @@ const Omnibox = {
       `;
 
       el.addEventListener('click', () => {
-        this.navigateToUrl(item.url);
+        this.navigateToUrl(item.url, item);
       });
 
       this.suggestionsEl.appendChild(el);
@@ -403,8 +530,9 @@ const Omnibox = {
   handleEnter() {
     console.log('[OMNIBOX] handleEnter called! selectedIndex:', this.selectedIndex, 'input value:', this.inputEl.value);
     if (this.selectedIndex >= 0 && this.currentSuggestions[this.selectedIndex]) {
-      console.log('[OMNIBOX] navigating to selected suggestion:', this.currentSuggestions[this.selectedIndex].url);
-      this.navigateToUrl(this.currentSuggestions[this.selectedIndex].url);
+      const selected = this.currentSuggestions[this.selectedIndex];
+      console.log('[OMNIBOX] navigating to selected suggestion:', selected.url);
+      this.navigateToUrl(selected.url, selected);
     } else {
       const val = this.inputEl.value.trim();
       console.log('[OMNIBOX] navigating to raw input:', val);
@@ -414,17 +542,32 @@ const Omnibox = {
     }
   },
 
-  navigateToUrl(url) {
+  navigateToUrl(url, item) {
     console.log('[OMNIBOX] navigateToUrl called with url:', url, 'activeTabId:', State.activeTabId);
     this.closeSuggestions();
     this.inputEl.blur();
 
+    if (item && item.tabId) {
+      IpcClient.switchTab(item.tabId);
+      return;
+    }
+
     const trimmed = (url || '').trim();
+    if (!trimmed) return;
+
     if (trimmed.startsWith('@ai') || trimmed.startsWith('@gemini')) {
       const prompt = trimmed.replace(/^@(ai|gemini)\s*/i, '').trim();
       if (typeof AiPanel !== 'undefined') {
         AiPanel.openWithPrompt(prompt);
       }
+      return;
+    }
+
+    if (trimmed.startsWith('@') && trimmed.endsWith(' ')) {
+      // User selected a keyword prefix like '@bookmarks ' -> put it into the input and focus
+      this.inputEl.value = trimmed;
+      this.inputEl.focus();
+      this.fetchSuggestions(trimmed);
       return;
     }
 

@@ -18,6 +18,8 @@ const App = {
       this.initModals();
       this.initReaderOverlay();
       this.initIpcTriggers();
+      this.initShareSheet();
+      this.initQuickNotes();
       this.updateTopOffset();
 
       document.getElementById('split-screen-btn')?.addEventListener('click', () => {
@@ -292,6 +294,21 @@ const App = {
       this.openTaskManager();
     });
 
+    document.getElementById('menu-share')?.addEventListener('click', () => {
+      menuEl.classList.add('hidden');
+      this.openShareSheet();
+    });
+
+    document.getElementById('menu-quick-notes')?.addEventListener('click', () => {
+      menuEl.classList.add('hidden');
+      this.toggleQuickNotes();
+    });
+
+    document.getElementById('menu-clear-browsing-data')?.addEventListener('click', () => {
+      menuEl.classList.add('hidden');
+      this.showClearBrowsingDataDialog();
+    });
+
     document.getElementById('menu-settings')?.addEventListener('click', () => {
       menuEl.classList.add('hidden');
       IpcClient.createTab('aether://settings');
@@ -467,10 +484,83 @@ const App = {
 
     closeBtn?.addEventListener('click', () => {
       overlay.classList.add('hidden');
+      if (typeof SpeechEngine !== 'undefined') {
+        SpeechEngine.stop(true);
+      }
+      document.getElementById('reader-speech-bar')?.classList.add('hidden');
       if (IpcClient.setViewVisible) {
         IpcClient.setViewVisible(true);
       }
     });
+
+    // Microsoft Edge Read Aloud Engine integration
+    if (typeof SpeechEngine !== 'undefined') {
+      SpeechEngine.init();
+
+      const speechBar = document.getElementById('reader-speech-bar');
+      const speechBtn = document.getElementById('reader-speech-btn');
+      const playBtn = document.getElementById('speech-play-btn');
+      const stopBtn = document.getElementById('speech-stop-btn');
+      const rateSelect = document.getElementById('speech-rate-select');
+      const voiceSelect = document.getElementById('speech-voice-select');
+      const statusLabel = document.getElementById('speech-status-label');
+
+      const populateVoices = () => {
+        if (!voiceSelect) return;
+        const voices = SpeechEngine.getVoices();
+        if (voices.length > 0 && voiceSelect.options.length <= 1) {
+          voiceSelect.innerHTML = voices.map(v => `
+            <option value="${v.name}" ${SpeechEngine.selectedVoice?.name === v.name ? 'selected' : ''}>
+              ${v.name} (${v.lang})
+            </option>
+          `).join('');
+        }
+      };
+
+      populateVoices();
+      SpeechEngine.onStateChange = () => {
+        if (playBtn) playBtn.textContent = SpeechEngine.isPlaying && !SpeechEngine.isPaused ? '⏸ Pause' : '▶ Play';
+        if (statusLabel) {
+          statusLabel.textContent = SpeechEngine.isPlaying && !SpeechEngine.isPaused ? 'Reading aloud...' :
+                                    SpeechEngine.isPaused ? 'Paused' : 'Ready to read';
+        }
+        populateVoices();
+      };
+
+      speechBtn?.addEventListener('click', () => {
+        speechBar?.classList.toggle('hidden');
+        if (!speechBar?.classList.contains('hidden')) {
+          populateVoices();
+          if (!SpeechEngine.isPlaying) {
+            SpeechEngine.start(article);
+          }
+        } else {
+          SpeechEngine.stop(true);
+        }
+      });
+
+      playBtn?.addEventListener('click', () => {
+        if (!SpeechEngine.isPlaying) {
+          SpeechEngine.start(article);
+        } else if (SpeechEngine.isPaused) {
+          SpeechEngine.resume();
+        } else {
+          SpeechEngine.pause();
+        }
+      });
+
+      stopBtn?.addEventListener('click', () => {
+        SpeechEngine.stop(true);
+      });
+
+      rateSelect?.addEventListener('change', (e) => {
+        SpeechEngine.setRate(e.target.value);
+      });
+
+      voiceSelect?.addEventListener('change', (e) => {
+        SpeechEngine.setVoice(e.target.value);
+      });
+    }
 
     document.querySelectorAll('.reader-theme-btn').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -504,6 +594,10 @@ const App = {
 
     if (!overlay.classList.contains('hidden')) {
       overlay.classList.add('hidden');
+      if (typeof SpeechEngine !== 'undefined') {
+        SpeechEngine.stop(true);
+      }
+      document.getElementById('reader-speech-bar')?.classList.add('hidden');
       if (IpcClient.setViewVisible) {
         IpcClient.setViewVisible(true);
       }
@@ -824,6 +918,306 @@ const App = {
     if (winBridge?.onCreateTabGroup) {
       winBridge.onCreateTabGroup((tabId) => this.promptCreateTabGroup(tabId));
     }
+  },
+
+  initShareSheet() {
+    const shareBtn = document.getElementById('share-tool-btn');
+    if (shareBtn) {
+      shareBtn.addEventListener('click', () => {
+        this.openShareSheet();
+      });
+    }
+  },
+
+  openShareSheet() {
+    const tab = State.getActiveTab();
+    if (!tab) return;
+    const rawUrl = tab.url || '';
+    if (!rawUrl || rawUrl.startsWith('amiyo://') || rawUrl.startsWith('aether://')) {
+      alert('Internal browser pages cannot be shared.');
+      return;
+    }
+
+    let cleanUrl = rawUrl;
+    try {
+      const u = new URL(rawUrl);
+      const trackers = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'fbclid', 'gclid', 'msclkid', 'mc_cid', 'mc_eid', '_ga', '_gl', 'ref'];
+      trackers.forEach(t => u.searchParams.delete(t));
+      cleanUrl = u.toString();
+    } catch (e) {}
+
+    const bodyHtml = `
+      <div class="share-sheet-body">
+        <div class="share-target-card">
+          <div class="share-target-info">
+            <div class="share-target-title">${Utils.escapeHtml(tab.title || 'Web Page')}</div>
+            <div class="share-target-url">${Utils.escapeHtml(cleanUrl)}</div>
+          </div>
+        </div>
+
+        <div class="share-qr-section">
+          <canvas id="share-qr-canvas" width="180" height="180" class="share-qr-canvas"></canvas>
+          <div class="share-qr-caption">
+            <span>📱 <strong>Scan with Phone Camera</strong></span>
+            <span style="font-size:11px;color:var(--text-muted);">Instant Mobile Handoff to Safari / Chrome</span>
+          </div>
+        </div>
+
+        <div class="share-action-list">
+          <button class="share-action-btn" id="share-btn-copy-clean">
+            <span class="share-action-icon">🔗</span>
+            <div class="share-action-text">
+              <div class="share-action-label" id="share-copy-label">Copy Clean Link (Safari Advanced Tracking Protection)</div>
+              <div class="share-action-desc">Strips UTM parameters, click IDs &amp; trackers from URL</div>
+            </div>
+          </button>
+
+          <button class="share-action-btn" id="share-btn-reading-list">
+            <span class="share-action-icon">📖</span>
+            <div class="share-action-text">
+              <div class="share-action-label" id="share-reading-label">Add to Safari Reading List</div>
+              <div class="share-action-desc">Save offline for reading anytime</div>
+            </div>
+          </button>
+
+          <button class="share-action-btn" id="share-btn-email">
+            <span class="share-action-icon">✉️</span>
+            <div class="share-action-text">
+              <div class="share-action-label">Email Link</div>
+              <div class="share-action-desc">Open default email client with page title and link</div>
+            </div>
+          </button>
+        </div>
+      </div>
+    `;
+
+    this.showModal('Safari Share Sheet', bodyHtml, [
+      { label: 'Done', class: 'btn-secondary', click: () => this.closeModal() }
+    ]);
+
+    // Draw QR Code
+    setTimeout(() => {
+      const canvas = document.getElementById('share-qr-canvas');
+      if (canvas && typeof QRCode !== 'undefined') {
+        QRCode.draw(canvas, cleanUrl, {
+          size: 180,
+          margin: 2,
+          foreground: '#0df2c9',
+          background: '#0a0f1d'
+        });
+      }
+    }, 50);
+
+    // Copy clean link
+    document.getElementById('share-btn-copy-clean')?.addEventListener('click', async () => {
+      await navigator.clipboard.writeText(cleanUrl);
+      const label = document.getElementById('share-copy-label');
+      if (label) {
+        label.textContent = '✓ Copied Clean Link!';
+        label.style.color = 'var(--accent)';
+        setTimeout(() => {
+          label.textContent = 'Copy Clean Link (Safari Advanced Tracking Protection)';
+          label.style.color = '';
+        }, 2000);
+      }
+    });
+
+    // Add to Safari Reading List
+    document.getElementById('share-btn-reading-list')?.addEventListener('click', () => {
+      const readingList = State.readingList || [];
+      const exists = readingList.some(item => item.url === tab.url);
+      if (!exists) {
+        readingList.unshift({
+          id: 'rl_' + Date.now(),
+          title: tab.title || tab.url,
+          url: tab.url,
+          favicon: tab.favicon || '',
+          dateAdded: Date.now(),
+          isRead: false
+        });
+        State.readingList = readingList;
+        localStorage.setItem('aether_reading_list', JSON.stringify(readingList));
+      }
+      const label = document.getElementById('share-reading-label');
+      if (label) {
+        label.textContent = '✓ Added to Reading List!';
+        label.style.color = 'var(--accent)';
+      }
+    });
+
+    // Email link
+    document.getElementById('share-btn-email')?.addEventListener('click', () => {
+      const mailto = `mailto:?subject=${encodeURIComponent(tab.title || 'Check this out')}&body=${encodeURIComponent(cleanUrl)}`;
+      window.open(mailto, '_blank');
+    });
+  },
+
+  initQuickNotes() {
+    const notesBtn = document.getElementById('notes-tool-btn');
+    const panel = document.getElementById('quick-notes-panel');
+    const textarea = document.getElementById('quick-notes-textarea');
+    const countInfo = document.getElementById('notes-count-info');
+    const closeBtn = document.getElementById('notes-close-btn');
+    const insertLinkBtn = document.getElementById('notes-insert-link-btn');
+    const copyBtn = document.getElementById('notes-copy-btn');
+    const exportBtn = document.getElementById('notes-export-btn');
+    const clearBtn = document.getElementById('notes-clear-btn');
+
+    if (!panel || !textarea) return;
+
+    // Load saved notes
+    textarea.value = localStorage.getItem('aether_quick_notes') || '';
+    const updateCounts = () => {
+      const val = textarea.value;
+      const chars = val.length;
+      const words = val.trim() ? val.trim().split(/\s+/).length : 0;
+      if (countInfo) countInfo.textContent = `${words} words • ${chars} chars`;
+    };
+    updateCounts();
+
+    textarea.addEventListener('input', () => {
+      localStorage.setItem('aether_quick_notes', textarea.value);
+      updateCounts();
+    });
+
+    notesBtn?.addEventListener('click', () => {
+      this.toggleQuickNotes();
+    });
+
+    closeBtn?.addEventListener('click', () => {
+      panel.classList.add('hidden');
+      notesBtn?.classList.remove('active');
+    });
+
+    insertLinkBtn?.addEventListener('click', () => {
+      const tab = State.getActiveTab();
+      if (!tab) return;
+      const snippet = `\n[${tab.title || 'Link'}](${tab.url})\n`;
+      const pos = textarea.selectionStart || textarea.value.length;
+      textarea.value = textarea.value.slice(0, pos) + snippet + textarea.value.slice(pos);
+      localStorage.setItem('aether_quick_notes', textarea.value);
+      updateCounts();
+      textarea.focus();
+    });
+
+    copyBtn?.addEventListener('click', async () => {
+      await navigator.clipboard.writeText(textarea.value);
+      copyBtn.textContent = '✓';
+      setTimeout(() => { copyBtn.textContent = '📋'; }, 1500);
+    });
+
+    exportBtn?.addEventListener('click', () => {
+      const blob = new Blob([textarea.value], { type: 'text/plain;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `aether-quick-notes-${new Date().toISOString().slice(0, 10)}.txt`;
+      a.click();
+    });
+
+    clearBtn?.addEventListener('click', () => {
+      if (textarea.value && confirm('Are you sure you want to clear your scratchpad notes?')) {
+        textarea.value = '';
+        localStorage.setItem('aether_quick_notes', '');
+        updateCounts();
+      }
+    });
+  },
+
+  toggleQuickNotes() {
+    const panel = document.getElementById('quick-notes-panel');
+    const notesBtn = document.getElementById('notes-tool-btn');
+    if (!panel) return;
+    const isHidden = panel.classList.toggle('hidden');
+    notesBtn?.classList.toggle('active', !isHidden);
+    if (!isHidden) {
+      document.getElementById('quick-notes-textarea')?.focus();
+    }
+  },
+
+  showClearBrowsingDataDialog(onSuccess) {
+    const bodyHtml = `
+      <div class="clear-data-body">
+        <p style="font-size:13px;color:var(--text-secondary);margin-bottom:14px;">
+          Select the data types and time range to remove from AETHER Browser:
+        </p>
+
+        <div style="margin-bottom:16px;">
+          <label style="font-size:12px;font-weight:600;color:var(--text-primary);display:block;margin-bottom:6px;">Time Range</label>
+          <select id="clear-range-select" class="settings-select" style="width:100%;">
+            <option value="hour">Last hour</option>
+            <option value="today" selected>Last 24 hours</option>
+            <option value="week">Last 7 days</option>
+            <option value="month">Last 4 weeks</option>
+            <option value="all">All time</option>
+          </select>
+        </div>
+
+        <div class="clear-data-options">
+          <label class="clear-data-row">
+            <input type="checkbox" id="chk-clear-history" checked />
+            <div class="clear-data-desc">
+              <strong>Browsing history</strong>
+              <span>Clears pages from history, omnibox suggestions, and visited URLs</span>
+            </div>
+          </label>
+
+          <label class="clear-data-row">
+            <input type="checkbox" id="chk-clear-downloads" checked />
+            <div class="clear-data-desc">
+              <strong>Download history</strong>
+              <span>Clears completed and cancelled downloads list (does not delete downloaded files)</span>
+            </div>
+          </label>
+
+          <label class="clear-data-row">
+            <input type="checkbox" id="chk-clear-cookies" checked />
+            <div class="clear-data-desc">
+              <strong>Cookies and site data</strong>
+              <span>Signs you out of most websites and clears site preferences</span>
+            </div>
+          </label>
+
+          <label class="clear-data-row">
+            <input type="checkbox" id="chk-clear-cache" checked />
+            <div class="clear-data-desc">
+              <strong>Cached images and files</strong>
+              <span>Frees up disk cache and forces fresh assets on subsequent visits</span>
+            </div>
+          </label>
+        </div>
+      </div>
+    `;
+
+    this.showModal('Clear Browsing Data', bodyHtml, [
+      { label: 'Cancel', class: 'btn-secondary', click: () => this.closeModal() },
+      {
+        label: 'Clear Data',
+        class: 'btn-danger',
+        click: async () => {
+          const range = document.getElementById('clear-range-select')?.value || 'all';
+          const doHistory = document.getElementById('chk-clear-history')?.checked;
+          const doDownloads = document.getElementById('chk-clear-downloads')?.checked;
+          const doCookies = document.getElementById('chk-clear-cookies')?.checked;
+          const doCache = document.getElementById('chk-clear-cache')?.checked;
+
+          if (doHistory) {
+            await IpcClient.clearHistory(range);
+            State.history = await IpcClient.getHistory();
+          }
+          if (doDownloads) {
+            await IpcClient.clearDownloads();
+            State.downloads = [];
+            DownloadManager.updateBadge();
+          }
+          if (doCookies || doCache) {
+            await IpcClient.clearData({ cookies: doCookies, cache: doCache });
+          }
+
+          this.closeModal();
+          if (onSuccess) onSuccess();
+        }
+      }
+    ]);
   }
 };
 

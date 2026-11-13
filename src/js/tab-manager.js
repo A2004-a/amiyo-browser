@@ -184,6 +184,54 @@ const TabManager = {
         });
       }
 
+      // Chrome Tab Hover Preview Card
+      let hoverTimer = null;
+      tabEl.addEventListener('mouseenter', () => {
+        hoverTimer = setTimeout(() => {
+          const card = document.getElementById('tab-hover-card');
+          if (!card) return;
+          const titleEl = document.getElementById('tab-hover-title');
+          const domainEl = document.getElementById('tab-hover-domain');
+          const badgeEl = document.getElementById('tab-hover-badge');
+          const favEl = document.getElementById('tab-hover-favicon');
+
+          let domain = 'AETHER System Page';
+          if (tab.url && tab.url.startsWith('http')) {
+            try { domain = new URL(tab.url).hostname; } catch (e) { domain = tab.url; }
+          } else if (tab.url) {
+            domain = tab.url;
+          }
+
+          if (titleEl) titleEl.textContent = tab.title || 'New Tab';
+          if (domainEl) domainEl.textContent = domain;
+          if (badgeEl) {
+            if (tab.isSuspended) {
+              badgeEl.textContent = '💤 Sleeping (Edge Efficiency Mode)';
+              badgeEl.style.color = 'var(--text-muted)';
+            } else {
+              badgeEl.textContent = tab.id === State.activeTabId ? 'Active Tab' : 'Background Tab';
+              badgeEl.style.color = 'var(--accent)';
+            }
+          }
+          if (favEl) {
+            favEl.innerHTML = tab.favicon
+              ? `<img src="${Utils.escapeHtml(tab.favicon)}" style="width:14px;height:14px;" onerror="this.style.display='none'" />`
+              : Utils.icons.globe;
+          }
+
+          const rect = tabEl.getBoundingClientRect();
+          card.style.left = `${Math.max(12, Math.min(window.innerWidth - 270, rect.left))}px`;
+          card.style.top = `${rect.bottom + 6}px`;
+          card.classList.remove('hidden');
+        }, 300);
+      });
+
+      tabEl.addEventListener('mouseleave', () => {
+        if (hoverTimer) clearTimeout(hoverTimer);
+        const card = document.getElementById('tab-hover-card');
+        card?.classList.add('hidden');
+      });
+
       // Context menu for tab (duplicate, pin, mute, close)
       tabEl.addEventListener('contextmenu', (e) => {
         e.preventDefault();

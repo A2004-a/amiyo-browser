@@ -6,6 +6,13 @@ const State = {
   history: [],
   downloads: [],
   permissions: {},
+  readingList: (() => {
+    try {
+      return JSON.parse(localStorage.getItem('aether_reading_list') || '[]');
+    } catch (e) {
+      return [];
+    }
+  })(),
   isMaximized: false,
   isPrivate: false,
 

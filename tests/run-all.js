@@ -8,6 +8,7 @@ const shieldsTests = require('./shields.test');
 const groupTests = require('./tab-groups.test');
 const memoryTests = require('./memory-saver.test');
 const readerTests = require('./reader-mode.test');
+const featureTests = require('./browser-features.test');
 
 console.log('========================================');
 console.log('       AETHER Browser Test Suite       ');
@@ -24,9 +25,10 @@ try {
   groupTests.run();
   memoryTests.run();
   readerTests.run();
+  featureTests.run();
 
   console.log('\n========================================');
-  console.log('  ALL UNIT TEST SUITES PASSED (10/10)!  ');
+  console.log('  ALL UNIT TEST SUITES PASSED (11/11)!  ');
   console.log('========================================');
 } catch (err) {
   console.error('\n❌ Test failure:', err);
