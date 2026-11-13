@@ -17,8 +17,22 @@ async function main() {
     "const path = require('path');",
     "const fs = require('fs');",
     "",
-    "let appPath = null;",
     "const args = process.argv.slice(1);",
+    "",
+    "// Handle version checks immediately so VS Code debugger and tools get a valid version string",
+    "if (args.includes('-v') || args.includes('--version')) {",
+    "  console.log('v' + (process.versions.node || '20.0.0'));",
+    "  process.exit(0);",
+    "}",
+    "",
+    "// Handle eval",
+    "const evalIdx = args.findIndex(a => a === '-e' || a === '--eval');",
+    "if (evalIdx !== -1 && args[evalIdx + 1]) {",
+    "  eval(args[evalIdx + 1]);",
+    "  process.exit(0);",
+    "}",
+    "",
+    "let appPath = null;",
     "for (const arg of args) {",
     "  if (!arg.startsWith('-')) {",
     "    appPath = arg;",
@@ -62,4 +76,3 @@ async function main() {
 }
 
 main().catch(console.error);
-

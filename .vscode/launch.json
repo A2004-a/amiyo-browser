@@ -3,27 +3,18 @@
   "configurations": [
     {
       "name": "Launch AETHER Browser",
-      "type": "node",
+      "type": "node-terminal",
       "request": "launch",
-      "cwd": "${workspaceFolder}",
-      "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/electron.cmd",
-      "windows": {
-        "runtimeExecutable": "${workspaceFolder}/node_modules/electron/dist/electron.exe"
-      },
-      "args": ["."],
-      "env": {
-        "ELECTRON_ENABLE_LOGGING": "1"
-      },
-      "outputCapture": "std"
+      "command": "npm start"
     },
     {
-      "name": "Run main.js directly",
+      "name": "Debug Main Process",
       "type": "node",
       "request": "launch",
-      "program": "${workspaceFolder}/main.js",
       "cwd": "${workspaceFolder}",
+      "runtimeExecutable": "${workspaceFolder}/node_modules/electron/dist/electron.exe",
+      "args": ["."],
       "outputCapture": "std"
     }
   ]
 }
-
