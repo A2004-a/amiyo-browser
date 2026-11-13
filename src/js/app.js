@@ -4,6 +4,15 @@ const App = {
   async init() {
     console.log('[App] Starting initialization...');
     try {
+      // macOS platform integration
+      const isDarwin = (window.amiyoAPI && window.amiyoAPI.platform === 'darwin') ||
+        (window.aetherAPI && window.aetherAPI.platform === 'darwin') ||
+        navigator.userAgent.includes('Macintosh') ||
+        navigator.platform.includes('Mac');
+      if (isDarwin) {
+        document.documentElement.classList.add('platform-darwin');
+      }
+
       // 1. Initialize UI DOM components and listeners IMMEDIATELY (zero lag)
       this.initWindowControls();
       TabManager.init();

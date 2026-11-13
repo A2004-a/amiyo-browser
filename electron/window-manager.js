@@ -25,6 +25,7 @@ class WindowManager {
       minHeight: 400,
       frame: false, // Custom sleek modern window chrome
       titleBarStyle: 'hidden',
+      trafficLightPosition: process.platform === 'darwin' ? { x: 14, y: 14 } : undefined,
       title: isPrivate ? 'AETHER Browser (Private)' : 'AETHER Browser',
       backgroundColor: '#0B0F14',
       icon: path.join(__dirname, '..', 'assets', 'branding', 'aether-official-logo.jpg'),

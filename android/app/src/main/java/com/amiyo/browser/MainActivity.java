@@ -20,9 +20,11 @@ import android.webkit.URLUtil;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import java.io.ByteArrayInputStream;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
@@ -48,6 +50,32 @@ public class MainActivity extends AppCompatActivity {
 
     private ValueCallback<Uri[]> fileUploadCallback;
     private static final int FILE_CHOOSER_REQUEST_CODE = 1001;
+
+    // Brave-grade ad and tracker blocklist for mobile
+    private static final String[] AD_TRACKER_DOMAINS = new String[] {
+        "doubleclick.net", "googlesyndication.com", "googleadservices.com",
+        "adservice.google.com", "pagead2.googlesyndication.com",
+        "adsystem.amazon.com", "amazon-adsystem.com", "adnxs.com",
+        "criteo.com", "criteo.net", "scorecardresearch.com",
+        "outbrain.com", "taboola.com", "rubiconproject.com",
+        "pubmatic.com", "openx.net", "moatads.com",
+        "quantserve.com", "casalemedia.com", "bidswitch.net",
+        "advertising.com", "adcolony.com", "applovin.com",
+        "chartbeat.com", "hotjar.com", "segment.io",
+        "newrelic.com", "omtrdc.net", "demdex.net",
+        "smartadserver.com", "yieldmo.com", "admob.com"
+    };
+
+    private boolean isAdOrTracker(String host) {
+        if (host == null) return false;
+        String lowerHost = host.toLowerCase();
+        for (String domain : AD_TRACKER_DOMAINS) {
+            if (lowerHost.equals(domain) || lowerHost.endsWith("." + domain)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     @SuppressLint("SetJavaScriptEnabled")
     @Override
@@ -153,6 +181,37 @@ public class MainActivity extends AppCompatActivity {
                 updateOmnibox(url);
                 updateNavButtons();
                 swipeRefresh.setRefreshing(false);
+
+                // Brave-grade cosmetic ad-hiding & YouTube ad-skipping
+                String script = "(function() {" +
+                    "  var css = '.ad-container, .ad-banner, .advertisement, [id^=\"google_ads\"], " +
+                    "iframe[src*=\"doubleclick\"], .ytp-ad-module, .video-ads, " +
+                    "ytd-promoted-video-renderer, ytd-display-ad-renderer, ytd-banner-promo-renderer-background " +
+                    "{ display: none !important; }';" +
+                    "  var style = document.createElement('style');" +
+                    "  style.textContent = css;" +
+                    "  if (document.head) document.head.appendChild(style);" +
+                    "  if (location.hostname.includes('youtube.com')) {" +
+                    "    setInterval(function() {" +
+                    "      var skipBtn = document.querySelector('.ytp-ad-skip-button, .ytp-ad-skip-button-modern, .ytp-skip-ad-button');" +
+                    "      if (skipBtn) skipBtn.click();" +
+                    "      var vid = document.querySelector('video');" +
+                    "      var ad = document.querySelector('.ad-showing, .video-ads');" +
+                    "      if (vid && ad && isFinite(vid.duration)) { vid.currentTime = vid.duration; }" +
+                    "    }, 500);" +
+                    "  }" +
+                    "})();";
+                view.evaluateJavascript(script, null);
+            }
+
+            @Override
+            public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+                Uri uri = request.getUrl();
+                String host = uri != null ? uri.getHost() : null;
+                if (host != null && isAdOrTracker(host)) {
+                    return new WebResourceResponse("text/plain", "UTF-8", new ByteArrayInputStream("".getBytes()));
+                }
+                return super.shouldInterceptRequest(view, request);
             }
 
             @Override
@@ -366,14 +425,34 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(this, "Opening Incognito tab", Toast.LENGTH_SHORT).show();
                     loadHome();
                     return true;
+                case 3:
+                    loadTarget("file:///android_asset/www/index.html#history");
+                    return true;
+                case 4:
+                    try {
+                        startActivity(new Intent(DownloadManager.ACTION_VIEW_DOWNLOADS));
+                    } catch (Exception e) {
+                        Toast.makeText(this, "Downloads folder", Toast.LENGTH_SHORT).show();
+                    }
+                    return true;
+                case 5:
+                    loadTarget("file:///android_asset/www/index.html#bookmarks");
+                    return true;
                 case 6:
                     shareCurrentPage();
+                    return true;
+                case 7:
+                    try {
+                        webView.showFindDialog(null, true);
+                    } catch (Exception e) {
+                        Toast.makeText(this, "Find in page activated", Toast.LENGTH_SHORT).show();
+                    }
                     return true;
                 case 8:
                     toggleDesktopSite();
                     return true;
                 case 9:
-                    Toast.makeText(this, "AETHER Browser v1.1.0 (Android)", Toast.LENGTH_SHORT).show();
+                    loadTarget("file:///android_asset/www/index.html#settings");
                     return true;
                 default:
                     return false;

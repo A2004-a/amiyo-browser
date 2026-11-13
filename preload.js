@@ -15,6 +15,7 @@ const validChannels = [
 ];
 
 const api = {
+  platform: process.platform,
   // --- Window ---
   window: {
     minimize: () => ipcRenderer.invoke('window:minimize'),

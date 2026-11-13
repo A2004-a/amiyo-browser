@@ -355,4 +355,16 @@
   border-color: var(--border-subtle);
 }
 
+/* ========================================================
+   macOS Native Window Controls & Traffic Light Layout
+======================================================== */
+.platform-darwin #window-controls {
+  display: none !important;
+}
+
+.platform-darwin #tab-bar-container {
+  padding-left: 78px;
+}
+
+
 

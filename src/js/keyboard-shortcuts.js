@@ -26,10 +26,10 @@ const KeyboardShortcuts = {
         return;
       }
 
-      // Ctrl + L: Focus Address Bar
+      // Ctrl + L or Cmd + L: Focus Address Bar
       if (isCtrlOrCmd && e.key.toLowerCase() === 'l') {
         e.preventDefault();
-        const urlInput = document.getElementById('url-input');
+        const urlInput = document.getElementById('omnibox-input') || document.getElementById('url-input');
         if (urlInput) {
           urlInput.focus();
           urlInput.select();
@@ -51,15 +51,15 @@ const KeyboardShortcuts = {
         return;
       }
 
-      // Alt + Left: Back
-      if (e.altKey && e.key === 'ArrowLeft') {
+      // Back: Alt + Left, Cmd + [, Cmd + Left
+      if ((e.altKey && e.key === 'ArrowLeft') || (isCtrlOrCmd && (e.key === '[' || e.key === 'ArrowLeft'))) {
         e.preventDefault();
         IpcClient.goBack(State.activeTabId);
         return;
       }
 
-      // Alt + Right: Forward
-      if (e.altKey && e.key === 'ArrowRight') {
+      // Forward: Alt + Right, Cmd + ], Cmd + Right
+      if ((e.altKey && e.key === 'ArrowRight') || (isCtrlOrCmd && (e.key === ']' || e.key === 'ArrowRight'))) {
         e.preventDefault();
         IpcClient.goForward(State.activeTabId);
         return;

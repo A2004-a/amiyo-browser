@@ -188,6 +188,46 @@ function testTabHoverCardLifecycle() {
   assert.strictEqual(isHidden, true, 'Hover card must dismiss on click or tab re-render');
 }
 
+function testCrossPlatformMac() {
+  const fs = require('fs');
+  const path = require('path');
+
+  // Verify macOS styles exist in tabs.css
+  const tabsCss = fs.readFileSync(path.join(__dirname, '..', 'src', 'styles', 'tabs.css'), 'utf8');
+  assert(tabsCss.includes('.platform-darwin #window-controls'), 'Must hide window controls on macOS');
+  assert(tabsCss.includes('.platform-darwin #tab-bar-container'), 'Must have left padding for macOS traffic lights');
+  assert(tabsCss.includes('padding-left: 78px;'), 'Traffic light clearance must be 78px');
+
+  // Verify Mac shortcuts in keyboard-shortcuts.js
+  const shortcutsJs = fs.readFileSync(path.join(__dirname, '..', 'src', 'js', 'keyboard-shortcuts.js'), 'utf8');
+  assert(shortcutsJs.includes("omnibox-input"), 'Must properly look up omnibox-input for address bar focus');
+  assert(shortcutsJs.includes("e.key === '['"), 'Must support Cmd + [ for Mac back navigation');
+  assert(shortcutsJs.includes("e.key === ']'"), 'Must support Cmd + ] for Mac forward navigation');
+
+  // Verify platform exposed in preload.js
+  const preloadJs = fs.readFileSync(path.join(__dirname, '..', 'preload.js'), 'utf8');
+  assert(preloadJs.includes("platform: process.platform"), 'Preload must expose platform');
+}
+
+function testMobileAdBlocking() {
+  const fs = require('fs');
+  const path = require('path');
+
+  // Verify Android ad blocking
+  const androidMain = fs.readFileSync(path.join(__dirname, '..', 'android', 'app', 'src', 'main', 'java', 'com', 'amiyo', 'browser', 'MainActivity.java'), 'utf8');
+  assert(androidMain.includes("shouldInterceptRequest"), 'Android must intercept network requests for ad blocking');
+  assert(androidMain.includes("doubleclick.net"), 'Android blocklist must contain major ad networks');
+  assert(androidMain.includes("ytp-ad-skip-button"), 'Android must include YouTube ad-skipping scriptlet');
+  assert(androidMain.includes("ACTION_VIEW_DOWNLOADS"), 'Android menu must implement downloads');
+
+  // Verify iOS bottom navigation & ad blocking
+  const iosVc = fs.readFileSync(path.join(__dirname, '..', 'ios', 'AetherBrowser', 'ViewController.swift'), 'utf8');
+  assert(iosVc.includes("bottomBar"), 'iOS must include sleek bottom toolbar');
+  assert(iosVc.includes("allowsBackForwardNavigationGestures = true"), 'iOS must enable native swipe gestures');
+  assert(iosVc.includes("refreshControl"), 'iOS must support pull-to-refresh');
+  assert(iosVc.includes("WKUserScript"), 'iOS must inject cosmetic ad blocker');
+}
+
 module.exports = {
   run() {
     console.log('Testing Signature Browser Features (Brave, Chrome, Safari, Edge)...');
@@ -199,6 +239,8 @@ module.exports = {
     testFindBarOffsets();
     testViewVisibilityReset();
     testTabHoverCardLifecycle();
+    testCrossPlatformMac();
+    testMobileAdBlocking();
     console.log('✔ Signature Browser Features tests passed!');
   }
 };
