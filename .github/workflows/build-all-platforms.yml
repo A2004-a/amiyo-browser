@@ -73,7 +73,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v1.0.0
-          name: "AMIYO Browser v1.0.0 (Windows, Mac, Linux, Android)"
+          name: "AETHER Browser v1.0.0 (Windows, Mac, Linux, Android)"
           draft: false
           prerelease: false
           files: |
@@ -113,14 +113,14 @@ jobs:
       - name: Prepare APK for Release
         run: |
           mkdir -p output-apk
-          find android/app/build/outputs/apk/ -name "*.apk" -exec cp {} output-apk/AMIYO-Browser-v1.0.0-Android.apk \;
+          find android/app/build/outputs/apk/ -name "*.apk" -exec cp {} output-apk/AETHER-Browser-v1.0.0-Android.apk \;
           ls -lh output-apk/
 
       - name: Upload Android Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: AMYIO-Browser-Android-APK
-          path: output-apk/AMIYO-Browser-v1.0.0-Android.apk
+          name: AETHER-Browser-Android-APK
+          path: output-apk/AETHER-Browser-v1.0.0-Android.apk
           if-no-files-found: error
 
       - name: Release Android APK
@@ -129,7 +129,7 @@ jobs:
           tag_name: v1.0.0
           draft: false
           prerelease: false
-          files: output-apk/AMIYO-Browser-v1.0.0-Android.apk
+          files: output-apk/AETHER-Browser-v1.0.0-Android.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

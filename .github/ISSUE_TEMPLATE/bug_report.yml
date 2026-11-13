@@ -1,18 +1,18 @@
 name: 🐛 Bug Report
-description: File a bug report to help us improve AMIYO Browser.
+description: File a bug report to help us improve AETHER Browser.
 title: "[Bug]: "
 labels: ["bug"]
 body:
   - type: markdown
     attributes:
       value: |
-        Thank you for reporting an issue with AMIYO Browser! Please fill out the information below to help us troubleshoot and resolve the bug quickly.
+        Thank you for reporting an issue with AETHER Browser! Please fill out the information below to help us troubleshoot and resolve the bug quickly.
 
   - type: input
     id: version
     attributes:
-      label: AMIYO Browser Version
-      description: What version of AMIYO Browser are you running? (Check Settings > About)
+      label: AETHER Browser Version
+      description: What version of AETHER Browser are you running? (Check Settings > About)
       placeholder: "e.g., 1.0.0"
     validations:
       required: true
@@ -47,7 +47,7 @@ body:
       label: Steps to Reproduce
       description: How can we reproduce this behavior?
       placeholder: |
-        1. Open AMIYO Browser
+        1. Open AETHER Browser
         2. Go to '...'
         3. Click on '...'
         4. See error
@@ -76,6 +76,6 @@ body:
       options:
         - label: I have verified that this issue does not already exist in open or closed issues.
           required: true
-        - label: I am using the latest release or main branch of AMIYO Browser.
+        - label: I am using the latest release or main branch of AETHER Browser.
           required: true
 

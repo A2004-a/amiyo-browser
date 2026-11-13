@@ -33,7 +33,7 @@ jobs:
       - name: Upload Windows 64-bit Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: AMIYO-Browser-Windows-x64
+          name: AETHER-Browser-Windows-x64
           path: |
             dist/*.exe
             dist/*.zip
@@ -43,7 +43,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v1.0.0
-          name: "AMIYO Browser v1.0.0 (Windows 64-bit)"
+          name: "AETHER Browser v1.0.0 (Windows 64-bit)"
           draft: false
           prerelease: false
           files: |

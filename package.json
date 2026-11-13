@@ -62,14 +62,14 @@
           ]
         }
       ],
-      "artifactName": "AMIYO-Browser-Setup-${version}-x64.${ext}"
+      "artifactName": "AETHER-Browser-Setup-${version}-x64.${ext}"
     },
     "nsis": {
       "oneClick": true,
       "perMachine": false,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "AMIYO Browser"
+      "shortcutName": "AETHER Browser"
     },
     "mac": {
       "target": [
@@ -89,7 +89,7 @@
         }
       ],
       "category": "public.app-category.productivity",
-      "artifactName": "AMIYO-Browser-${version}-mac-${arch}.${ext}"
+      "artifactName": "AETHER-Browser-${version}-mac-${arch}.${ext}"
     },
     "dmg": {
       "contents": [
@@ -127,13 +127,14 @@
         }
       ],
       "category": "Network;WebBrowser;",
-      "artifactName": "AMIYO-Browser-${version}-linux-${arch}.${ext}"
+      "artifactName": "AETHER-Browser-${version}-linux-${arch}.${ext}"
     },
     "files": [
       "main.js",
       "preload.js",
       "electron/**/*",
       "src/**/*",
+      "assets/**/*",
       "data/.gitkeep",
       "!scripts/**",
       "!tests/**"

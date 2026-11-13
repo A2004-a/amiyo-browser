@@ -1,6 +1,6 @@
-# Contributing to AMIYO Browser
+# Contributing to AETHER Browser
 
-Thank you for your interest in contributing to AMIYO Browser!
+Thank you for your interest in contributing to AETHER Browser!
 
 ## Development Setup
 

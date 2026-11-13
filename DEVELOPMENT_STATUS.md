@@ -1,10 +1,10 @@
-# AMIYO Browser — Development Status
+# AETHER Browser — Development Status
 
 ## Project Overview
-- **Name:** AMIYO Browser
+- **Name:** AETHER Browser
 - **Engine:** Chromium 156 via Electron 45.3.0
 - **Architecture:** Multi-process, WebContentsView-based, contextIsolated preload bridge, modular controllers
-- **Current Phase:** Phase 1 through Phase 6 Completed & Operational
+- **Current Phase:** Production-Ready & Brand-Unified (AETHER Browser — Explore Without Limits)
 
 ---
 
