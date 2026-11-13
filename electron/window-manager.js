@@ -63,8 +63,12 @@ class WindowManager {
     });
 
     // Window events
-    win.webContents.on('console-message', (event, level, message, line, sourceId) => {
-      console.log(`[Renderer] [${level}] ${message} (${sourceId}:${line})`);
+    win.webContents.on('console-message', (event) => {
+      const msg = event?.message || '';
+      const lvl = event?.level || 0;
+      const src = event?.sourceId || '';
+      const line = event?.lineNumber || 0;
+      console.log(`[Renderer] [${lvl}] ${msg} (${src}:${line})`);
     });
 
     win.webContents.on('render-process-gone', (event, details) => {

@@ -162,8 +162,12 @@ class TabController {
   setupTabListeners(tab, wc) {
     if (!wc || !tab) return;
 
-    wc.on('console-message', (event, level, message, line, sourceId) => {
-      console.log(`[Tab ${tab.id}] [${level}] ${message} (${sourceId}:${line})`);
+    wc.on('console-message', (event) => {
+      const msg = event?.message || '';
+      const lvl = event?.level || 0;
+      const src = event?.sourceId || '';
+      const line = event?.lineNumber || 0;
+      console.log(`[Tab ${tab.id}] [${lvl}] ${msg} (${src}:${line})`);
     });
 
     wc.on('render-process-gone', (event, details) => {
