@@ -1,4 +1,30 @@
-const { app, BrowserWindow } = require('electron');
+const electron = require('electron');
+
+// Auto-spawn under Electron when executed directly with `node main.js` (e.g. VS Code Run/Debug)
+if (typeof electron === 'string') {
+  const { spawn } = require('child_process');
+  const env = { ...process.env };
+  delete env.ELECTRON_RUN_AS_NODE;
+  env.ELECTRON_ENABLE_LOGGING = '1';
+
+  const flags = [
+    '.',
+    ...process.argv.slice(2)
+  ];
+
+  const child = spawn(electron, flags, {
+    stdio: 'inherit',
+    env,
+    windowsHide: false
+  });
+
+  child.on('exit', (code) => {
+    process.exit(code || 0);
+  });
+  return;
+}
+
+const { app, BrowserWindow } = electron;
 if (app && typeof app.setName === 'function') {
   app.setName('AETHER Browser');
 }
