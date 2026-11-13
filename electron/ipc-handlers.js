@@ -13,6 +13,11 @@ const captureController = require('./capture-controller');
 function getTabControllerForSender(event) {
   const win = BrowserWindow.fromWebContents(event.sender);
   if (!win) return null;
+  // Security guard: verify that the caller is the trusted browser UI window
+  if (win.webContents !== event.sender) {
+    console.warn('[IPC Security Alert] Rejected privileged call from untrusted view/frame');
+    return null;
+  }
   const winInfo = windowManager.getWindowInfo(win);
   return winInfo ? winInfo.tabController : null;
 }

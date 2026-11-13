@@ -254,8 +254,36 @@ class TabController {
       });
     });
 
+    wc.on('will-navigate', (event, targetUrl) => {
+      if (!targetUrl) return;
+      const lower = targetUrl.toLowerCase();
+      if (lower.startsWith('amiyo://') || lower.startsWith('file://') || lower.startsWith('javascript:')) {
+        console.warn(`[Security] Blocked unauthorized will-navigate to ${targetUrl} from tab ${tab.id}`);
+        event.preventDefault();
+        return;
+      }
+    });
+
+    wc.on('will-redirect', (event, targetUrl) => {
+      if (!targetUrl) return;
+      const lower = targetUrl.toLowerCase();
+      if (lower.startsWith('amiyo://') || lower.startsWith('file://') || lower.startsWith('javascript:')) {
+        console.warn(`[Security] Blocked unauthorized will-redirect to ${targetUrl} from tab ${tab.id}`);
+        event.preventDefault();
+        return;
+      }
+    });
+
     wc.setWindowOpenHandler(({ url }) => {
-      this.createTab(url, { active: true });
+      if (!url) return { action: 'deny' };
+      const lower = url.toLowerCase();
+      if (lower.startsWith('amiyo://') || lower.startsWith('file://') || lower.startsWith('javascript:')) {
+        console.warn(`[Security] Blocked window.open attempt to ${url}`);
+        return { action: 'deny' };
+      }
+      if (lower.startsWith('http://') || lower.startsWith('https://')) {
+        this.createTab(url, { active: true });
+      }
       return { action: 'deny' };
     });
 

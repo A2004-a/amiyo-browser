@@ -66,3 +66,4 @@ class CaptureController {
 }
 
 module.exports = new CaptureController();
+

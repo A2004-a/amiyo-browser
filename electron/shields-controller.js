@@ -310,3 +310,4 @@ class ShieldsController {
 }
 
 module.exports = new ShieldsController();
+
