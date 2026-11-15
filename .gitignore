@@ -61,4 +61,6 @@ android/.gradle/
 android/app/build/
 android/build/
 .gradle/
+*.apk
+
 

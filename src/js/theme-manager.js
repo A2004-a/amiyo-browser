@@ -25,6 +25,9 @@ const ThemeManager = {
   },
 
   setTheme(theme) {
+    if (this.currentTheme === theme && document.documentElement.getAttribute('data-theme') === theme) {
+      return;
+    }
     this.applyTheme(theme);
     if (typeof State !== 'undefined' && State.settings) {
       State.settings.theme = theme;

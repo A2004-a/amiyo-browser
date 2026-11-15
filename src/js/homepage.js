@@ -609,10 +609,6 @@ const Homepage = {
             this.updateSearchPlaceholder(selected);
           }
           App.closeModal();
-          const container = document.getElementById('internal-page-container');
-          if (container) {
-            this.render(container);
-          }
           if (typeof Omnibox !== 'undefined') {
             Omnibox.update();
           }

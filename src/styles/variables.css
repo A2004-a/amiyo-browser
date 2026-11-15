@@ -1,4 +1,4 @@
-:root {
+:root, [data-theme="dark"] {
   /* ========================================================
      AETHER Official Design Tokens — Obsidian + Electric Cyan
      ======================================================== */
@@ -63,13 +63,14 @@
 }
 
 /* Smooth Theme Transitions to Prevent Blinking / Flashing */
-html, body, #app, #toolbar, #tab-bar, #browser-content, #internal-page-container,
-.chrome-ntp, .modal-dialog, .settings-container, .settings-sidebar, .settings-content,
-.settings-card, .tab, .tab-title, .omnibox-container, .settings-input, .settings-select {
-  transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
-              border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
-              color 0.15s cubic-bezier(0.4, 0, 0.2, 1),
-              box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+html, body, #app, #browser-header, #tab-bar-container, #tabs-strip, #toolbar, #omnibox-container,
+#bookmarks-bar, #view-container, #internal-page-container, .chrome-ntp, .browser-tab, .tab-title,
+.modal-dialog, #modal-dialog-content, .settings-container, .settings-sidebar, .settings-content,
+.settings-card, .settings-input, .settings-select, .chrome-search-box, .chrome-search-input {
+  transition: background-color 0.15s ease,
+              border-color 0.15s ease,
+              color 0.12s ease,
+              box-shadow 0.15s ease;
 }
 
 [data-theme="light"] {

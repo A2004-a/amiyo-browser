@@ -78,8 +78,8 @@ const App = {
               Homepage.updateSearchPlaceholder(newSettings.searchEngine);
             }
           }
-          if (newSettings.theme) {
-            ThemeManager.setTheme(newSettings.theme);
+          if (newSettings.theme && newSettings.theme !== ThemeManager.currentTheme) {
+            ThemeManager.applyTheme(newSettings.theme);
           }
         });
       }
@@ -134,6 +134,7 @@ const App = {
 
     if (!tab || !tab.isInternal) {
       container.classList.add('hidden');
+      container.dataset.currentPage = '';
       if (IpcClient.setViewVisible) {
         IpcClient.setViewVisible(true);
       }
@@ -142,15 +143,22 @@ const App = {
 
     container.classList.remove('hidden');
 
-    if (tab.url === 'aether://newtab' || tab.url === 'amiyo://newtab') {
+    const targetUrl = tab.url || 'aether://newtab';
+    // If the page is already rendered and active, avoid re-rendering to prevent any DOM blinking / flashing
+    if (container.dataset.currentPage === targetUrl && container.children.length > 0) {
+      return;
+    }
+    container.dataset.currentPage = targetUrl;
+
+    if (targetUrl === 'aether://newtab' || targetUrl === 'amiyo://newtab') {
       Homepage.render(container);
-    } else if (tab.url === 'aether://bookmarks' || tab.url === 'amiyo://bookmarks') {
+    } else if (targetUrl === 'aether://bookmarks' || targetUrl === 'amiyo://bookmarks') {
       BookmarkManager.render(container);
-    } else if (tab.url === 'aether://history' || tab.url === 'amiyo://history') {
+    } else if (targetUrl === 'aether://history' || targetUrl === 'amiyo://history') {
       HistoryManager.render(container);
-    } else if (tab.url === 'aether://downloads' || tab.url === 'amiyo://downloads') {
+    } else if (targetUrl === 'aether://downloads' || targetUrl === 'amiyo://downloads') {
       DownloadManager.render(container);
-    } else if (tab.url === 'aether://settings' || tab.url === 'amiyo://settings') {
+    } else if (targetUrl === 'aether://settings' || targetUrl === 'amiyo://settings') {
       SettingsManager.render(container);
     } else {
       Homepage.render(container);
