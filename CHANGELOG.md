@@ -2,6 +2,16 @@
 
 All notable changes to AETHER Browser will be documented in this file.
 
+## [1.1.0] - 2026-11-15
+
+### Added & Enhanced
+- **Official Brand Artwork**: Transparent 3D illuminated **A** emblem across Desktop, Android, iOS, macOS, and Linux platforms.
+- **AETHER Nexus Homepage**: Google Chrome-style New Tab page with customizable themes, search engine selector, shortcuts, and 3D visual mark.
+- **Enhanced Incognito Mode**: Ephemeral non-persistent session partitions, strict history suppression, omnibox privacy filters, and private landing page.
+- **Robust Shell Lifecycle**: Fixed debugger `NODE_OPTIONS` interception and `DOMContentLoaded` race conditions for instant startup.
+- **Shields & Privacy Engine**: Ad and tracker blocker with Brave-style cosmetical filtering and cosmetic scriptlet injection.
+- **Mobile Edition (Android)**: Full Android build with isolated Incognito mode, custom WebView client, and branding sync.
+
 ## [1.0.0] - 2026-11-11
 
 ### Initial Release
