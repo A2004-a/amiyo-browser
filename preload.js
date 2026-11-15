@@ -24,6 +24,7 @@ const api = {
     isMaximized: () => ipcRenderer.invoke('window:is-maximized'),
     createNew: () => ipcRenderer.invoke('window:create-new'),
     createPrivate: () => ipcRenderer.invoke('window:create-private'),
+    isPrivate: () => ipcRenderer.invoke('window:is-private'),
     toggleFullscreen: () => ipcRenderer.invoke('window:toggle-fullscreen'),
     setTopOffset: (offset) => ipcRenderer.invoke('window:set-top-offset', offset),
     setLeftOffset: (offset) => ipcRenderer.invoke('window:set-left-offset', offset),

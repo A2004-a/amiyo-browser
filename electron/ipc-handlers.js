@@ -58,6 +58,13 @@ function registerIpcHandlers() {
     windowManager.createWindow(true);
   });
 
+  ipcMain.handle('window:is-private', (event) => {
+    const win = BrowserWindow.fromWebContents(event.sender);
+    if (!win) return false;
+    const winInfo = windowManager.getWindowInfo(win);
+    return winInfo ? !!winInfo.isPrivate : false;
+  });
+
   ipcMain.handle('window:toggle-fullscreen', (event) => {
     const win = BrowserWindow.fromWebContents(event.sender);
     if (win) {
@@ -196,7 +203,9 @@ function registerIpcHandlers() {
 
   ipcMain.handle('nav:suggestions', async (event, query) => {
     if (typeof query !== 'string') return [];
-    return navigationController.getSuggestionsAsync(query);
+    const tabCtrl = getTabControllerForSender(event);
+    const isPrivate = tabCtrl ? !!tabCtrl.isPrivate : false;
+    return navigationController.getSuggestionsAsync(query, isPrivate);
   });
 
   ipcMain.handle('nav:security-status', (event, url) => {

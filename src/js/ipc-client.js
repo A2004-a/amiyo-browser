@@ -8,6 +8,7 @@ const IpcClient = {
   isMaximized() { return this.api.window.isMaximized(); },
   createNewWindow() { return this.api.window.createNew(); },
   createPrivate() { return this.api.window.createPrivate(); },
+  isPrivate() { return this.api.window.isPrivate ? this.api.window.isPrivate() : Promise.resolve(false); },
   toggleFullscreen() { return this.api.window.toggleFullscreen(); },
   setTopOffset(offset) { return this.api.window.setTopOffset(offset); },
   setLeftOffset(offset) { return this.api.window.setLeftOffset ? this.api.window.setLeftOffset(offset) : Promise.resolve(); },

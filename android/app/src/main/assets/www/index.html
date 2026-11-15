@@ -510,6 +510,39 @@
   </section>
 
 
+  <!-- ================= INCOGNITO VIEW ================= -->
+  <section id="view-incognito" class="view-section">
+    <div style="display:flex;flex-direction:column;align-items:center;text-align:center;padding:24px 16px;">
+      <div style="width:68px;height:68px;border-radius:50%;background:rgba(168,85,247,0.15);border:1px solid rgba(168,85,247,0.4);display:flex;align-items:center;justify-content:center;margin-bottom:16px;box-shadow:0 0 25px rgba(168,85,247,0.3);">
+        <span style="font-size:32px;">🕶️</span>
+      </div>
+      <h2 style="font-size:22px;font-weight:700;color:#f8fafc;margin-bottom:6px;">You’ve Gone Incognito</h2>
+      <p style="font-size:13px;color:#94a3b8;line-height:1.5;margin-bottom:24px;max-width:320px;">
+        Now you can browse privately. Other people who use this device won’t see your activity.
+      </p>
+
+      <!-- Private Search Box -->
+      <form onsubmit="handleSearch(event)" style="width:100%;max-width:360px;margin-bottom:24px;">
+        <div style="display:flex;align-items:center;background:var(--bg-card);border:1px solid rgba(168,85,247,0.4);border-radius:24px;padding:4px 14px;">
+          <input type="text" id="android-incognito-input" class="search-input" placeholder="Search privately or type URL..." style="border:none;background:transparent;flex:1;height:38px;color:#fff;outline:none;" />
+          <button type="submit" style="background:#8b5cf6;border:none;border-radius:16px;color:#fff;padding:6px 12px;font-size:12px;font-weight:600;">Go</button>
+        </div>
+      </form>
+
+      <div class="list-card" style="width:100%;text-align:left;margin-bottom:16px;">
+        <div style="padding:14px;border-bottom:1px solid var(--border);">
+          <div style="font-size:13px;font-weight:700;color:#f8fafc;margin-bottom:6px;">🚫 Won't save</div>
+          <p style="font-size:12px;color:#94a3b8;line-height:1.5;">Browsing history, cookies and site data, or form inputs.</p>
+        </div>
+        <div style="padding:14px;">
+          <div style="font-size:13px;font-weight:700;color:#f8fafc;margin-bottom:6px;">🛡️ Shields Active</div>
+          <p style="font-size:12px;color:#38bdf8;line-height:1.5;">Third-party trackers and ads are automatically blocked.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
   <!-- ================= 2. HISTORY VIEW ================= -->
   <section id="view-history" class="view-section">
     <div class="page-header">
@@ -641,7 +674,10 @@
       const hash = (window.location.hash || '#newtab').toLowerCase();
       document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
 
-      if (hash === '#history') {
+      const isIncognito = hash === '#incognito' || location.search.includes('private=1') || location.search.includes('incognito=1');
+      if (isIncognito) {
+        document.getElementById('view-incognito').classList.add('active');
+      } else if (hash === '#history') {
         document.getElementById('view-history').classList.add('active');
         loadHistoryView();
       } else if (hash === '#bookmarks') {
@@ -689,6 +725,7 @@
 
     function recordHistoryItem(title, url) {
       if (!url || url.startsWith('file://')) return;
+      if (location.search.includes('private=1') || location.hash === '#incognito') return; // Do not save history in incognito!
       try {
         let history = JSON.parse(localStorage.getItem('aether_history') || '[]');
         history = history.filter(h => h.url !== url);
@@ -699,7 +736,9 @@
 
     function handleSearch(e) {
       e.preventDefault();
-      const input = document.getElementById('android-search-input');
+      const input = (document.getElementById('view-incognito')?.classList.contains('active'))
+        ? document.getElementById('android-incognito-input')
+        : (document.getElementById('android-search-input') || document.getElementById('android-incognito-input'));
       const val = input ? input.value.trim() : '';
       if (!val) return;
 

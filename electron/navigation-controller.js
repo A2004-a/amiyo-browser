@@ -137,7 +137,7 @@ class NavigationController {
     return { isSecure: false, type: 'unknown', text: 'Unknown' };
   }
 
-  getOmniboxSuggestions(query) {
+  getOmniboxSuggestions(query, isPrivate = false) {
     if (!query || typeof query !== 'string') return [];
     const q = query.toLowerCase().trim();
     if (!q) return [];
@@ -182,19 +182,21 @@ class NavigationController {
       }
     }
 
-    // 3. Check History
-    const history = storageManager.getHistory();
-    for (const h of history) {
-      if ((h.title && h.title.toLowerCase().includes(q)) || (h.url && h.url.toLowerCase().includes(q))) {
-        if (!addedUrls.has(h.url)) {
-          suggestions.push({
-            type: 'history',
-            title: h.title,
-            url: h.url,
-            favicon: h.favicon
-          });
-          addedUrls.add(h.url);
-          if (suggestions.length >= 10) break;
+    // 3. Check History (suppressed in private windows to protect privacy)
+    if (!isPrivate) {
+      const history = storageManager.getHistory();
+      for (const h of history) {
+        if ((h.title && h.title.toLowerCase().includes(q)) || (h.url && h.url.toLowerCase().includes(q))) {
+          if (!addedUrls.has(h.url)) {
+            suggestions.push({
+              type: 'history',
+              title: h.title,
+              url: h.url,
+              favicon: h.favicon
+            });
+            addedUrls.add(h.url);
+            if (suggestions.length >= 10) break;
+          }
         }
       }
     }
@@ -295,8 +297,8 @@ class NavigationController {
     });
   }
 
-  async getSuggestionsAsync(query) {
-    const local = this.getOmniboxSuggestions(query);
+  async getSuggestionsAsync(query, isPrivate = false) {
+    const local = this.getOmniboxSuggestions(query, isPrivate);
     if (!query || typeof query !== 'string') return local;
     const q = query.trim();
     if (!q || q.startsWith('http://') || q.startsWith('https://') || q.startsWith('amiyo://') || q.startsWith('aether://')) {

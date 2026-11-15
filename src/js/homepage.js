@@ -26,6 +26,11 @@ const Homepage = {
       clearInterval(this.clockInterval);
     }
 
+    if (State.isPrivate) {
+      this.renderIncognito(container);
+      return;
+    }
+
     const shortcuts = this.getShortcuts();
     const showShortcuts = this.getShortcutsVisible();
     const activeWallpaper = this.getWallpaper();
@@ -826,5 +831,97 @@ const Homepage = {
         }
       }
     ]);
+  },
+
+  renderIncognito(container) {
+    const engineMap = {
+      google: { name: 'Google', icon: '🌐' },
+      duckduckgo: { name: 'DuckDuckGo', icon: '🦆' },
+      bing: { name: 'Bing', icon: '🔷' },
+      yahoo: { name: 'Yahoo', icon: '🟣' },
+      ecosia: { name: 'Ecosia', icon: '🌿' },
+      yandex: { name: 'Yandex', icon: '🔴' }
+    };
+    const currentEngineKey = (typeof State !== 'undefined' && State.settings && State.settings.searchEngine) ? State.settings.searchEngine.toLowerCase() : 'duckduckgo';
+    const currentEngine = engineMap[currentEngineKey] || engineMap.duckduckgo;
+
+    container.innerHTML = `
+      <div class="chrome-ntp incognito-ntp" style="background:#0b0d13;color:#e2e8f0;padding:40px 24px;min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+        <div style="max-width:680px;width:100%;display:flex;flex-direction:column;align-items:center;text-align:center;">
+          
+          <div style="width:72px;height:72px;border-radius:50%;background:rgba(168,85,247,0.15);border:1px solid rgba(168,85,247,0.4);display:flex;align-items:center;justify-content:center;margin-bottom:20px;box-shadow:0 0 30px rgba(168,85,247,0.25);">
+            <svg viewBox="0 0 24 24" width="38" height="38" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M2 12h20M7 12a5 5 0 0 1 10 0M4 17a3 3 0 1 0 6 0 3 3 0 0 0-6 0zm10 0a3 3 0 1 0 6 0 3 3 0 0 0-6 0z"/>
+            </svg>
+          </div>
+
+          <h1 style="font-size:28px;font-weight:700;color:#f8fafc;margin-bottom:8px;letter-spacing:-0.5px;">You’ve Gone Incognito</h1>
+          <p style="font-size:14px;color:#94a3b8;line-height:1.6;margin-bottom:28px;max-width:540px;">
+            Now you can browse privately. Other people who use this device won’t see your activity, and session data will be permanently cleared when you close all private windows.
+          </p>
+
+          <!-- Search Box -->
+          <div class="ntp-search-container" style="width:100%;max-width:560px;margin-bottom:32px;">
+            <form id="incognito-search-form" style="display:flex;align-items:center;background:#161922;border:1px solid rgba(168,85,247,0.3);border-radius:28px;padding:6px 16px;box-shadow:0 4px 20px rgba(0,0,0,0.4);">
+              <span style="font-size:18px;margin-right:12px;">${currentEngine.icon}</span>
+              <input type="text" id="incognito-search-input" placeholder="Search privately with ${currentEngine.name} or type URL" style="flex:1;background:transparent;border:none;outline:none;color:#f8fafc;font-size:14px;height:36px;" />
+              <button type="submit" style="background:#8b5cf6;border:none;border-radius:20px;color:#fff;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;transition:background 0.15s ease;">Search</button>
+            </form>
+          </div>
+
+          <!-- Privacy Cards Grid -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;width:100%;text-align:left;margin-bottom:28px;">
+            <div style="background:#131620;border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:20px 22px;">
+              <div style="font-size:14px;font-weight:700;color:#f8fafc;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
+                <span style="color:#ef4444;">🚫</span> What AETHER won't save
+              </div>
+              <ul style="margin:0;padding-left:18px;font-size:13px;color:#94a3b8;line-height:1.7;">
+                <li>Your browsing history across tabs</li>
+                <li>Cookies and persistent site data</li>
+                <li>Information entered into forms</li>
+                <li>Temporary cache and download history</li>
+              </ul>
+            </div>
+
+            <div style="background:#131620;border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:20px 22px;">
+              <div style="font-size:14px;font-weight:700;color:#f8fafc;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
+                <span style="color:#38bdf8;">🌐</span> Your activity might still be visible to
+              </div>
+              <ul style="margin:0;padding-left:18px;font-size:13px;color:#94a3b8;line-height:1.7;">
+                <li>Websites that you visit</li>
+                <li>Your employer, university, or school</li>
+                <li>Your internet service provider (ISP)</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Shields Protection Notice -->
+          <div style="background:rgba(56,189,248,0.08);border:1px solid rgba(56,189,248,0.25);border-radius:12px;padding:12px 18px;display:flex;align-items:center;gap:12px;width:100%;text-align:left;">
+            <span style="font-size:20px;">🛡️</span>
+            <div style="font-size:12px;color:#bae6fd;line-height:1.5;">
+              <strong>AETHER Shields Active:</strong> Third-party trackers, invasive ad networks, and browser fingerprinting noise are blocked on all websites in this window.
+            </div>
+          </div>
+
+        </div>
+      </div>
+    `;
+
+    // Hook search form
+    const form = container.querySelector('#incognito-search-form');
+    if (form) {
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const input = container.querySelector('#incognito-search-input');
+        const val = input ? input.value.trim() : '';
+        if (val) {
+          Omnibox.navigate(val);
+        }
+      });
+    }
   }
 };
+
+if (typeof module !== 'undefined') {
+  module.exports = Homepage;
+}

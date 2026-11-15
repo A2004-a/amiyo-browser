@@ -84,11 +84,22 @@ const App = {
         });
       }
 
-      // Check if private window
-      const title = document.title;
-      if (title.includes('Private')) {
+      // Check if private window via URL parameter, IPC query, or document title
+      const urlParams = new URLSearchParams(window.location.search);
+      const isPrivateFromUrl = urlParams.get('private') === '1' || urlParams.get('private') === 'true';
+      let isPrivate = isPrivateFromUrl || document.title.includes('Private');
+      if (!isPrivate && IpcClient.isPrivate) {
+        try {
+          isPrivate = await IpcClient.isPrivate();
+        } catch (e) {}
+      }
+
+      if (isPrivate) {
         State.isPrivate = true;
         document.documentElement.setAttribute('data-private', 'true');
+        document.body.classList.add('private-window');
+        const badge = document.getElementById('private-badge');
+        if (badge) badge.style.display = 'inline-flex';
       }
 
       ThemeManager.init(State.settings);

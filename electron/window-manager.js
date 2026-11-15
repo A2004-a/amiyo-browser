@@ -109,8 +109,10 @@ class WindowManager {
       }
     });
 
-    // Load shell HTML
-    win.loadFile(path.join(__dirname, '..', 'src', 'index.html'));
+    // Load shell HTML (with query param for immediate private mode detection)
+    win.loadFile(path.join(__dirname, '..', 'src', 'index.html'), {
+      query: isPrivate ? { private: '1' } : {}
+    });
 
     win.once('ready-to-show', () => {
       win.show();

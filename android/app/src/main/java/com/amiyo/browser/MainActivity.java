@@ -469,11 +469,29 @@ public class MainActivity extends AppCompatActivity {
         builder.show();
     }
 
+    private void applyIncognitoSettings(boolean isIncognito) {
+        WebSettings settings = webView.getSettings();
+        if (isIncognito) {
+            settings.setSaveFormData(false);
+            settings.setCacheMode(WebSettings.LOAD_NO_CACHE);
+            CookieManager.getInstance().setAcceptThirdPartyCookies(webView, false);
+            btnSecurity.setColorFilter(0xFFC084FC); // Purple incognito tint
+            urlInput.setHint("🕶️ Search privately or type URL");
+        } else {
+            settings.setSaveFormData(true);
+            settings.setCacheMode(WebSettings.LOAD_DEFAULT);
+            CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
+            btnSecurity.clearColorFilter();
+            urlInput.setHint(R.string.search_hint);
+        }
+    }
+
     private void createNewTab(boolean isIncognito) {
         TabItem newTab = new TabItem(isIncognito ? "Incognito Tab" : "New Tab", HOME_URL, isIncognito);
         tabs.add(newTab);
         activeTabIndex = tabs.size() - 1;
         updateTabCountDisplay();
+        applyIncognitoSettings(isIncognito);
         loadHome();
         if (isIncognito) {
             Toast.makeText(this, "🕶️ Incognito tab opened", Toast.LENGTH_SHORT).show();
@@ -484,6 +502,7 @@ public class MainActivity extends AppCompatActivity {
         if (index >= 0 && index < tabs.size()) {
             activeTabIndex = index;
             TabItem t = tabs.get(index);
+            applyIncognitoSettings(t.isIncognito);
             if (t.url != null && !t.url.isEmpty()) {
                 loadTarget(t.url);
             } else {
@@ -494,7 +513,20 @@ public class MainActivity extends AppCompatActivity {
 
     private void closeTab(int index) {
         if (tabs.size() <= 1) return;
-        tabs.remove(index);
+        TabItem removed = tabs.remove(index);
+        if (removed.isIncognito) {
+            boolean hasOtherIncognito = false;
+            for (TabItem t : tabs) {
+                if (t.isIncognito) {
+                    hasOtherIncognito = true;
+                    break;
+                }
+            }
+            if (!hasOtherIncognito) {
+                CookieManager.getInstance().removeSessionCookies(null);
+                webView.clearCache(true);
+            }
+        }
         if (activeTabIndex >= tabs.size()) {
             activeTabIndex = tabs.size() - 1;
         }
@@ -556,7 +588,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void loadHome() {
-        webView.loadUrl(HOME_URL);
+        boolean isIncognito = false;
+        if (activeTabIndex >= 0 && activeTabIndex < tabs.size()) {
+            isIncognito = tabs.get(activeTabIndex).isIncognito;
+        }
+        if (isIncognito) {
+            webView.loadUrl(HOME_URL + "?private=1#incognito");
+        } else {
+            webView.loadUrl(HOME_URL);
+        }
     }
 
     private void openInternalPage(String page) {
@@ -573,13 +613,28 @@ public class MainActivity extends AppCompatActivity {
         if (url == null)
             return;
 
+        boolean isIncognito = false;
+        if (activeTabIndex >= 0 && activeTabIndex < tabs.size()) {
+            isIncognito = tabs.get(activeTabIndex).isIncognito;
+        }
+
         if (url.equals(HOME_URL) || url.startsWith("file:///android_asset")) {
             urlInput.setText("");
-            urlInput.setHint(R.string.search_hint);
-            btnSecurity.setImageResource(android.R.drawable.ic_lock_idle_lock);
+            if (isIncognito) {
+                urlInput.setHint("🕶️ Search privately or type URL");
+                btnSecurity.setImageResource(android.R.drawable.ic_lock_idle_lock);
+                btnSecurity.setColorFilter(0xFFC084FC);
+            } else {
+                urlInput.setHint(R.string.search_hint);
+                btnSecurity.setImageResource(android.R.drawable.ic_lock_idle_lock);
+                btnSecurity.clearColorFilter();
+            }
         } else {
             urlInput.setText(url);
-            if (url.startsWith("https://")) {
+            if (isIncognito) {
+                btnSecurity.setImageResource(android.R.drawable.ic_lock_idle_lock);
+                btnSecurity.setColorFilter(0xFFC084FC);
+            } else if (url.startsWith("https://")) {
                 btnSecurity.setImageResource(android.R.drawable.ic_lock_idle_lock);
                 btnSecurity.setColorFilter(getResources().getColor(R.color.accent, getTheme()));
             } else {
