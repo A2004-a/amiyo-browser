@@ -330,7 +330,7 @@ class NavigationController {
         }
         return enriched;
       }
-    } catch (e) { }
+    } catch (e) {}
 
     return local;
   }

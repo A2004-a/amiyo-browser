@@ -97,6 +97,22 @@ const App = {
         });
       }
 
+      // Listen for split screen view changes
+      const tabsBridge = window.aetherAPI?.tabs || window.amiyoAPI?.tabs;
+      if (tabsBridge?.onSplitViewChanged) {
+        tabsBridge.onSplitViewChanged(({ splitTabId }) => {
+          const splitBtn = document.getElementById('split-screen-btn');
+          const app = document.getElementById('app');
+          if (splitTabId) {
+            splitBtn?.classList.add('active');
+            app?.classList.add('split-view-mode');
+          } else {
+            splitBtn?.classList.remove('active');
+            app?.classList.remove('split-view-mode');
+          }
+        });
+      }
+
       // Check if private window via URL parameter, IPC query, or document title
       const urlParams = new URLSearchParams(window.location.search);
       const isPrivateFromUrl = urlParams.get('private') === '1' || urlParams.get('private') === 'true';

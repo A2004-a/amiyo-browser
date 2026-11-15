@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%">
+  <defs>
+    <linearGradient id="goldenSky" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1c1917" />
+      <stop offset="25%" stop-color="#451a03" />
+      <stop offset="55%" stop-color="#9a3412" />
+      <stop offset="78%" stop-color="#ea580c" />
+      <stop offset="90%" stop-color="#f59e0b" />
+      <stop offset="100%" stop-color="#fef08a" />
+    </linearGradient>
+    <radialGradient id="goldenSun" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="1" />
+      <stop offset="30%" stop-color="#fef08a" stop-opacity="0.9" />
+      <stop offset="65%" stop-color="#f59e0b" stop-opacity="0.5" />
+      <stop offset="100%" stop-color="#ea580c" stop-opacity="0" />
+    </radialGradient>
+    <linearGradient id="mountainsBack" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#7c2d12" />
+      <stop offset="100%" stop-color="#292524" />
+    </linearGradient>
+  </defs>
+
+  <rect width="1920" height="1080" fill="url(#goldenSky)" />
+
+  <!-- Blazing Golden Sun on Horizon -->
+  <circle cx="960" cy="620" r="380" fill="url(#goldenSun)" />
+  <circle cx="960" cy="620" r="140" fill="#ffffff" />
+
+  <!-- Sun Beams -->
+  <polygon points="960,620 400,0 520,0" fill="#fef08a" opacity="0.12" />
+  <polygon points="960,620 820,0 960,0" fill="#fef08a" opacity="0.16" />
+  <polygon points="960,620 1360,0 1500,0" fill="#fef08a" opacity="0.14" />
+  <polygon points="960,620 0,260 0,380" fill="#fef08a" opacity="0.1" />
+  <polygon points="960,620 1920,280 1920,400" fill="#fef08a" opacity="0.1" />
+
+  <!-- Majestic Multi-Layer Sharp Mountains -->
+  <polygon points="-50,1080 160,640 440,820 720,560 980,780 1280,510 1560,760 1880,580 2000,1080" fill="url(#mountainsBack)" opacity="0.85" />
+  <polygon points="-50,1080 280,720 540,890 840,660 1140,860 1440,640 1740,820 2000,1080" fill="#441a07" opacity="0.95" />
+  <polygon points="-50,1080 120,840 420,780 760,940 1060,760 1380,910 1660,740 1920,880 2000,1080" fill="#1c1917" />
+
+  <!-- Golden Edge Lighting on Ridges -->
+  <polyline points="130,665 160,640 190,670" stroke="#fef08a" stroke-width="3" fill="none" opacity="0.9" />
+  <polyline points="690,585 720,560 750,590" stroke="#fef08a" stroke-width="3.5" fill="none" opacity="0.95" />
+  <polyline points="1250,535 1280,510 1310,540" stroke="#fef08a" stroke-width="4" fill="none" opacity="1" />
+  <polyline points="1850,605 1880,580 1910,610" stroke="#fef08a" stroke-width="3" fill="none" opacity="0.9" />
+</svg>

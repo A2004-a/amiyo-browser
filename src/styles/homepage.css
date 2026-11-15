@@ -554,14 +554,22 @@
   background-size: cover;
   background-position: center center;
   background-repeat: no-repeat;
+  transition: background-image 0.25s ease;
 }
 
 .chrome-ntp.has-custom-wallpaper::before {
   content: "";
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.32);
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.05) 35%, rgba(0, 0, 0, 0.35) 100%);
   pointer-events: none;
+  z-index: 1;
+}
+
+.wallpaper-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--cyan-accent, #35D8F2) !important;
+  box-shadow: 0 4px 14px rgba(53, 216, 242, 0.35) !important;
 }
 
 .chrome-ntp.has-custom-wallpaper .chrome-nav-link {

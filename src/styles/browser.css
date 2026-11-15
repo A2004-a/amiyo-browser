@@ -59,6 +59,14 @@
   transform: translateZ(0);
 }
 
+/* Split-Screen Dual View Mode for Internal Pages */
+#app.split-view-mode #view-container #internal-page-container {
+  width: 50% !important;
+  right: auto !important;
+  border-right: 1px solid var(--border-subtle);
+  box-shadow: 4px 0 16px rgba(0, 0, 0, 0.4);
+}
+
 /* Overlay Layer for Modals and Drawers */
 #overlay-backdrop {
   position: fixed;

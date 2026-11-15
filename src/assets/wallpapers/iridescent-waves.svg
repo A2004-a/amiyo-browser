@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%">
+  <defs>
+    <linearGradient id="iridBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#090d16" />
+      <stop offset="45%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#1e1b4b" />
+    </linearGradient>
+    <linearGradient id="fluidRibbon1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#06b6d4" stop-opacity="0.9" />
+      <stop offset="35%" stop-color="#3b82f6" stop-opacity="0.85" />
+      <stop offset="70%" stop-color="#8b5cf6" stop-opacity="0.9" />
+      <stop offset="100%" stop-color="#ec4899" stop-opacity="0.85" />
+    </linearGradient>
+    <linearGradient id="fluidRibbon2" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ec4899" stop-opacity="0.8" />
+      <stop offset="40%" stop-color="#f59e0b" stop-opacity="0.75" />
+      <stop offset="75%" stop-color="#10b981" stop-opacity="0.8" />
+      <stop offset="100%" stop-color="#06b6d4" stop-opacity="0.85" />
+    </linearGradient>
+    <filter id="softFluidGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="30" result="blur" />
+    </filter>
+  </defs>
+
+  <rect width="1920" height="1080" fill="url(#iridBg)" />
+
+  <!-- Fluid Flow Ribbons -->
+  <path d="M-100,500 C400,200 700,800 1200,400 C1600,100 1800,600 2100,300 L2100,1080 L-100,1080 Z" fill="url(#fluidRibbon1)" opacity="0.65" filter="url(#softFluidGlow)" />
+  <path d="M-100,650 C500,400 800,900 1300,550 C1700,250 1850,750 2100,500 L2100,1080 L-100,1080 Z" fill="url(#fluidRibbon2)" opacity="0.55" filter="url(#softFluidGlow)" />
+
+  <!-- Crisp Modern Ribbon Accents -->
+  <path d="M-100,480 C400,180 700,780 1200,380 C1600,80 1800,580 2100,280" fill="none" stroke="#67e8f9" stroke-width="4" opacity="0.8" />
+  <path d="M-100,630 C500,380 800,880 1300,530 C1700,230 1850,730 2100,480" fill="none" stroke="#f472b6" stroke-width="3" opacity="0.75" />
+  <path d="M-100,380 C300,680 850,220 1400,620 C1750,850 1950,450 2100,600" fill="none" stroke="#a78bfa" stroke-width="3" opacity="0.7" />
+</svg>

@@ -1074,30 +1074,7 @@ class TabController {
 
   updateActiveViewBounds() {
     const activeTab = this.getActiveTab();
-    if (!activeTab || !activeTab.view || activeTab.isInternal) {
-      if (activeTab && activeTab.view && activeTab.isInternal) {
-        try {
-          try { activeTab.view.setVisible(false); } catch (e) {}
-          activeTab.view.setBounds({ x: 0, y: 0, width: 0, height: 0 });
-        } catch (e) {}
-      }
-      return;
-    }
-
-    if (this.isViewVisible === false) {
-      try {
-        try { activeTab.view.setVisible(false); } catch (e) {}
-        activeTab.view.setBounds({ x: 0, y: 0, width: 0, height: 0 });
-        if (this.splitTabId) {
-          const splitTab = this.getTab(this.splitTabId);
-          if (splitTab && splitTab.view) {
-            try { splitTab.view.setVisible(false); } catch (e) {}
-            splitTab.view.setBounds({ x: 0, y: 0, width: 0, height: 0 });
-          }
-        }
-      } catch (e) {}
-      return;
-    }
+    const splitTab = this.splitTabId ? this.getTab(this.splitTabId) : null;
 
     try {
       const [width, height] = this.browserWindow.getContentSize();
@@ -1106,16 +1083,45 @@ class TabController {
       const sideOffset = typeof this.sideOffset === 'number' && this.sideOffset > 0 ? this.sideOffset : 0;
       const availableWidth = Math.max(0, width - sideOffset - leftOffset);
       const availableHeight = Math.max(0, height - topOffset);
+      const halfWidth = Math.floor(availableWidth / 2);
+
+      if (this.isViewVisible === false) {
+        if (activeTab && activeTab.view) {
+          try { activeTab.view.setVisible(false); } catch (e) {}
+          activeTab.view.setBounds({ x: 0, y: 0, width: 0, height: 0 });
+        }
+        if (splitTab && splitTab.view) {
+          try { splitTab.view.setVisible(false); } catch (e) {}
+          splitTab.view.setBounds({ x: 0, y: 0, width: 0, height: 0 });
+        }
+        return;
+      }
 
       // Check for active split-screen dual view
-      const splitTab = this.splitTabId ? this.getTab(this.splitTabId) : null;
-      if (splitTab && splitTab.view && !splitTab.isInternal && splitTab.id !== activeTab.id) {
+      if (splitTab && splitTab.view && !splitTab.isInternal && splitTab.id !== (activeTab ? activeTab.id : null)) {
         if (!this.browserWindow.contentView.children.includes(splitTab.view)) {
           try {
             this.browserWindow.contentView.addChildView(splitTab.view);
           } catch (e) {}
         }
-        const halfWidth = Math.floor(availableWidth / 2);
+
+        // If activeTab is internal (e.g. New Tab page), hide activeTab.view, but position splitTab.view on the right half
+        if (!activeTab || !activeTab.view || activeTab.isInternal) {
+          if (activeTab && activeTab.view) {
+            try { activeTab.view.setVisible(false); } catch (e) {}
+            activeTab.view.setBounds({ x: 0, y: 0, width: 0, height: 0 });
+          }
+          try { splitTab.view.setVisible(true); } catch (e) {}
+          splitTab.view.setBounds({
+            x: leftOffset + halfWidth,
+            y: topOffset,
+            width: availableWidth - halfWidth,
+            height: availableHeight
+          });
+          return;
+        }
+
+        // Both activeTab and splitTab are external web views: side-by-side
         try { activeTab.view.setVisible(true); } catch (e) {}
         activeTab.view.setBounds({
           x: leftOffset,
@@ -1134,7 +1140,23 @@ class TabController {
         return;
       }
 
+      // If splitTab is not active or is internal, ensure splitTab.view is hidden if it exists
+      if (splitTab && splitTab.view && (splitTab.isInternal || splitTab.id === (activeTab ? activeTab.id : null))) {
+        try { splitTab.view.setVisible(false); } catch (e) {}
+        splitTab.view.setBounds({ x: 0, y: 0, width: 0, height: 0 });
+      }
+
       // Single active view bounds
+      if (!activeTab || !activeTab.view || activeTab.isInternal) {
+        if (activeTab && activeTab.view && activeTab.isInternal) {
+          try {
+            try { activeTab.view.setVisible(false); } catch (e) {}
+            activeTab.view.setBounds({ x: 0, y: 0, width: 0, height: 0 });
+          } catch (e) {}
+        }
+        return;
+      }
+
       try { activeTab.view.setVisible(true); } catch (e) {}
       activeTab.view.setBounds({
         x: leftOffset,

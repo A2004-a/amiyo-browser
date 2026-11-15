@@ -81,10 +81,9 @@ if (app && app.commandLine) {
   }
   app.commandLine.appendSwitch('enable-fast-unload');
   app.commandLine.appendSwitch('enable-features', isGpuDisabled
-    ? 'OverlayScrollbar,SmoothScrolling,ParallelDownloading'
-    : 'VaapiVideoDecoder,OverlayScrollbar,CanvasOopRasterization,SmoothScrolling,ParallelDownloading');
-  app.commandLine.appendSwitch('disable-features', 'CalculateNativeWinOcclusion,WinHttpProxyResolver');
-  app.commandLine.appendSwitch('disable-async-dns');
+    ? 'OverlayScrollbar,SmoothScrolling,ParallelDownloading,AsyncDns'
+    : 'VaapiVideoDecoder,OverlayScrollbar,CanvasOopRasterization,SmoothScrolling,ParallelDownloading,AsyncDns');
+  app.commandLine.appendSwitch('disable-features', 'CalculateNativeWinOcclusion');
   app.commandLine.appendSwitch('js-flags', '--max-old-space-size=2048');
 }
 

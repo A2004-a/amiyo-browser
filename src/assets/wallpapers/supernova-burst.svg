@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%">
+  <defs>
+    <radialGradient id="supernovaCore" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="1" />
+      <stop offset="15%" stop-color="#fef08a" stop-opacity="0.9" />
+      <stop offset="35%" stop-color="#f43f5e" stop-opacity="0.75" />
+      <stop offset="65%" stop-color="#8b5cf6" stop-opacity="0.45" />
+      <stop offset="85%" stop-color="#06b6d4" stop-opacity="0.2" />
+      <stop offset="100%" stop-color="#030712" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id="nebulaCloudLeft" cx="30%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#ec4899" stop-opacity="0.65" />
+      <stop offset="45%" stop-color="#6366f1" stop-opacity="0.4" />
+      <stop offset="85%" stop-color="#0284c7" stop-opacity="0.15" />
+      <stop offset="100%" stop-color="#030712" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id="nebulaCloudRight" cx="70%" cy="60%" r="55%">
+      <stop offset="0%" stop-color="#06b6d4" stop-opacity="0.7" />
+      <stop offset="45%" stop-color="#3b82f6" stop-opacity="0.4" />
+      <stop offset="80%" stop-color="#a855f7" stop-opacity="0.2" />
+      <stop offset="100%" stop-color="#030712" stop-opacity="0" />
+    </radialGradient>
+    <filter id="starGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+    </filter>
+  </defs>
+
+  <rect width="1920" height="1080" fill="#050814" />
+
+  <!-- Luminous Gas Clouds -->
+  <circle cx="580" cy="460" r="720" fill="url(#nebulaCloudLeft)" />
+  <circle cx="1340" cy="620" r="680" fill="url(#nebulaCloudRight)" />
+  <ellipse cx="960" cy="540" rx="900" ry="500" fill="url(#supernovaCore)" />
+
+  <!-- Central Supernova Star Burst -->
+  <circle cx="960" cy="540" r="48" fill="#ffffff" filter="url(#starGlow)" />
+  <ellipse cx="960" cy="540" rx="420" ry="6" fill="#ffffff" opacity="0.9" filter="url(#starGlow)" />
+  <ellipse cx="960" cy="540" rx="6" ry="420" fill="#ffffff" opacity="0.9" filter="url(#starGlow)" />
+  <ellipse cx="960" cy="540" rx="260" ry="4" transform="rotate(45 960 540)" fill="#fde047" opacity="0.8" />
+  <ellipse cx="960" cy="540" rx="260" ry="4" transform="rotate(-45 960 540)" fill="#fde047" opacity="0.8" />
+
+  <!-- Dense Vibrant Starfield -->
+  <g fill="#ffffff">
+    <circle cx="160" cy="180" r="1.5" /><circle cx="320" cy="90" r="2.5" /><circle cx="480" cy="240" r="1.8" />
+    <circle cx="720" cy="120" r="2.2" /><circle cx="880" cy="280" r="1.5" /><circle cx="1140" cy="160" r="2.5" />
+    <circle cx="1360" cy="110" r="1.8" /><circle cx="1580" cy="220" r="2.2" /><circle cx="1780" cy="140" r="1.5" />
+    <circle cx="210" cy="780" r="2.2" /><circle cx="440" cy="890" r="1.5" /><circle cx="680" cy="740" r="2.5" />
+    <circle cx="890" cy="920" r="1.8" /><circle cx="1180" cy="840" r="2.2" /><circle cx="1420" cy="910" r="1.5" />
+    <circle cx="1650" cy="790" r="2.5" /><circle cx="1820" cy="880" r="1.8" />
+  </g>
+</svg>

@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%">
+  <defs>
+    <linearGradient id="sakuraSky" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1e1035" />
+      <stop offset="40%" stop-color="#3b1d60" />
+      <stop offset="70%" stop-color="#831843" />
+      <stop offset="90%" stop-color="#db2777" />
+      <stop offset="100%" stop-color="#f472b6" />
+    </linearGradient>
+    <radialGradient id="sakuraSun" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fff1f2" stop-opacity="0.95" />
+      <stop offset="35%" stop-color="#fbcfe8" stop-opacity="0.8" />
+      <stop offset="70%" stop-color="#f472b6" stop-opacity="0.4" />
+      <stop offset="100%" stop-color="#db2777" stop-opacity="0" />
+    </radialGradient>
+    <linearGradient id="sakuraHills" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#4a044e" />
+      <stop offset="100%" stop-color="#18021f" />
+    </linearGradient>
+  </defs>
+
+  <!-- Sky -->
+  <rect width="1920" height="1080" fill="url(#sakuraSky)" />
+
+  <!-- Luminous Twilight Moon / Sun -->
+  <circle cx="960" cy="420" r="320" fill="url(#sakuraSun)" />
+  <circle cx="960" cy="420" r="160" fill="#fff1f2" opacity="0.9" />
+
+  <!-- Distant Mountain Silhouettes (Mount Fuji style) -->
+  <polygon points="460,820 960,380 1460,820" fill="#2e1065" opacity="0.65" />
+  <polygon points="900,432 960,380 1020,432 980,450 960,440 940,450" fill="#fdf2f8" opacity="0.95" />
+
+  <!-- Layered Hills & Temple Silhouettes -->
+  <path d="M-50,780 Q450,680 960,760 T1970,720 L1970,1080 L-50,1080 Z" fill="url(#sakuraHills)" opacity="0.85" />
+  <path d="M-50,860 Q550,780 1150,860 T1970,820 L1970,1080 L-50,1080 Z" fill="#18021f" />
+
+  <!-- Cherry Blossom Branch Silhouette (Foreground) -->
+  <path d="M0,80 Q280,180 520,120 T940,220" fill="none" stroke="#2a0833" stroke-width="12" stroke-linecap="round" />
+  <path d="M340,150 Q480,240 680,210" fill="none" stroke="#2a0833" stroke-width="7" stroke-linecap="round" />
+  <path d="M620,180 Q760,110 880,150" fill="none" stroke="#2a0833" stroke-width="5" stroke-linecap="round" />
+
+  <!-- Glowing Sakura Petals & Blossom Clusters -->
+  <g fill="#fbcfe8" opacity="0.92">
+    <circle cx="320" cy="130" r="14" fill="#f472b6" /><circle cx="330" cy="120" r="10" />
+    <circle cx="500" cy="110" r="16" fill="#f472b6" /><circle cx="510" cy="100" r="11" />
+    <circle cx="670" cy="200" r="18" fill="#f472b6" /><circle cx="680" cy="190" r="12" />
+    <circle cx="860" cy="140" r="15" fill="#f472b6" /><circle cx="870" cy="130" r="10" />
+    <circle cx="920" cy="210" r="16" fill="#f472b6" /><circle cx="930" cy="200" r="11" />
+  </g>
+
+  <!-- Cascading Falling Petals -->
+  <g fill="#fdf2f8" opacity="0.85">
+    <ellipse cx="440" cy="280" rx="9" ry="5" transform="rotate(35 440 280)" fill="#fbcfe8" />
+    <ellipse cx="620" cy="380" rx="8" ry="4" transform="rotate(-25 620 380)" fill="#f472b6" />
+    <ellipse cx="820" cy="320" rx="10" ry="6" transform="rotate(45 820 320)" fill="#fbcfe8" />
+    <ellipse cx="1080" cy="460" rx="9" ry="5" transform="rotate(15 1080 460)" fill="#fdf2f8" />
+    <ellipse cx="1260" cy="340" rx="8" ry="5" transform="rotate(-40 1260 340)" fill="#fbcfe8" />
+    <ellipse cx="1480" cy="520" rx="10" ry="6" transform="rotate(30 1480 520)" fill="#f472b6" />
+    <ellipse cx="740" cy="580" rx="7" ry="4" transform="rotate(60 740 580)" fill="#fdf2f8" />
+    <ellipse cx="980" cy="690" rx="9" ry="5" transform="rotate(-15 980 690)" fill="#fbcfe8" />
+    <ellipse cx="1320" cy="740" rx="8" ry="4" transform="rotate(50 1320 740)" fill="#f472b6" />
+  </g>
+</svg>

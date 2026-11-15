@@ -1,32 +1,60 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%">
   <defs>
-    <linearGradient id="oceanBg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#040d1a" />
-      <stop offset="45%" stop-color="#06182c" />
-      <stop offset="85%" stop-color="#021020" />
-      <stop offset="100%" stop-color="#01070e" />
+    <linearGradient id="oceanSky" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0a192f" />
+      <stop offset="35%" stop-color="#0e3a64" />
+      <stop offset="65%" stop-color="#0b5282" />
+      <stop offset="100%" stop-color="#032b49" />
     </linearGradient>
-    <radialGradient id="biolumGlow" cx="65%" cy="35%" r="55%">
-      <stop offset="0%" stop-color="#00f0ff" stop-opacity="0.32" />
-      <stop offset="40%" stop-color="#0077b6" stop-opacity="0.18" />
-      <stop offset="100%" stop-color="#040d1a" stop-opacity="0" />
+    <radialGradient id="sunMoonGlow" cx="50%" cy="30%" r="50%">
+      <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.8" />
+      <stop offset="25%" stop-color="#0284c7" stop-opacity="0.45" />
+      <stop offset="60%" stop-color="#0369a1" stop-opacity="0.15" />
+      <stop offset="100%" stop-color="#0a192f" stop-opacity="0" />
     </radialGradient>
-    <linearGradient id="wave1" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#00f0ff" stop-opacity="0.12" />
-      <stop offset="50%" stop-color="#00a8e8" stop-opacity="0.22" />
-      <stop offset="100%" stop-color="#003566" stop-opacity="0.08" />
+    <linearGradient id="waveFront" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#06b6d4" stop-opacity="0.85" />
+      <stop offset="50%" stop-color="#38bdf8" stop-opacity="0.95" />
+      <stop offset="100%" stop-color="#0284c7" stop-opacity="0.75" />
     </linearGradient>
-    <linearGradient id="wave2" x1="100%" y1="0%" x2="0%" y2="0%">
-      <stop offset="0%" stop-color="#0077b6" stop-opacity="0.18" />
-      <stop offset="60%" stop-color="#03045e" stop-opacity="0.25" />
-      <stop offset="100%" stop-color="#001845" stop-opacity="0.1" />
+    <linearGradient id="waveMid" x1="100%" y1="0%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#0284c7" stop-opacity="0.75" />
+      <stop offset="50%" stop-color="#0369a1" stop-opacity="0.85" />
+      <stop offset="100%" stop-color="#075985" stop-opacity="0.65" />
     </linearGradient>
+    <linearGradient id="waveDeep" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0c4a6e" />
+      <stop offset="50%" stop-color="#082f49" />
+      <stop offset="100%" stop-color="#021a2c" />
+    </linearGradient>
+    <filter id="biolumBlur" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="35" result="blur" />
+    </filter>
   </defs>
-  <rect width="1920" height="1080" fill="url(#oceanBg)" />
-  <circle cx="1250" cy="380" r="750" fill="url(#biolumGlow)" />
-  <circle cx="350" cy="850" r="500" fill="#00f0ff" fill-opacity="0.08" filter="blur(60px)" />
-  <!-- Wave Layers -->
-  <path d="M0,520 C320,440 680,620 1050,540 C1420,460 1680,560 1920,500 L1920,1080 L0,1080 Z" fill="url(#wave1)" />
-  <path d="M0,680 C360,590 740,780 1150,670 C1560,560 1780,690 1920,630 L1920,1080 L0,1080 Z" fill="url(#wave2)" />
-  <path d="M0,840 C420,760 860,910 1280,820 C1650,740 1820,830 1920,790 L1920,1080 L0,1080 Z" fill="#010c18" fill-opacity="0.6" />
+
+  <!-- Sky / Water Gradient -->
+  <rect width="1920" height="1080" fill="url(#oceanSky)" />
+  <circle cx="960" cy="340" r="580" fill="url(#sunMoonGlow)" />
+
+  <!-- Bioluminescent ambient glow -->
+  <ellipse cx="600" cy="780" rx="420" ry="180" fill="#22d3ee" opacity="0.3" filter="url(#biolumBlur)" />
+  <ellipse cx="1400" cy="720" rx="380" ry="160" fill="#38bdf8" opacity="0.35" filter="url(#biolumBlur)" />
+
+  <!-- Stars / Bioluminescent Specks -->
+  <g fill="#e0f2fe" opacity="0.85">
+    <circle cx="200" cy="140" r="1.5" /><circle cx="340" cy="90" r="2" /><circle cx="520" cy="180" r="1.5" />
+    <circle cx="780" cy="110" r="2" /><circle cx="1120" cy="130" r="2.5" /><circle cx="1340" cy="80" r="1.5" />
+    <circle cx="1620" cy="160" r="2" /><circle cx="1780" cy="100" r="1.5" /><circle cx="940" cy="60" r="2" />
+  </g>
+
+  <!-- Layered Majestic Ocean Waves with Crest Highlights -->
+  <path d="M0,560 C380,480 720,640 1100,550 C1460,470 1700,580 1920,530 L1920,1080 L0,1080 Z" fill="url(#waveDeep)" opacity="0.95" />
+  <path d="M0,640 C420,550 820,740 1220,630 C1580,530 1780,670 1920,610 L1920,1080 L0,1080 Z" fill="url(#waveMid)" opacity="0.9" />
+  <path d="M0,730 C360,650 780,820 1200,720 C1540,640 1760,760 1920,700 L1920,1080 L0,1080 Z" fill="url(#waveFront)" opacity="0.8" />
+  <path d="M0,840 C440,780 860,910 1320,830 C1660,770 1820,850 1920,810 L1920,1080 L0,1080 Z" fill="#082f49" opacity="0.95" />
+
+  <!-- Luminous Crest Foam Lines -->
+  <path d="M0,560 C380,480 720,640 1100,550 C1460,470 1700,580 1920,530" fill="none" stroke="#7dd3fc" stroke-width="2.5" opacity="0.75" />
+  <path d="M0,640 C420,550 820,740 1220,630 C1580,530 1780,670 1920,610" fill="none" stroke="#bae6fd" stroke-width="3" opacity="0.85" />
+  <path d="M0,730 C360,650 780,820 1200,720 C1540,640 1760,760 1920,700" fill="none" stroke="#38bdf8" stroke-width="3.5" opacity="0.9" />
 </svg>

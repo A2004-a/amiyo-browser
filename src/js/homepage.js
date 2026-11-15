@@ -3,25 +3,30 @@ const Homepage = {
 
   defaultShortcuts: [
     { title: 'Google', url: 'https://www.google.com', icon: 'https://www.google.com/favicon.ico' },
-    { title: 'YouTube', url: 'https://www.youtube.com', icon: 'https://www.youtube.com/s/desktop/f719b161/img/favicon.ico' },
+    { title: 'YouTube', url: 'https://www.youtube.com', icon: 'https://www.youtube.com/favicon.ico' },
+    { title: 'ChatGPT', url: 'https://chatgpt.com', icon: 'https://chatgpt.com/favicon.ico' },
+    { title: 'GitHub', url: 'https://github.com', icon: 'https://github.com/favicon.ico' },
+    { title: 'Claude', url: 'https://claude.ai', icon: 'https://claude.ai/favicon.ico' },
     { title: 'Gmail', url: 'https://mail.google.com', icon: 'https://ssl.gstatic.com/ui/v1/icons/mail/rfr/gmail.ico' },
-    { title: 'GitHub', url: 'https://github.com', icon: 'https://github.githubassets.com/favicons/favicon.png' },
-    { title: 'Wikipedia', url: 'https://www.wikipedia.org', icon: 'https://www.wikipedia.org/static/favicon/wikipedia.ico' },
-    { title: 'Maps', url: 'https://maps.google.com', icon: 'https://www.google.com/images/branding/product/ico/maps15_bnu.ico' },
-    { title: 'Reddit', url: 'https://www.reddit.com', icon: 'https://www.redditstatic.com/shreddit/assets/favicon/192x192.png' },
-    { title: 'Twitter / X', url: 'https://x.com', icon: 'https://abs.twimg.com/favicons/twitter.3.ico' }
+    { title: 'Wikipedia', url: 'https://www.wikipedia.org', icon: 'https://en.wikipedia.org/favicon.ico' },
+    { title: 'Reddit', url: 'https://www.reddit.com', icon: 'https://www.redditstatic.com/shreddit/assets/favicon/64x64.png' }
   ],
 
   wallpapers: [
-    { id: 'none', name: 'Classic Clean', url: '', preview: 'var(--bg-primary)' },
-    { id: 'ocean', name: 'Deep Ocean', url: 'assets/wallpapers/deep-ocean.svg', preview: 'linear-gradient(135deg, #040d1a, #0077b6)' },
-    { id: 'cyber', name: 'Cyber Neon', url: 'assets/wallpapers/cyber-neon.svg', preview: 'linear-gradient(135deg, #0a0518, #ff007f 50%, #00f0ff)' },
-    { id: 'aurora', name: 'Aurora Borealis', url: 'assets/wallpapers/aurora-glow.svg', preview: 'linear-gradient(135deg, #020712, #05f7a4 50%, #6366f1)' },
-    { id: 'nebula', name: 'Cosmic Nebula', url: 'assets/wallpapers/cosmic-nebula.svg', preview: 'linear-gradient(135deg, #030712, #ec4899 40%, #00f0ff)' },
-    { id: 'sunset', name: 'Sunset Horizon', url: 'assets/wallpapers/sunset-horizon.svg', preview: 'linear-gradient(135deg, #1e1b4b, #be185d 50%, #f59e0b)' },
-    { id: 'minimal', name: 'Minimal Flow', url: 'assets/wallpapers/minimal-flow.svg', preview: 'linear-gradient(135deg, #090d16, #00f0ff 40%, #a855f7)' },
-    { id: 'matrix', name: 'Obsidian Matrix', url: 'assets/wallpapers/obsidian-matrix.svg', preview: 'linear-gradient(135deg, #070b14, #1f293d 50%, #00f0ff)' },
-    { id: 'mountains', name: 'Earth & Mountains', url: 'assets/wallpapers/earth-mountains.svg', preview: 'linear-gradient(135deg, #0a1128, #3a506b 60%, #5bc0be)' }
+    { id: 'none', name: 'Classic Clean', url: '', preview: 'linear-gradient(135deg, #0b0f14, #162234)' },
+    { id: 'ocean', name: 'Deep Ocean', url: 'assets/wallpapers/deep-ocean.svg', preview: 'linear-gradient(135deg, #0284c7, #06b6d4 50%, #0369a1)' },
+    { id: 'sakura', name: 'Sakura Blossom', url: 'assets/wallpapers/sakura-spring.svg', preview: 'linear-gradient(135deg, #831843, #f472b6 50%, #3b1d60)' },
+    { id: 'golden', name: 'Golden Horizon', url: 'assets/wallpapers/golden-horizon.svg', preview: 'linear-gradient(135deg, #ea580c, #f59e0b 60%, #451a03)' },
+    { id: 'tokyo', name: 'Cyber Tokyo', url: 'assets/wallpapers/cyber-tokyo.svg', preview: 'linear-gradient(135deg, #ff007f, #00f0ff 50%, #1f0338)' },
+    { id: 'aurora', name: 'Aurora Borealis', url: 'assets/wallpapers/aurora-glow.svg', preview: 'linear-gradient(135deg, #10b981, #22d3ee 50%, #a855f7)' },
+    { id: 'supernova', name: 'Supernova Burst', url: 'assets/wallpapers/supernova-burst.svg', preview: 'linear-gradient(135deg, #ec4899, #6366f1 50%, #06b6d4)' },
+    { id: 'iridescent', name: 'Iridescent Waves', url: 'assets/wallpapers/iridescent-waves.svg', preview: 'linear-gradient(135deg, #3b82f6, #8b5cf6 50%, #ec4899)' },
+    { id: 'cyber', name: 'Cyber Neon', url: 'assets/wallpapers/cyber-neon.svg', preview: 'linear-gradient(135deg, #a21caf, #06b6d4 50%, #0f172a)' },
+    { id: 'nebula', name: 'Cosmic Nebula', url: 'assets/wallpapers/cosmic-nebula.svg', preview: 'linear-gradient(135deg, #8b5cf6, #ec4899 50%, #0284c7)' },
+    { id: 'sunset', name: 'Sunset Horizon', url: 'assets/wallpapers/sunset-horizon.svg', preview: 'linear-gradient(135deg, #f59e0b, #e11d48 50%, #1e1b4b)' },
+    { id: 'minimal', name: 'Minimal Flow', url: 'assets/wallpapers/minimal-flow.svg', preview: 'linear-gradient(135deg, #0ea5e9, #a855f7 50%, #0f172a)' },
+    { id: 'mountains', name: 'Earth & Mountains', url: 'assets/wallpapers/earth-mountains.svg', preview: 'linear-gradient(135deg, #0284c7, #10b981 60%, #0f172a)' },
+    { id: 'matrix', name: 'Obsidian Matrix', url: 'assets/wallpapers/obsidian-matrix.svg', preview: 'linear-gradient(135deg, #06b6d4, #1e293b 50%, #0b0f14)' }
   ],
 
   render(container) {
@@ -208,20 +213,23 @@ const Homepage = {
           <!-- Chrome Quick Shortcuts Grid -->
           <div class="chrome-shortcuts-section ${showShortcuts ? '' : 'hidden'}" id="chrome-shortcuts-section">
             <div class="chrome-shortcuts-grid" id="shortcuts-grid">
-              ${shortcuts.map((s, idx) => `
+              ${shortcuts.map((s, idx) => {
+                const brand = Utils.getBrandIcon ? Utils.getBrandIcon(s.title, s.url) : null;
+                const iconHtml = brand || (s.icon ? `<img src="${Utils.escapeHtml(s.icon)}" onerror="this.style.display='none'; if (this.nextElementSibling) this.nextElementSibling.style.display='flex';" />` : '');
+                return `
                 <div class="chrome-shortcut-tile" data-url="${Utils.escapeHtml(s.url)}" data-idx="${idx}" title="${Utils.escapeHtml(s.title)}">
                   <button class="shortcut-actions-btn" data-idx="${idx}" title="More options">
                     ${Utils.icons.more}
                   </button>
                   <div class="chrome-shortcut-circle">
-                    ${s.icon ? `<img src="${Utils.escapeHtml(s.icon)}" onerror="this.style.display='none'; if (this.nextElementSibling) this.nextElementSibling.style.display='flex';" />` : ''}
-                    <div class="shortcut-fallback" style="${s.icon ? 'display:none;' : ''}">
+                    ${iconHtml}
+                    <div class="shortcut-fallback" style="${(brand || s.icon) ? 'display:none;' : ''}">
                       ${Utils.escapeHtml((s.title && s.title[0]) || 'W')}
                     </div>
                   </div>
                   <div class="chrome-shortcut-label">${Utils.escapeHtml(s.title)}</div>
                 </div>
-              `).join('')}
+              `;}).join('')}
 
               <div class="chrome-shortcut-tile add-tile" id="add-shortcut-btn" title="Add shortcut">
                 <div class="chrome-shortcut-circle add-circle">
@@ -559,18 +567,18 @@ const Homepage = {
               <input type="file" id="upload-wallpaper-file" accept="image/*" style="display:none;" />
             </div>
           </div>
-          <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:10px;">
+          <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:12px;">
             ${this.wallpapers.map(w => {
               const isSelected = activeWallpaper === w.url;
               return `
                 <div 
                   class="wallpaper-card ${isSelected ? 'active' : ''}" 
                   data-url="${Utils.escapeHtml(w.url)}"
-                  style="height:68px;border-radius:8px;border:2px solid ${isSelected ? 'var(--cyan-accent, #35D8F2)' : 'var(--border-subtle)'};background:${w.preview || 'var(--bg-tertiary)'};background-image:${w.url ? `url('${w.url}')` : 'none'};background-size:cover;background-position:center;cursor:pointer;display:flex;align-items:flex-end;justify-content:space-between;padding:6px 8px;position:relative;overflow:hidden;box-shadow:${isSelected ? '0 0 14px rgba(53, 216, 242, 0.45)' : 'none'};transition:all 0.15s ease;"
+                  style="height:78px;border-radius:10px;border:2px solid ${isSelected ? 'var(--cyan-accent, #35D8F2)' : 'var(--border-subtle)'};background:${w.preview || 'var(--bg-tertiary)'};background-image:${w.url ? `url('${w.url}')` : 'none'};background-size:cover;background-position:center;cursor:pointer;display:flex;align-items:flex-end;justify-content:space-between;padding:8px 10px;position:relative;overflow:hidden;box-shadow:${isSelected ? '0 0 16px rgba(53, 216, 242, 0.55)' : '0 2px 8px rgba(0,0,0,0.3)'};transition:all 0.18s ease;"
                 >
-                  <span style="font-size:11px;font-weight:600;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,0.9);z-index:2;">${w.name}</span>
-                  ${isSelected ? `<span style="font-size:12px;color:var(--cyan-accent, #35D8F2);font-weight:800;text-shadow:0 1px 3px rgba(0,0,0,0.9);z-index:2;">✓</span>` : ''}
-                  <div style="position:absolute;inset:0;background:linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 60%);pointer-events:none;"></div>
+                  <span style="font-size:11.5px;font-weight:700;color:#ffffff;text-shadow:0 1px 4px rgba(0,0,0,0.95);z-index:2;letter-spacing:0.2px;">${w.name}</span>
+                  ${isSelected ? `<span style="font-size:13px;color:var(--cyan-accent, #35D8F2);font-weight:900;text-shadow:0 1px 4px rgba(0,0,0,0.95);z-index:2;">✓</span>` : ''}
+                  <div style="position:absolute;inset:0;background:linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 45%);pointer-events:none;"></div>
                 </div>
               `;
             }).join('')}
