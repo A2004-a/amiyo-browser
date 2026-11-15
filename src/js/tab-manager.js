@@ -18,6 +18,36 @@ const TabManager = {
     card?.classList.add('hidden');
   },
 
+  syncVerticalTabsLayout(isVertical) {
+    const app = document.getElementById('app');
+    const verticalBtn = document.getElementById('toggle-vertical-tabs-btn');
+    const tabBarContainer = document.getElementById('tab-bar-container');
+    const newTabBtn = document.getElementById('new-tab-btn');
+    const verticalContainer = document.getElementById('vertical-tabs-container');
+    const verticalSidebar = document.getElementById('vertical-tabs-sidebar');
+    const tabsStrip = document.getElementById('tabs-strip');
+
+    if (!tabsStrip) return;
+
+    if (isVertical) {
+      app?.classList.add('vertical-tabs-mode');
+      verticalBtn?.classList.add('active');
+      verticalSidebar?.classList.remove('hidden');
+      if (verticalContainer && tabsStrip.parentElement !== verticalContainer) {
+        verticalContainer.appendChild(tabsStrip);
+      }
+      IpcClient.setLeftOffset?.(220);
+    } else {
+      app?.classList.remove('vertical-tabs-mode');
+      verticalBtn?.classList.remove('active');
+      verticalSidebar?.classList.add('hidden');
+      if (tabBarContainer && newTabBtn && tabsStrip.parentElement !== tabBarContainer) {
+        tabBarContainer.insertBefore(tabsStrip, newTabBtn);
+      }
+      IpcClient.setLeftOffset?.(0);
+    }
+  },
+
   init() {
     this.stripEl = document.getElementById('tabs-strip');
     const newTabBtn = document.getElementById('new-tab-btn');
@@ -86,23 +116,21 @@ const TabManager = {
 
     // Toggle Vertical Tabs button
     const verticalBtn = document.getElementById('toggle-vertical-tabs-btn');
+    const isVertical = (localStorage.getItem('aether_vertical_tabs') || localStorage.getItem('amiyo_vertical_tabs')) === 'true';
+    this.syncVerticalTabsLayout(isVertical);
+
     if (verticalBtn) {
-      const isVertical = (localStorage.getItem('aether_vertical_tabs') || localStorage.getItem('amiyo_vertical_tabs')) === 'true';
-      if (isVertical) {
-        document.getElementById('app')?.classList.add('vertical-tabs-mode');
-        verticalBtn.classList.add('active');
-        IpcClient.setLeftOffset?.(210);
-      }
       verticalBtn.addEventListener('click', () => {
-        const app = document.getElementById('app');
-        const active = app.classList.toggle('vertical-tabs-mode');
-        verticalBtn.classList.toggle('active', active);
-        const str = active ? 'true' : 'false';
-        localStorage.setItem('aether_vertical_tabs', str);
-        localStorage.setItem('amiyo_vertical_tabs', str);
-        IpcClient.setLeftOffset?.(active ? 210 : 0);
+        const willBeVertical = !document.getElementById('app')?.classList.contains('vertical-tabs-mode');
+        localStorage.setItem('aether_vertical_tabs', willBeVertical ? 'true' : 'false');
+        localStorage.setItem('amiyo_vertical_tabs', willBeVertical ? 'true' : 'false');
+        this.syncVerticalTabsLayout(willBeVertical);
       });
     }
+
+    document.getElementById('vertical-new-tab-btn')?.addEventListener('click', () => {
+      IpcClient.createTab('aether://newtab');
+    });
 
     // Tab Search button
     const tabSearchBtn = document.getElementById('tab-search-btn');

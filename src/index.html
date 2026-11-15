@@ -44,6 +44,7 @@
         <button id="new-tab-btn" title="New Tab (Ctrl+T)">
           <svg class="icon" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
         </button>
+        <div class="tab-bar-spacer"></div>
         <button id="tab-search-btn" class="nav-btn-sm" title="Search Tabs (Ctrl+Shift+A)">
           <svg class="icon" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
         </button>
@@ -320,146 +321,158 @@
       </div>
     </header>
 
-    <!-- Main View Container -->
-    <main id="view-container">
-      <!-- Internal Pages Container (New Tab, History, Settings, etc.) -->
-      <div id="internal-page-container"></div>
-
-      <!-- Seamless Freeze-Frame Viewport Snapshot Backdrop for Popovers/Dropdowns -->
-      <div id="freeze-backdrop" class="freeze-backdrop hidden"></div>
-
-      <!-- Distraction-Free Reader Mode Overlay -->
-      <div id="reader-mode-overlay" class="reader-overlay hidden">
-        <div class="reader-topbar">
-          <div class="reader-brand">
-            <svg class="icon" viewBox="0 0 24 24"><path d="M19 2H5c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 16H6V4h12v14zM8 6h8v2H8V6zm0 3h8v2H8V9zm0 3h5v2H8v-2z"/></svg>
-            <span>Reader View</span>
-          </div>
-          <div class="reader-controls">
-            <button class="reader-btn" id="reader-speech-btn" title="Edge Read Aloud (Ctrl+Shift+U)">🔊 Read Aloud</button>
-            <button class="reader-btn" id="reader-font-smaller" title="Decrease font size">A−</button>
-            <button class="reader-btn" id="reader-font-larger" title="Increase font size">A+</button>
-            <button class="reader-btn" id="reader-font-family" title="Toggle font family">Font</button>
-            <div class="reader-theme-group">
-              <button class="reader-theme-btn dark" data-reader-theme="dark" title="Dark theme"></button>
-              <button class="reader-theme-btn sepia" data-reader-theme="sepia" title="Sepia theme"></button>
-              <button class="reader-theme-btn light" data-reader-theme="light" title="Light theme"></button>
-            </div>
-            <button class="reader-btn close-reader-btn" id="reader-close-btn" title="Exit Reader View">✕ Close</button>
-          </div>
+    <!-- Browser Body: holds Vertical Tabs Sidebar + Main View Container -->
+    <div id="browser-body">
+      <!-- Microsoft Edge-style Vertical Tabs Sidebar -->
+      <aside id="vertical-tabs-sidebar" class="vertical-tabs-sidebar hidden">
+        <div class="vertical-sidebar-top">
+          <button id="vertical-new-tab-btn" class="vertical-new-tab-btn" title="New Tab (Ctrl+T)">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+            <span>New tab</span>
+          </button>
         </div>
-
-        <!-- Microsoft Edge-style Read Aloud Floating Speech Bar -->
-        <div id="reader-speech-bar" class="reader-speech-bar hidden">
-          <button class="speech-ctrl-btn" id="speech-play-btn" title="Play / Pause">▶ Play</button>
-          <button class="speech-ctrl-btn" id="speech-stop-btn" title="Stop">⏹ Stop</button>
-          <div class="speech-group">
-            <span class="speech-label">Speed:</span>
-            <select id="speech-rate-select" class="speech-select">
-              <option value="0.75">0.75x</option>
-              <option value="1.0" selected>1.0x</option>
-              <option value="1.25">1.25x</option>
-              <option value="1.5">1.5x</option>
-              <option value="2.0">2.0x</option>
-            </select>
-          </div>
-          <div class="speech-group">
-            <span class="speech-label">Voice:</span>
-            <select id="speech-voice-select" class="speech-select voice-select"></select>
-          </div>
-          <div class="speech-status" id="speech-status-label">Ready to read</div>
-        </div>
-        <div class="reader-scroll-container">
-          <article class="reader-article" id="reader-article-content"></article>
-        </div>
-      </div>
-
-      <!-- AETHER Intelligence Side Panel -->
-      <aside id="ai-side-panel" class="ai-panel hidden">
-        <!-- Header -->
-        <div class="ai-header">
-          <div class="ai-brand">
-            <div class="ai-brand-badge">
-              <svg class="icon" viewBox="0 0 24 24"><path d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5zM19 15l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 19l-2.75-1.25L19 15z"/></svg>
-            </div>
-            <div class="ai-title-wrap">
-              <span class="ai-title">AETHER Intelligence</span>
-              <span class="ai-provider-pill" id="ai-provider-pill">Autonomous Cognition</span>
-            </div>
-          </div>
-          <div class="ai-header-actions">
-            <button class="ai-btn-icon" id="ai-clear-btn" title="Clear conversation">
-              <svg class="icon" viewBox="0 0 24 24"><path d="M19 4h-3.5l-1-1h-5l-1 1H5v2h14V4zM6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12z"/></svg>
-            </button>
-            <button class="ai-btn-icon" id="ai-close-btn" title="Close AI panel">
-              <svg class="icon" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
-            </button>
-          </div>
-        </div>
-
-        <!-- Quick Action Chips -->
-        <div class="ai-quick-actions">
-          <button class="ai-chip" data-action="summarize">📄 Summarize Page</button>
-          <button class="ai-chip" data-action="highlights">✨ Key Highlights</button>
-          <button class="ai-chip" data-action="explain">💡 Explain Simply</button>
-          <button class="ai-chip" data-action="actionable">🎯 Action Items</button>
-        </div>
-
-        <!-- Messages Area -->
-        <div class="ai-messages" id="ai-messages"></div>
-
-        <!-- Input Area -->
-        <div class="ai-input-container">
-          <div class="ai-context-toggle">
-            <label class="ai-context-pill">
-              <input type="checkbox" id="ai-context-chk" checked />
-              <span>Active Page Context</span>
-            </label>
-            <span id="ai-context-page-title" class="ai-context-title" style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;color:var(--text-muted);"></span>
-          </div>
-          <div class="ai-input-wrap">
-            <textarea id="ai-prompt-input" class="ai-textarea" rows="1" placeholder="Ask AETHER Intelligence anything or about this page..."></textarea>
-            <button id="ai-send-btn" class="ai-send-btn" title="Send (Enter)">
-              <svg class="icon" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-            </button>
-          </div>
-        </div>
+        <div id="vertical-tabs-container" class="vertical-tabs-container"></div>
       </aside>
 
-      <!-- Microsoft Edge-style Quick Notes / Scratchpad Drawer -->
-      <aside id="quick-notes-panel" class="quick-notes-panel hidden">
-        <div class="quick-notes-header">
-          <div class="quick-notes-title">
-            <svg class="icon" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
-            <span>Edge Scratchpad</span>
-          </div>
-          <div class="quick-notes-actions">
-            <button class="ai-btn-icon" id="notes-insert-link-btn" title="Insert active page link">📌</button>
-            <button class="ai-btn-icon" id="notes-copy-btn" title="Copy all notes">📋</button>
-            <button class="ai-btn-icon" id="notes-export-btn" title="Export as text file">💾</button>
-            <button class="ai-btn-icon" id="notes-clear-btn" title="Clear notes">🗑️</button>
-            <button class="ai-btn-icon" id="notes-close-btn" title="Close notes">✕</button>
-          </div>
-        </div>
-        <textarea id="quick-notes-textarea" class="quick-notes-textarea" placeholder="Jot down research notes, thoughts, or ideas while browsing... (auto-saved)"></textarea>
-        <div class="quick-notes-footer">
-          <span id="notes-count-info">0 words • 0 chars</span>
-          <span class="notes-sync-status">✓ Saved locally</span>
-        </div>
-      </aside>
+      <!-- Main View Container -->
+      <main id="view-container">
+        <!-- Internal Pages Container (New Tab, History, Settings, etc.) -->
+        <div id="internal-page-container"></div>
 
-      <!-- Google Chrome-style Tab Hover Preview Card -->
-      <div id="tab-hover-card" class="tab-hover-card hidden">
-        <div class="tab-hover-header">
-          <div class="tab-hover-favicon" id="tab-hover-favicon"></div>
-          <div class="tab-hover-title" id="tab-hover-title">Tab Title</div>
+        <!-- Seamless Freeze-Frame Viewport Snapshot Backdrop for Popovers/Dropdowns -->
+        <div id="freeze-backdrop" class="freeze-backdrop hidden"></div>
+
+        <!-- Distraction-Free Reader Mode Overlay -->
+        <div id="reader-mode-overlay" class="reader-overlay hidden">
+          <div class="reader-topbar">
+            <div class="reader-brand">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M19 2H5c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 16H6V4h12v14zM8 6h8v2H8V6zm0 3h8v2H8V9zm0 3h5v2H8v-2z"/></svg>
+              <span>Reader View</span>
+            </div>
+            <div class="reader-controls">
+              <button class="reader-btn" id="reader-speech-btn" title="Edge Read Aloud (Ctrl+Shift+U)">🔊 Read Aloud</button>
+              <button class="reader-btn" id="reader-font-smaller" title="Decrease font size">A−</button>
+              <button class="reader-btn" id="reader-font-larger" title="Increase font size">A+</button>
+              <button class="reader-btn" id="reader-font-family" title="Toggle font family">Font</button>
+              <div class="reader-theme-group">
+                <button class="reader-theme-btn dark" data-reader-theme="dark" title="Dark theme"></button>
+                <button class="reader-theme-btn sepia" data-reader-theme="sepia" title="Sepia theme"></button>
+                <button class="reader-theme-btn light" data-reader-theme="light" title="Light theme"></button>
+              </div>
+              <button class="reader-btn close-reader-btn" id="reader-close-btn" title="Exit Reader View">✕ Close</button>
+            </div>
+          </div>
+
+          <!-- Microsoft Edge-style Read Aloud Floating Speech Bar -->
+          <div id="reader-speech-bar" class="reader-speech-bar hidden">
+            <button class="speech-ctrl-btn" id="speech-play-btn" title="Play / Pause">▶ Play</button>
+            <button class="speech-ctrl-btn" id="speech-stop-btn" title="Stop">⏹ Stop</button>
+            <div class="speech-group">
+              <span class="speech-label">Speed:</span>
+              <select id="speech-rate-select" class="speech-select">
+                <option value="0.75">0.75x</option>
+                <option value="1.0" selected>1.0x</option>
+                <option value="1.25">1.25x</option>
+                <option value="1.5">1.5x</option>
+                <option value="2.0">2.0x</option>
+              </select>
+            </div>
+            <div class="speech-group">
+              <span class="speech-label">Voice:</span>
+              <select id="speech-voice-select" class="speech-select voice-select"></select>
+            </div>
+            <div class="speech-status" id="speech-status-label">Ready to read</div>
+          </div>
+          <div class="reader-scroll-container">
+            <article class="reader-article" id="reader-article-content"></article>
+          </div>
         </div>
-        <div class="tab-hover-domain" id="tab-hover-domain">example.com</div>
-        <div class="tab-hover-meta" id="tab-hover-meta">
-          <span class="tab-hover-badge" id="tab-hover-badge">Active</span>
+
+        <!-- AETHER Intelligence Side Panel -->
+        <aside id="ai-side-panel" class="ai-panel hidden">
+          <!-- Header -->
+          <div class="ai-header">
+            <div class="ai-brand">
+              <div class="ai-brand-badge">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5zM19 15l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 19l-2.75-1.25L19 15z"/></svg>
+              </div>
+              <div class="ai-title-wrap">
+                <span class="ai-title">AETHER Intelligence</span>
+                <span class="ai-provider-pill" id="ai-provider-pill">Autonomous Cognition</span>
+              </div>
+            </div>
+            <div class="ai-header-actions">
+              <button class="ai-btn-icon" id="ai-clear-btn" title="Clear conversation">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M19 4h-3.5l-1-1h-5l-1 1H5v2h14V4zM6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12z"/></svg>
+              </button>
+              <button class="ai-btn-icon" id="ai-close-btn" title="Close AI panel">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Quick Action Chips -->
+          <div class="ai-quick-actions">
+            <button class="ai-chip" data-action="summarize">📄 Summarize Page</button>
+            <button class="ai-chip" data-action="highlights">✨ Key Highlights</button>
+            <button class="ai-chip" data-action="explain">💡 Explain Simply</button>
+            <button class="ai-chip" data-action="actionable">🎯 Action Items</button>
+          </div>
+
+          <!-- Messages Area -->
+          <div class="ai-messages" id="ai-messages"></div>
+
+          <!-- Input Area -->
+          <div class="ai-input-container">
+            <div class="ai-context-toggle">
+              <label class="ai-context-pill">
+                <input type="checkbox" id="ai-context-chk" checked />
+                <span>Active Page Context</span>
+              </label>
+              <span id="ai-context-page-title" class="ai-context-title" style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;color:var(--text-muted);"></span>
+            </div>
+            <div class="ai-input-wrap">
+              <textarea id="ai-prompt-input" class="ai-textarea" rows="1" placeholder="Ask AETHER Intelligence anything or about this page..."></textarea>
+              <button id="ai-send-btn" class="ai-send-btn" title="Send (Enter)">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+              </button>
+            </div>
+          </div>
+        </aside>
+
+        <!-- Microsoft Edge-style Quick Notes / Scratchpad Drawer -->
+        <aside id="quick-notes-panel" class="quick-notes-panel hidden">
+          <div class="quick-notes-header">
+            <div class="quick-notes-title">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+              <span>Edge Scratchpad</span>
+            </div>
+            <div class="quick-notes-actions">
+              <button class="ai-btn-icon" id="notes-insert-link-btn" title="Insert active page link">📌</button>
+              <button class="ai-btn-icon" id="notes-copy-btn" title="Copy all notes">📋</button>
+              <button class="ai-btn-icon" id="notes-export-btn" title="Export as text file">💾</button>
+              <button class="ai-btn-icon" id="notes-clear-btn" title="Clear notes">🗑️</button>
+              <button class="ai-btn-icon" id="notes-close-btn" title="Close notes">✕</button>
+            </div>
+          </div>
+          <textarea id="quick-notes-textarea" class="quick-notes-textarea" placeholder="Jot down research notes, thoughts, or ideas while browsing... (auto-saved)"></textarea>
+          <div class="quick-notes-footer">
+            <span id="notes-count-info">0 words • 0 chars</span>
+            <span class="notes-sync-status">✓ Saved locally</span>
+          </div>
+        </aside>
+
+        <!-- Google Chrome-style Tab Hover Preview Card -->
+        <div id="tab-hover-card" class="tab-hover-card hidden">
+          <div class="tab-hover-header">
+            <div class="tab-hover-favicon" id="tab-hover-favicon"></div>
+            <div class="tab-hover-title" id="tab-hover-title">Tab Title</div>
+          </div>
+          <div class="tab-hover-domain" id="tab-hover-domain">example.com</div>
+          <div class="tab-hover-meta" id="tab-hover-badge">Active</div>
         </div>
-      </div>
-    </main>
+      </main>
+    </div>
 
     <!-- Modal / Dialog Backdrop -->
     <div id="overlay-backdrop">
