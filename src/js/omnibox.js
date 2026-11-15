@@ -431,7 +431,8 @@ const Omnibox = {
   },
 
   async fetchSuggestions(query) {
-    const currentSeq = ++(this._suggestionSeq || (this._suggestionSeq = 0));
+    this._suggestionSeq = (this._suggestionSeq || 0) + 1;
+    const currentSeq = this._suggestionSeq;
     if (!query || query.trim() === '') {
       this.closeSuggestions();
       return;

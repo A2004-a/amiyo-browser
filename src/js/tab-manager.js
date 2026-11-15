@@ -9,6 +9,10 @@ const TabManager = {
       clearTimeout(this.hoverTimer);
       this.hoverTimer = null;
     }
+    if (this._autoHideTimer) {
+      clearTimeout(this._autoHideTimer);
+      this._autoHideTimer = null;
+    }
     this.hoveredTabId = null;
     const card = document.getElementById('tab-hover-card');
     card?.classList.add('hidden');
@@ -18,16 +22,18 @@ const TabManager = {
     this.stripEl = document.getElementById('tabs-strip');
     const newTabBtn = document.getElementById('new-tab-btn');
 
-    // Global dismiss for tab hover preview card
+    // Global dismiss for tab hover preview card to prevent any overlapping/sticking
     this.stripEl?.addEventListener('mouseleave', () => this.hideHoverCard());
-    document.addEventListener('mousedown', () => this.hideHoverCard());
-    document.addEventListener('click', () => this.hideHoverCard());
-    window.addEventListener('blur', () => this.hideHoverCard());
-    window.addEventListener('resize', () => this.hideHoverCard());
+    document.getElementById('browser-header')?.addEventListener('mouseleave', () => this.hideHoverCard());
+    document.getElementById('titlebar')?.addEventListener('mouseleave', () => this.hideHoverCard());
     document.getElementById('toolbar')?.addEventListener('mouseenter', () => this.hideHoverCard());
     document.getElementById('toolbar')?.addEventListener('mousemove', () => this.hideHoverCard());
     document.getElementById('view-container')?.addEventListener('mouseenter', () => this.hideHoverCard());
     document.getElementById('omnibox-input')?.addEventListener('focus', () => this.hideHoverCard());
+    document.addEventListener('mousedown', () => this.hideHoverCard());
+    document.addEventListener('click', () => this.hideHoverCard());
+    window.addEventListener('blur', () => this.hideHoverCard());
+    window.addEventListener('resize', () => this.hideHoverCard());
     window.addEventListener('mousemove', (e) => {
       if (e.clientY > 44) {
         this.hideHoverCard();
@@ -216,7 +222,7 @@ const TabManager = {
         });
       }
 
-      // Chrome Tab Hover Preview Card
+      // Chrome Tab Hover Preview Card (Only for inactive background tabs, never overlaps active tab)
       tabEl.addEventListener('mouseenter', () => {
         if (this.hoverTimer) clearTimeout(this.hoverTimer);
         // Do NOT show hover preview card for the currently active tab or if omnibox has focus
@@ -256,9 +262,6 @@ const TabManager = {
             if (tab.isSuspended) {
               badgeEl.textContent = '💤 Sleeping (Memory Saved)';
               badgeEl.className = 'tab-hover-badge sleeping';
-            } else if (tab.id === State.activeTabId) {
-              badgeEl.textContent = '● Active Tab';
-              badgeEl.className = 'tab-hover-badge active';
             } else {
               badgeEl.textContent = 'Background Tab';
               badgeEl.className = 'tab-hover-badge background';
@@ -274,7 +277,11 @@ const TabManager = {
           card.style.left = `${Math.max(12, Math.min(window.innerWidth - 270, rect.left))}px`;
           card.style.top = `${rect.bottom + 6}px`;
           card.classList.remove('hidden');
-        }, 220);
+
+          // Auto-hide after 3 seconds to ensure card never gets stuck
+          if (this._autoHideTimer) clearTimeout(this._autoHideTimer);
+          this._autoHideTimer = setTimeout(() => this.hideHoverCard(), 3000);
+        }, 500);
       });
 
       tabEl.addEventListener('mouseleave', () => {

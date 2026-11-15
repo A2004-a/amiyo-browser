@@ -55,3 +55,10 @@ coverage/
 .tmp/
 temp/
 
+# Android local SDK & Gradle cache
+android/local.properties
+android/.gradle/
+android/app/build/
+android/build/
+.gradle/
+

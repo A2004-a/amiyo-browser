@@ -19,9 +19,9 @@
       "type": "image/svg+xml"
     },
     {
-      "src": "assets/branding/aether-official-logo.jpg",
-      "sizes": "1024x1024",
-      "type": "image/jpeg",
+      "src": "assets/branding/icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
       "purpose": "any maskable"
     }
   ]
