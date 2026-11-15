@@ -38,12 +38,13 @@ if (typeof electron === 'string') {
   delete env.VSCODE_INSPECTOR_OPTIONS;
   env.ELECTRON_ENABLE_LOGGING = '0';
 
+  const explicitDisableGpu = process.argv.includes('--disable-gpu') || process.env.AETHER_DISABLE_GPU === '1';
   const flags = [
     '--no-sandbox',
-    '--disable-gpu',
+    ...(explicitDisableGpu ? ['--disable-gpu'] : []),
     '--no-deprecation',
     '.',
-    ...process.argv.slice(2)
+    ...process.argv.slice(2).filter(arg => arg !== '--disable-gpu')
   ];
 
   const child = spawn(electron, flags, {
@@ -61,10 +62,19 @@ if (typeof electron === 'string') {
 const { app, BrowserWindow } = electron;
 process.noDeprecation = true;
 
-// Suppress internal Chromium DirectX/DirectComposition overlay notices
+// Suppress internal Chromium DirectX/DirectComposition overlay notices and activate acceleration
 if (app && app.commandLine) {
   app.commandLine.appendSwitch('log-level', '3');
   app.commandLine.appendSwitch('disable-logging');
+
+  // Hardware Acceleration & High-Performance Switches
+  app.commandLine.appendSwitch('enable-gpu-rasterization');
+  app.commandLine.appendSwitch('enable-zero-copy');
+  app.commandLine.appendSwitch('enable-fast-unload');
+  app.commandLine.appendSwitch('enable-features', 'VaapiVideoDecoder,OverlayScrollbar,CanvasOopRasterization,SmoothScrolling,ParallelDownloading');
+  app.commandLine.appendSwitch('disable-features', 'CalculateNativeWinOcclusion');
+  app.commandLine.appendSwitch('dns-prefetch-disable', 'false');
+  app.commandLine.appendSwitch('js-flags', '--max-old-space-size=2048');
 }
 
 if (app && typeof app.setName === 'function') {

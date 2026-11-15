@@ -10,6 +10,8 @@ class NavigationController {
       ecosia: 'https://www.ecosia.org/search?q=%s',
       yandex: 'https://yandex.com/search/?text=%s'
     };
+    // Fast in-memory LRU suggestion cache (5-minute TTL)
+    this.suggestionCache = new Map();
   }
 
   isInternalUrl(url) {
@@ -233,9 +235,15 @@ class NavigationController {
   }
 
   fetchSearchSuggestions(query, engine = 'google') {
+    const normalizedEngine = (engine || 'google').toLowerCase();
+    const cacheKey = `${normalizedEngine}:${query.toLowerCase()}`;
+    const cached = this.suggestionCache.get(cacheKey);
+    if (cached && (Date.now() - cached.timestamp < 300000)) { // 5-minute TTL
+      return Promise.resolve(cached.results);
+    }
+
     return new Promise((resolve) => {
       const https = require('https');
-      const normalizedEngine = (engine || 'google').toLowerCase();
       let url = `https://suggestqueries.google.com/complete/search?client=chrome&q=${encodeURIComponent(query)}`;
 
       if (normalizedEngine === 'duckduckgo') {
@@ -248,7 +256,16 @@ class NavigationController {
         url = `https://ac.ecosia.org/autocomplete?q=${encodeURIComponent(query)}&type=list`;
       }
 
-      const req = https.get(url, { headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' }, timeout: 800 }, (res) => {
+      const saveAndResolve = (results) => {
+        if (this.suggestionCache.size > 500) {
+          const firstKey = this.suggestionCache.keys().next().value;
+          this.suggestionCache.delete(firstKey);
+        }
+        this.suggestionCache.set(cacheKey, { timestamp: Date.now(), results });
+        resolve(results);
+      };
+
+      const req = https.get(url, { headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' }, timeout: 600 }, (res) => {
         let data = '';
         res.on('data', chunk => data += chunk);
         res.on('end', () => {
@@ -256,18 +273,18 @@ class NavigationController {
             const parsed = JSON.parse(data);
             if (Array.isArray(parsed)) {
               if (Array.isArray(parsed[1])) {
-                return resolve(parsed[1].map(x => typeof x === 'string' ? x : x.phrase || x.suggestion || '').filter(Boolean));
+                return saveAndResolve(parsed[1].map(x => typeof x === 'string' ? x : x.phrase || x.suggestion || '').filter(Boolean));
               }
               // DuckDuckGo array of objects fallback
               if (parsed.length > 0 && typeof parsed[0] === 'object' && parsed[0].phrase) {
-                return resolve(parsed.map(p => p.phrase).filter(Boolean));
+                return saveAndResolve(parsed.map(p => p.phrase).filter(Boolean));
               }
             } else if (parsed && Array.isArray(parsed.r)) {
               // Yahoo format
-              return resolve(parsed.r.map(item => item.k).filter(Boolean));
+              return saveAndResolve(parsed.r.map(item => item.k).filter(Boolean));
             }
           } catch (e) {}
-          resolve([]);
+          saveAndResolve([]);
         });
       });
       req.on('error', () => resolve([]));

@@ -15,13 +15,14 @@ if (verbose) {
 
 const hasTarget = extraArgs.some(arg => arg.endsWith('.js') || arg === '.');
 const target = hasTarget ? [] : ['.'];
+const explicitDisableGpu = extraArgs.includes('--disable-gpu') || process.env.AETHER_DISABLE_GPU === '1';
 const flags = [
   '--no-sandbox',
-  '--disable-gpu',
+  ...(explicitDisableGpu ? ['--disable-gpu'] : []),
   '--no-deprecation',
   ...(verbose ? ['--enable-logging'] : ['--log-level=3']),
   ...target,
-  ...extraArgs.filter(a => a !== '--verbose')
+  ...extraArgs.filter(a => a !== '--verbose' && a !== '--disable-gpu')
 ];
 
 const child = cp.spawn(electronPath, flags, {

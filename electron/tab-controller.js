@@ -20,6 +20,38 @@ class TabController {
     this.isViewVisible = true; // WebContentsView visibility flag
     this.splitTabId = null; // Split view dual display
     this.groups = new Map(); // groupId -> { id, title, color, isCollapsed }
+
+    // Automatic Memory Saver / Inactive Tab Suspension sweep
+    this._memorySaverInterval = setInterval(() => {
+      this.checkAndSuspendInactiveTabs();
+    }, 60000);
+  }
+
+  checkAndSuspendInactiveTabs() {
+    try {
+      const settings = storageManager.getSettings();
+      if (settings && settings.memorySaver === false) return;
+
+      const timeoutMinutes = (settings && settings.memorySaverTimeout) ? Number(settings.memorySaverTimeout) : 15;
+      const thresholdMs = timeoutMinutes * 60 * 1000;
+      const now = Date.now();
+
+      for (const tab of this.tabs) {
+        if (tab.id !== this.activeTabId &&
+            tab.id !== this.splitTabId &&
+            !tab.isInternal &&
+            !tab.isPinned &&
+            !tab.isPlayingAudio &&
+            !tab.isSuspended &&
+            tab.view) {
+          if (now - (tab.lastAccessed || 0) > thresholdMs) {
+            this.suspendTab(tab.id);
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('Memory saver sweep error:', e.message);
+    }
   }
 
   setTopOffset(offset) {
@@ -112,7 +144,7 @@ class TabController {
         sandbox: true,
         webSecurity: true,
         session: this.session,
-        backgroundThrottling: false
+        backgroundThrottling: true
       }
     });
 
@@ -650,7 +682,7 @@ class TabController {
         sandbox: true,
         webSecurity: true,
         session: this.session,
-        backgroundThrottling: false
+        backgroundThrottling: true
       }
     });
 
@@ -1133,6 +1165,10 @@ class TabController {
   }
 
   destroyAll() {
+    if (this._memorySaverInterval) {
+      clearInterval(this._memorySaverInterval);
+      this._memorySaverInterval = null;
+    }
     for (const tab of this.tabs) {
       if (tab.view) {
         try {

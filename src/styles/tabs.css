@@ -76,6 +76,7 @@
   font-size: 12px;
   position: relative;
   cursor: pointer;
+  contain: paint layout;
   transition: background var(--transition-fast), color var(--transition-fast);
   border: 1px solid transparent;
   border-bottom: none;

@@ -27,7 +27,12 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
+import android.os.Build;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
@@ -82,8 +87,8 @@ public class MainActivity extends AppCompatActivity {
     private ValueCallback<Uri[]> fileUploadCallback;
     private static final int FILE_CHOOSER_REQUEST_CODE = 1001;
 
-    // Brave-grade ad and tracker blocklist for mobile
-    private static final String[] AD_TRACKER_DOMAINS = new String[] {
+    // Brave-grade ad and tracker blocklist for mobile (O(1) HashSet lookup)
+    private static final Set<String> AD_TRACKER_DOMAINS = new HashSet<>(Arrays.asList(
         "doubleclick.net", "googlesyndication.com", "googleadservices.com",
         "adservice.google.com", "pagead2.googlesyndication.com",
         "adsystem.amazon.com", "amazon-adsystem.com", "adnxs.com",
@@ -94,16 +99,20 @@ public class MainActivity extends AppCompatActivity {
         "advertising.com", "adcolony.com", "applovin.com",
         "chartbeat.com", "hotjar.com", "segment.io",
         "newrelic.com", "omtrdc.net", "demdex.net",
-        "smartadserver.com", "yieldmo.com", "admob.com"
-    };
+        "smartadserver.com", "yieldmo.com", "admob.com",
+        "trafficstars.com", "popads.net", "propellerads.com",
+        "zergnet.com", "exoclick.com", "infolinks.com"
+    ));
 
     private boolean isAdOrTracker(String host) {
-        if (host == null) return false;
-        String lowerHost = host.toLowerCase();
-        for (String domain : AD_TRACKER_DOMAINS) {
-            if (lowerHost.equals(domain) || lowerHost.endsWith("." + domain)) {
-                return true;
-            }
+        if (host == null || host.isEmpty()) return false;
+        String lowerHost = host.toLowerCase(Locale.ROOT);
+        if (AD_TRACKER_DOMAINS.contains(lowerHost)) return true;
+        int dotIdx = lowerHost.indexOf('.');
+        while (dotIdx != -1) {
+            String parent = lowerHost.substring(dotIdx + 1);
+            if (AD_TRACKER_DOMAINS.contains(parent)) return true;
+            dotIdx = lowerHost.indexOf('.', dotIdx + 1);
         }
         return false;
     }
@@ -163,6 +172,11 @@ public class MainActivity extends AppCompatActivity {
 
     @SuppressLint("SetJavaScriptEnabled")
     private void setupWebView() {
+        // Hardware accelerated graphics rendering & smooth scrolling
+        webView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+        webView.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
+        webView.setOverScrollMode(View.OVER_SCROLL_IF_CONTENT_SCROLLS);
+
         WebSettings settings = webView.getSettings();
         settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true);
@@ -175,6 +189,17 @@ public class MainActivity extends AppCompatActivity {
         settings.setLoadWithOverviewMode(true);
         settings.setUseWideViewPort(true);
         settings.setMediaPlaybackRequiresUserGesture(false);
+
+        // High-Performance Caching & Rendering
+        settings.setCacheMode(WebSettings.LOAD_DEFAULT);
+        settings.setRenderPriority(WebSettings.RenderPriority.HIGH);
+        settings.setEnableSmoothTransition(true);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            settings.setOffscreenPreRaster(true);
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            webView.setRendererPriorityPolicy(WebView.RENDERER_PRIORITY_BOUND, false);
+        }
 
         defaultUserAgent = settings.getUserAgentString();
         String customUA = defaultUserAgent + " AETHERBrowser/1.1.0";
