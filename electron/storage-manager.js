@@ -98,32 +98,27 @@ class StorageManager {
       return process.env.AMIYO_DATA_DIR;
     }
 
-    // 2. Electron userData if available and not pointing into asar
-    try {
-      if (app && typeof app.getPath === 'function') {
-        const userData = app.getPath('userData');
-        if (userData && typeof userData === 'string' && !userData.includes('app.asar')) {
-          return path.join(userData, 'data');
-        }
-      }
-    } catch (e) {
-      // outside Electron or app not ready
-    }
-
-    // 3. Packaged app or running inside asar: NEVER resolve inside __dirname
     const isPackaged = (app && app.isPackaged) || __dirname.includes('app.asar');
+
+    // 2. Packaged app or running inside asar: store in user data
     if (isPackaged) {
+      try {
+        if (app && typeof app.getPath === 'function') {
+          const userData = app.getPath('userData');
+          if (userData && typeof userData === 'string' && !userData.includes('app.asar')) {
+            return path.join(userData, 'data');
+          }
+        }
+      } catch (e) {}
+
       const baseDir = (process.platform === 'win32' && process.env.APPDATA)
         ? path.join(process.env.APPDATA, 'AETHER Browser')
         : path.join(os.homedir(), '.aether-browser');
       return path.join(baseDir, 'data');
     }
 
-    // 4. In development outside asar, use project local data directory
+    // 3. In development outside asar, use project local data directory
     const devDataDir = path.join(__dirname, '..', 'data');
-    if (devDataDir.includes('app.asar')) {
-      return path.join(os.homedir(), '.aether-browser', 'data');
-    }
     return devDataDir;
   }
 

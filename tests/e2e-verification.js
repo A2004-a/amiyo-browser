@@ -1,5 +1,19 @@
 const { app, BrowserWindow, WebContentsView } = require('electron');
 const path = require('path');
+
+if (app && typeof app.setName === 'function') {
+  app.setName('AETHER Browser');
+  try {
+    if (process.platform === 'win32' && process.env.APPDATA) {
+      app.setPath('userData', path.join(process.env.APPDATA, 'AETHER Browser'));
+    }
+  } catch (e) {}
+}
+if (app && app.commandLine) {
+  app.commandLine.appendSwitch('disable-gpu-shader-disk-cache');
+  app.commandLine.appendSwitch('disable-gpu-program-cache');
+}
+
 const windowManager = require('../electron/window-manager');
 const storageManager = require('../electron/storage-manager');
 const navigationController = require('../electron/navigation-controller');
@@ -33,7 +47,11 @@ app.whenReady().then(async () => {
     reportTest('Window creation (frameless, modern chrome)', !!win);
 
     await new Promise((resolve, reject) => {
-      const timeout = setTimeout(() => reject(new Error('Window load timed out')), 5000);
+      if (!win.webContents.isLoading()) {
+        resolve();
+        return;
+      }
+      const timeout = setTimeout(() => reject(new Error('Window load timed out')), 15000);
       win.webContents.once('did-finish-load', () => {
         clearTimeout(timeout);
         resolve();

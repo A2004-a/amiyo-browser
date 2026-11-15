@@ -1,12 +1,16 @@
 const App = {
   findBarActive: false,
+  _initialized: false,
 
   async init() {
+    if (this._initialized) return;
+    this._initialized = true;
+
     console.log('[App] Starting initialization...');
     try {
       // macOS platform integration
-      const isDarwin = (window.amiyoAPI && window.amiyoAPI.platform === 'darwin') ||
-        (window.aetherAPI && window.aetherAPI.platform === 'darwin') ||
+      const isDarwin = (window.aetherAPI && window.aetherAPI.platform === 'darwin') ||
+        (window.amiyoAPI && window.amiyoAPI.platform === 'darwin') ||
         navigator.userAgent.includes('Macintosh') ||
         navigator.platform.includes('Mac');
       if (isDarwin) {
@@ -14,22 +18,24 @@ const App = {
       }
 
       // 1. Initialize UI DOM components and listeners IMMEDIATELY (zero lag)
-      this.initWindowControls();
-      TabManager.init();
-      Navigation.init();
-      Omnibox.init();
-      BookmarksBar.init();
-      DownloadManager.init();
-      if (typeof AiPanel !== 'undefined') AiPanel.init();
-      KeyboardShortcuts.init();
-      this.initFindBar();
-      this.initChromeMenu();
-      this.initModals();
-      this.initReaderOverlay();
-      this.initIpcTriggers();
-      this.initShareSheet();
-      this.initQuickNotes();
-      this.updateTopOffset();
+      try { this.initWindowControls(); } catch (e) { console.warn('initWindowControls error:', e); }
+      try { TabManager.init(); } catch (e) { console.warn('TabManager.init error:', e); }
+      try { Navigation.init(); } catch (e) { console.warn('Navigation.init error:', e); }
+      try { Omnibox.init(); } catch (e) { console.warn('Omnibox.init error:', e); }
+      try { BookmarksBar.init(); } catch (e) { console.warn('BookmarksBar.init error:', e); }
+      try { DownloadManager.init(); } catch (e) { console.warn('DownloadManager.init error:', e); }
+      if (typeof AiPanel !== 'undefined') {
+        try { AiPanel.init(); } catch (e) { console.warn('AiPanel.init error:', e); }
+      }
+      try { KeyboardShortcuts.init(); } catch (e) { console.warn('KeyboardShortcuts.init error:', e); }
+      try { this.initFindBar(); } catch (e) { console.warn('initFindBar error:', e); }
+      try { this.initChromeMenu(); } catch (e) { console.warn('initChromeMenu error:', e); }
+      try { this.initModals(); } catch (e) { console.warn('initModals error:', e); }
+      try { this.initReaderOverlay(); } catch (e) { console.warn('initReaderOverlay error:', e); }
+      try { this.initIpcTriggers(); } catch (e) { console.warn('initIpcTriggers error:', e); }
+      try { this.initShareSheet(); } catch (e) { console.warn('initShareSheet error:', e); }
+      try { this.initQuickNotes(); } catch (e) { console.warn('initQuickNotes error:', e); }
+      try { this.updateTopOffset(); } catch (e) {}
 
       document.getElementById('split-screen-btn')?.addEventListener('click', () => {
         this.toggleSplitScreen();
@@ -40,8 +46,8 @@ const App = {
       });
 
       console.log('[App] Loading state from IPC...');
-      // 2. Fetch state in parallel (5x faster startup)
-      const [settings, bookmarks, history, downloads, permissions, initialTabs] = await Promise.all([
+      // 2. Fetch state in parallel with allSettled so one failure never blocks the entire browser
+      const [settingsRes, bookmarksRes, historyRes, downloadsRes, permissionsRes, initialTabsRes] = await Promise.allSettled([
         IpcClient.getSettings(),
         IpcClient.getBookmarks(),
         IpcClient.getHistory(),
@@ -50,13 +56,20 @@ const App = {
         IpcClient.getTabs()
       ]);
 
-      console.log('[App] State loaded. Initial tabs count:', initialTabs ? initialTabs.length : 0);
+      const settings = settingsRes.status === 'fulfilled' && settingsRes.value ? settingsRes.value : {};
+      const bookmarks = bookmarksRes.status === 'fulfilled' && bookmarksRes.value ? bookmarksRes.value : [];
+      const history = historyRes.status === 'fulfilled' && historyRes.value ? historyRes.value : [];
+      const downloads = downloadsRes.status === 'fulfilled' && downloadsRes.value ? downloadsRes.value : [];
+      const permissions = permissionsRes.status === 'fulfilled' && permissionsRes.value ? permissionsRes.value : {};
+      const initialTabs = initialTabsRes.status === 'fulfilled' && initialTabsRes.value ? initialTabsRes.value : [];
 
-      State.settings = settings || {};
-      State.bookmarks = bookmarks || [];
-      State.history = history || [];
-      State.downloads = downloads || [];
-      State.permissions = permissions || {};
+      console.log('[App] State loaded. Initial tabs count:', initialTabs.length);
+
+      State.settings = settings;
+      State.bookmarks = bookmarks;
+      State.history = history;
+      State.downloads = downloads;
+      State.permissions = permissions;
 
       if (typeof Omnibox !== 'undefined' && Omnibox.updateSearchEngine) {
         Omnibox.updateSearchEngine(State.settings.searchEngine);
@@ -66,7 +79,7 @@ const App = {
       }
 
       // Listen for settings updates from any window or modal
-      const settingsBridge = window.amiyoAPI?.settings || window.amiyoApi?.settings;
+      const settingsBridge = window.aetherAPI?.settings || window.amiyoAPI?.settings;
       if (settingsBridge?.onUpdated) {
         settingsBridge.onUpdated((newSettings) => {
           State.settings = { ...State.settings, ...newSettings };
@@ -116,13 +129,31 @@ const App = {
         this.handleInternalPage(initialTabs[0]);
       } else {
         console.log('[App] No initial tabs found, requesting new tab creation...');
-        const created = await IpcClient.createTab('aether://newtab');
+        let created = null;
+        try {
+          created = await IpcClient.createTab('aether://newtab');
+        } catch (e) {
+          console.warn('Failed to create tab via IPC:', e);
+        }
         if (created) {
           State.setTabs([created], created.id);
           TabManager.render();
           Navigation.updateToolbar();
           Omnibox.update();
           this.handleInternalPage(created);
+        } else {
+          // Emergency local fallback tab so browser is never black
+          const fallbackTab = {
+            id: `tab_fallback_${Date.now()}`,
+            url: 'aether://newtab',
+            title: 'New Tab',
+            isInternal: true
+          };
+          State.setTabs([fallbackTab], fallbackTab.id);
+          TabManager.render();
+          Navigation.updateToolbar();
+          Omnibox.update();
+          this.handleInternalPage(fallbackTab);
         }
       }
       console.log('[App] Initialization complete.');
@@ -218,11 +249,14 @@ const App = {
       });
     }
 
-    window.amiyoAPI.window.onMaximizedChanged((isMax) => {
-      if (maxBtn) {
-        maxBtn.innerHTML = isMax ? Utils.icons.restore : Utils.icons.maximize;
-      }
-    });
+    const winBridge = window.aetherAPI?.window || window.amiyoAPI?.window;
+    if (winBridge?.onMaximizedChanged) {
+      winBridge.onMaximizedChanged((isMax) => {
+        if (maxBtn) {
+          maxBtn.innerHTML = isMax ? Utils.icons.restore : Utils.icons.maximize;
+        }
+      });
+    }
 
     // History button in toolbar
     document.getElementById('history-tool-btn')?.addEventListener('click', () => {
@@ -424,13 +458,16 @@ const App = {
     nextBtn?.addEventListener('click', () => executeFind(true));
     closeBtn?.addEventListener('click', () => this.toggleFindBar(false));
 
-    window.amiyoAPI.find.onResult((res) => {
-      if (res.matches !== undefined) {
-        countEl.textContent = res.matches > 0
-          ? `${res.activeMatchOrdinal} / ${res.matches}`
-          : 'No match';
-      }
-    });
+    const findBridge = window.aetherAPI?.find || window.amiyoAPI?.find;
+    if (findBridge?.onResult) {
+      findBridge.onResult((res) => {
+        if (res.matches !== undefined) {
+          countEl.textContent = res.matches > 0
+            ? `${res.activeMatchOrdinal} / ${res.matches}`
+            : 'No match';
+        }
+      });
+    }
   },
 
   toggleFindBar(forceState) {
@@ -1304,7 +1341,11 @@ const App = {
   }
 };
 
-window.addEventListener('DOMContentLoaded', () => {
+if (document.readyState === 'loading') {
+  window.addEventListener('DOMContentLoaded', () => {
+    App.init();
+  });
+} else {
   App.init();
-});
+}
 

@@ -19,6 +19,7 @@
       "env": {
         "ELECTRON_ENABLE_LOGGING": "0"
       },
+      "autoAttachChildProcesses": false,
       "outputCapture": "std",
       "console": "integratedTerminal"
     },

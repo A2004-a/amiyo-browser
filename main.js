@@ -1,4 +1,7 @@
 process.noDeprecation = true;
+delete process.env.NODE_OPTIONS;
+delete process.env.VSCODE_INSPECTOR_OPTIONS;
+delete process.env.ELECTRON_RUN_AS_NODE;
 
 // CLI evaluation & version checks (e.g. VS Code debugger inspection)
 if (process.argv.includes('-v') || process.argv.includes('--version')) {
@@ -67,18 +70,32 @@ if (app && app.commandLine) {
   app.commandLine.appendSwitch('log-level', '3');
   app.commandLine.appendSwitch('disable-logging');
 
-  // Hardware Acceleration & High-Performance Switches
-  app.commandLine.appendSwitch('enable-gpu-rasterization');
-  app.commandLine.appendSwitch('enable-zero-copy');
+  // Hardware Acceleration & High-Performance Switches (only when GPU is enabled)
+  const isGpuDisabled = process.argv.includes('--disable-gpu') || process.env.AETHER_DISABLE_GPU === '1';
+  if (!isGpuDisabled) {
+    app.commandLine.appendSwitch('enable-gpu-rasterization');
+    app.commandLine.appendSwitch('enable-zero-copy');
+  } else {
+    app.commandLine.appendSwitch('disable-gpu-shader-disk-cache');
+    app.commandLine.appendSwitch('disable-gpu-program-cache');
+  }
   app.commandLine.appendSwitch('enable-fast-unload');
-  app.commandLine.appendSwitch('enable-features', 'VaapiVideoDecoder,OverlayScrollbar,CanvasOopRasterization,SmoothScrolling,ParallelDownloading');
+  app.commandLine.appendSwitch('enable-features', isGpuDisabled
+    ? 'OverlayScrollbar,SmoothScrolling,ParallelDownloading'
+    : 'VaapiVideoDecoder,OverlayScrollbar,CanvasOopRasterization,SmoothScrolling,ParallelDownloading');
   app.commandLine.appendSwitch('disable-features', 'CalculateNativeWinOcclusion');
   app.commandLine.appendSwitch('dns-prefetch-disable', 'false');
   app.commandLine.appendSwitch('js-flags', '--max-old-space-size=2048');
 }
 
+const path = require('path');
 if (app && typeof app.setName === 'function') {
   app.setName('AETHER Browser');
+  try {
+    if (process.platform === 'win32' && process.env.APPDATA) {
+      app.setPath('userData', path.join(process.env.APPDATA, 'AETHER Browser'));
+    }
+  } catch (e) {}
 }
 
 // Single instance lock to prevent concurrent database & cache lock contention

@@ -66,16 +66,19 @@ const TabManager = {
     });
 
     // Listen for tab updates from main process
-    window.amiyoAPI.tabs.onListUpdated(({ tabs, activeTabId }) => {
-      State.setTabs(tabs, activeTabId);
-      this.render();
-      Navigation.updateToolbar();
-      Omnibox.update();
-      App.handleInternalPage(State.getActiveTab());
-    });
+    const tabsBridge = window.aetherAPI?.tabs || window.amiyoAPI?.tabs;
+    if (tabsBridge?.onListUpdated) {
+      tabsBridge.onListUpdated(({ tabs, activeTabId }) => {
+        State.setTabs(tabs, activeTabId);
+        this.render();
+        Navigation.updateToolbar();
+        Omnibox.update();
+        App.handleInternalPage(State.getActiveTab());
+      });
+    }
 
-    if (window.amiyoAPI?.tabs?.onGroupsUpdated) {
-      window.amiyoAPI.tabs.onGroupsUpdated((groups) => {
+    if (tabsBridge?.onGroupsUpdated) {
+      tabsBridge.onGroupsUpdated((groups) => {
         State.tabGroups = groups || [];
         this.render();
       });
@@ -111,30 +114,34 @@ const TabManager = {
       });
     }
 
-    window.amiyoAPI.tabs.onUpdated((tabData) => {
-      State.updateTab(tabData);
-      this.updateSingleTabElement(tabData);
-      if (State.activeTabId === tabData.id) {
+    if (tabsBridge?.onUpdated) {
+      tabsBridge.onUpdated((tabData) => {
+        State.updateTab(tabData);
+        this.updateSingleTabElement(tabData);
+        if (State.activeTabId === tabData.id) {
+          Navigation.updateToolbar();
+          Omnibox.update();
+          App.handleInternalPage(tabData);
+          if (typeof AiPanel !== 'undefined' && AiPanel.updateActivePageContext) {
+            AiPanel.updateActivePageContext();
+          }
+        }
+      });
+    }
+
+    if (tabsBridge?.onSwitched) {
+      tabsBridge.onSwitched(({ activeTabId, tab }) => {
+        State.activeTabId = activeTabId;
+        State.updateTab(tab);
+        this.render();
         Navigation.updateToolbar();
         Omnibox.update();
-        App.handleInternalPage(tabData);
+        App.handleInternalPage(tab);
         if (typeof AiPanel !== 'undefined' && AiPanel.updateActivePageContext) {
           AiPanel.updateActivePageContext();
         }
-      }
-    });
-
-    window.amiyoAPI.tabs.onSwitched(({ activeTabId, tab }) => {
-      State.activeTabId = activeTabId;
-      State.updateTab(tab);
-      this.render();
-      Navigation.updateToolbar();
-      Omnibox.update();
-      App.handleInternalPage(tab);
-      if (typeof AiPanel !== 'undefined' && AiPanel.updateActivePageContext) {
-        AiPanel.updateActivePageContext();
-      }
-    });
+      });
+    }
   },
 
   render() {

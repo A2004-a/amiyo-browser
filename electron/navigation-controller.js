@@ -64,7 +64,7 @@ class NavigationController {
         if (qParam && this.isDirectUrl(qParam)) {
           return this.resolveUrl(qParam);
         }
-      } catch (e) {}
+      } catch (e) { }
     }
 
     // Check for internal protocols
@@ -285,7 +285,7 @@ class NavigationController {
               // Yahoo format
               return saveAndResolve(parsed.r.map(item => item.k).filter(Boolean));
             }
-          } catch (e) {}
+          } catch (e) { }
           saveAndResolve([]);
         });
       });
@@ -330,7 +330,7 @@ class NavigationController {
         }
         return enriched;
       }
-    } catch (e) {}
+    } catch (e) { }
 
     return local;
   }
