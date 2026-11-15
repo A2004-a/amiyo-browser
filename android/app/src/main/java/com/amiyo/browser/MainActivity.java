@@ -202,7 +202,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         defaultUserAgent = settings.getUserAgentString();
-        String customUA = defaultUserAgent + " AETHERBrowser/1.1.0";
+        String customUA = defaultUserAgent + " AETHERBrowser/1.2.0";
         settings.setUserAgentString(customUA);
 
         CookieManager.getInstance().setAcceptCookie(true);
@@ -729,7 +729,7 @@ public class MainActivity extends AppCompatActivity {
             settings.setLoadWithOverviewMode(true);
             Toast.makeText(this, "Desktop site enabled", Toast.LENGTH_SHORT).show();
         } else {
-            settings.setUserAgentString(defaultUserAgent != null ? defaultUserAgent + " AETHERBrowser/1.1.0" : null);
+            settings.setUserAgentString(defaultUserAgent != null ? defaultUserAgent + " AETHERBrowser/1.2.0" : null);
             settings.setUseWideViewPort(false);
             settings.setLoadWithOverviewMode(false);
             Toast.makeText(this, "Mobile site enabled", Toast.LENGTH_SHORT).show();
