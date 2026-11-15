@@ -1,18 +1,30 @@
 {
   "debug.javascript.autoAttachFilter": "disabled",
-  "java.configuration.updateBuildConfiguration": "automatic",
+  "java.configuration.updateBuildConfiguration": "disabled",
+  "java.configuration.checkProjectSettingsExclusion": false,
   "java.errors.incompleteClasspath.severity": "ignore",
   "java.project.incompleteClasspath.severity": "ignore",
   "java.server.launchMode": "LightWeight",
   "java.autobuild.enabled": false,
   "java.import.gradle.enabled": false,
+  "java.import.gradle.wrapper.enabled": false,
   "java.import.maven.enabled": false,
-  "java.project.sourcePaths": [
-    "android/app/src/main/java"
-  ],
+  "java.import.generatesMetadataFilesAtProjectRoot": false,
+  "gradle.autoDetect": "off",
+  "gradle.nestedProjects": false,
   "java.project.import.exclusions": [
     "**/node_modules/**",
     "**/.git/**",
-    "**/dist/**"
-  ]
+    "**/dist/**",
+    "**/android/**",
+    "**"
+  ],
+  "files.watcherExclude": {
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
+    "**/node_modules/*/**": true,
+    "**/android/.gradle/**": true,
+    "**/android/build/**": true,
+    "**/android/app/build/**": true
+  }
 }

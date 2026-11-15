@@ -12,6 +12,27 @@
       },
       "runtimeArgs": [
         "--no-sandbox",
+        "--no-deprecation",
+        "."
+      ],
+      "env": {
+        "ELECTRON_ENABLE_LOGGING": "0"
+      },
+      "autoAttachChildProcesses": false,
+      "outputCapture": "std",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Launch AETHER Browser (Safe Mode / Software Rendering)",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/electron",
+      "windows": {
+        "runtimeExecutable": "${workspaceFolder}/node_modules/electron/dist/electron.exe"
+      },
+      "runtimeArgs": [
+        "--no-sandbox",
         "--disable-gpu",
         "--no-deprecation",
         "."

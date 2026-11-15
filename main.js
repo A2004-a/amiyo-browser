@@ -75,14 +75,16 @@ if (app && app.commandLine) {
   if (!isGpuDisabled) {
     app.commandLine.appendSwitch('enable-gpu-rasterization');
     app.commandLine.appendSwitch('enable-zero-copy');
+    app.commandLine.appendSwitch('enable-accelerated-2d-canvas');
+    app.commandLine.appendSwitch('enable-accelerated-video-decode');
   } else {
     app.commandLine.appendSwitch('disable-gpu-shader-disk-cache');
     app.commandLine.appendSwitch('disable-gpu-program-cache');
   }
   app.commandLine.appendSwitch('enable-fast-unload');
   app.commandLine.appendSwitch('enable-features', isGpuDisabled
-    ? 'OverlayScrollbar,SmoothScrolling,ParallelDownloading,AsyncDns'
-    : 'VaapiVideoDecoder,OverlayScrollbar,CanvasOopRasterization,SmoothScrolling,ParallelDownloading,AsyncDns');
+    ? 'OverlayScrollbar,SmoothScrolling,ParallelDownloading,AsyncDns,BackForwardCache'
+    : 'VaapiVideoDecoder,OverlayScrollbar,CanvasOopRasterization,SmoothScrolling,ParallelDownloading,AsyncDns,BackForwardCache');
   app.commandLine.appendSwitch('disable-features', 'CalculateNativeWinOcclusion');
   app.commandLine.appendSwitch('js-flags', '--max-old-space-size=2048');
 }
