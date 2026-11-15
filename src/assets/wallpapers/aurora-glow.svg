@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%">
+  <defs>
+    <linearGradient id="skyBg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#020712" />
+      <stop offset="50%" stop-color="#051329" />
+      <stop offset="100%" stop-color="#020813" />
+    </linearGradient>
+    <linearGradient id="auroraGreen" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#10b981" stop-opacity="0" />
+      <stop offset="25%" stop-color="#05f7a4" stop-opacity="0.5" />
+      <stop offset="50%" stop-color="#00f0ff" stop-opacity="0.45" />
+      <stop offset="75%" stop-color="#6366f1" stop-opacity="0.4" />
+      <stop offset="100%" stop-color="#a855f7" stop-opacity="0" />
+    </linearGradient>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#skyBg)" />
+  <!-- Stars -->
+  <g fill="#ffffff" opacity="0.6">
+    <circle cx="120" cy="180" r="1.5" /><circle cx="340" cy="90" r="1.2" /><circle cx="580" cy="220" r="1" />
+    <circle cx="890" cy="110" r="1.8" /><circle cx="1100" cy="190" r="1.2" /><circle cx="1340" cy="80" r="1.5" />
+    <circle cx="1520" cy="240" r="1" /><circle cx="1780" cy="130" r="1.8" /><circle cx="210" cy="420" r="1.2" />
+    <circle cx="450" cy="380" r="1.5" /><circle cx="780" cy="410" r="1" /><circle cx="1200" cy="360" r="1.4" />
+    <circle cx="1450" cy="430" r="1" /><circle cx="1680" cy="390" r="1.6" />
+  </g>
+  <!-- Aurora Ribbons -->
+  <path d="M-100,280 C320,120 740,360 1200,210 C1620,80 1880,260 2100,160 L2100,560 C1820,680 1480,480 1050,620 C620,740 280,510 -100,640 Z" fill="url(#auroraGreen)" />
+  <path d="M-50,380 C380,220 800,480 1280,310 C1700,160 1920,380 2050,290 L2050,720 C1750,560 1380,680 950,520 C580,380 220,590 -50,490 Z" fill="url(#auroraGreen)" opacity="0.6" />
+  <!-- Mountain Silhouettes -->
+  <polygon points="0,1080 0,820 180,690 380,850 620,640 840,830 1120,610 1380,810 1620,660 1840,820 1920,740 1920,1080" fill="#01060d" />
+</svg>

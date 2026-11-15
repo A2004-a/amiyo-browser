@@ -262,6 +262,8 @@
   color: var(--text-secondary);
   cursor: pointer;
   white-space: nowrap;
+  user-select: none;
+  transition: all var(--transition-fast);
 }
 
 .bookmark-bar-item:hover {
@@ -269,9 +271,25 @@
   color: var(--text-primary);
 }
 
+.bookmark-bar-item.bookmark-all-btn {
+  margin-left: auto;
+  color: var(--text-secondary);
+}
+
+.bookmark-bar-item.bookmark-all-btn:hover {
+  color: var(--accent);
+}
+
 .bookmark-bar-item img {
   width: 14px;
   height: 14px;
+  object-fit: contain;
+}
+
+.bookmark-bar-item .icon {
+  width: 14px;
+  height: 14px;
+  fill: currentColor;
 }
 
 /* Chrome 3-Dots Application Menu Dropdown */

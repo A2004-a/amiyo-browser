@@ -22,6 +22,20 @@ const BookmarksBar = {
       setTimeout(() => App.updateTopOffset(), 10);
     }
 
+    // 1. Chrome-style Apps Launcher item
+    const appsItem = document.createElement('div');
+    appsItem.className = 'bookmark-bar-item';
+    appsItem.title = 'AETHER Spaces & Apps';
+    appsItem.innerHTML = `
+      <svg class="icon" viewBox="0 0 24 24" style="width:14px;height:14px;fill:currentColor;"><path d="M4 8h4V4H4v4zm6 12h4v-4h-4v4zm-6 0h4v-4H4v4zm0-6h4v-4H4v4zm6 0h4v-4h-4v4zm6-10v4h4V4h-4zm-6 4h4V4h-4v4zm6 6h4v-4h-4v4zm0 6h4v-4h-4v4z"/></svg>
+      <span>Apps</span>
+    `;
+    appsItem.addEventListener('click', () => {
+      IpcClient.createTab('aether://newtab');
+    });
+    this.barEl.appendChild(appsItem);
+
+    // 2. User Bookmarks
     State.bookmarks.forEach(bm => {
       const item = document.createElement('div');
       item.className = 'bookmark-bar-item';
@@ -47,6 +61,19 @@ const BookmarksBar = {
 
       this.barEl.appendChild(item);
     });
+
+    // 3. Chrome-style "All Bookmarks" action on right side
+    const allBmBtn = document.createElement('div');
+    allBmBtn.className = 'bookmark-bar-item bookmark-all-btn';
+    allBmBtn.title = 'Open All Bookmarks (Ctrl+Shift+O)';
+    allBmBtn.innerHTML = `
+      <svg class="icon" viewBox="0 0 24 24" style="width:14px;height:14px;fill:currentColor;"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>
+      <span>All Bookmarks</span>
+    `;
+    allBmBtn.addEventListener('click', () => {
+      IpcClient.createTab('aether://bookmarks');
+    });
+    this.barEl.appendChild(allBmBtn);
   }
 };
 

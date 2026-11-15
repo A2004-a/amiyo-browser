@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%">
+  <defs>
+    <linearGradient id="twilightSky" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0a1128" />
+      <stop offset="50%" stop-color="#1c2541" />
+      <stop offset="85%" stop-color="#3a506b" />
+      <stop offset="100%" stop-color="#5bc0be" />
+    </linearGradient>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#twilightSky)" />
+  <!-- Stars -->
+  <g fill="#ffffff" opacity="0.6">
+    <circle cx="200" cy="150" r="1.5" /><circle cx="500" cy="80" r="1.2" /><circle cx="850" cy="180" r="1.8" />
+    <circle cx="1200" cy="100" r="1.4" /><circle cx="1600" cy="220" r="1.6" /><circle cx="1750" cy="90" r="1.2" />
+  </g>
+  <!-- Distant Peak -->
+  <polygon points="960,350 550,880 1370,880" fill="#1c2541" fill-opacity="0.75" />
+  <!-- Left Ridge -->
+  <polygon points="0,1080 0,680 340,540 680,820 980,620 1350,910 1620,710 1920,860 1920,1080" fill="#0b132b" fill-opacity="0.9" />
+  <!-- Foreground Ridge -->
+  <polygon points="0,1080 0,820 280,720 590,920 920,780 1280,960 1650,810 1920,950 1920,1080" fill="#030814" />
+</svg>

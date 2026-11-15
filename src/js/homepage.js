@@ -13,12 +13,15 @@ const Homepage = {
   ],
 
   wallpapers: [
-    { id: 'none', name: 'Classic Clean', url: '' },
-    { id: 'aurora', name: 'Aurora Borealis', url: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=1920&q=80' },
-    { id: 'mountains', name: 'Earth & Mountains', url: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=1920&q=80' },
-    { id: 'city', name: 'Cyber Cityscape', url: 'https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=1920&q=80' },
-    { id: 'abstract', name: 'Minimal Flow', url: 'https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=1920&q=80' },
-    { id: 'ocean', name: 'Deep Ocean', url: 'https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=1920&q=80' }
+    { id: 'none', name: 'Classic Clean', url: '', preview: 'var(--bg-primary)' },
+    { id: 'ocean', name: 'Deep Ocean', url: 'assets/wallpapers/deep-ocean.svg', preview: 'linear-gradient(135deg, #040d1a, #0077b6)' },
+    { id: 'cyber', name: 'Cyber Neon', url: 'assets/wallpapers/cyber-neon.svg', preview: 'linear-gradient(135deg, #0a0518, #ff007f 50%, #00f0ff)' },
+    { id: 'aurora', name: 'Aurora Borealis', url: 'assets/wallpapers/aurora-glow.svg', preview: 'linear-gradient(135deg, #020712, #05f7a4 50%, #6366f1)' },
+    { id: 'nebula', name: 'Cosmic Nebula', url: 'assets/wallpapers/cosmic-nebula.svg', preview: 'linear-gradient(135deg, #030712, #ec4899 40%, #00f0ff)' },
+    { id: 'sunset', name: 'Sunset Horizon', url: 'assets/wallpapers/sunset-horizon.svg', preview: 'linear-gradient(135deg, #1e1b4b, #be185d 50%, #f59e0b)' },
+    { id: 'minimal', name: 'Minimal Flow', url: 'assets/wallpapers/minimal-flow.svg', preview: 'linear-gradient(135deg, #090d16, #00f0ff 40%, #a855f7)' },
+    { id: 'matrix', name: 'Obsidian Matrix', url: 'assets/wallpapers/obsidian-matrix.svg', preview: 'linear-gradient(135deg, #070b14, #1f293d 50%, #00f0ff)' },
+    { id: 'mountains', name: 'Earth & Mountains', url: 'assets/wallpapers/earth-mountains.svg', preview: 'linear-gradient(135deg, #0a1128, #3a506b 60%, #5bc0be)' }
   ],
 
   render(container) {
@@ -547,17 +550,30 @@ const Homepage = {
       <div style="display:flex;flex-direction:column;gap:20px;max-height:65vh;overflow-y:auto;padding-right:4px;">
         <!-- Background Wallpaper Section -->
         <div>
-          <h4 style="margin:0 0 10px;font-size:14px;color:var(--text-primary);">Background Wallpapers</h4>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+            <h4 style="margin:0;font-size:14px;color:var(--text-primary);">Background Wallpapers</h4>
+            <div style="display:flex;gap:8px;">
+              <button id="upload-wallpaper-btn" style="background:rgba(255,255,255,0.06);border:1px solid var(--border-subtle);color:var(--text-primary);padding:5px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all 0.15s ease;">
+                📁 Upload from device
+              </button>
+              <input type="file" id="upload-wallpaper-file" accept="image/*" style="display:none;" />
+            </div>
+          </div>
           <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:10px;">
-            ${this.wallpapers.map(w => `
-              <div 
-                class="wallpaper-card ${activeWallpaper === w.url ? 'active' : ''}" 
-                data-url="${Utils.escapeHtml(w.url)}"
-                style="height:64px;border-radius:8px;border:2px solid ${activeWallpaper === w.url ? 'var(--cyan-accent, #35D8F2)' : 'var(--border-subtle)'};background:${w.url ? `url('${w.url}') center/cover` : 'var(--bg-tertiary)'};cursor:pointer;display:flex;align-items:flex-end;padding:4px 6px;text-shadow:0 1px 3px rgba(0,0,0,0.8);"
-              >
-                <span style="font-size:11px;font-weight:600;color:#fff;">${w.name}</span>
-              </div>
-            `).join('')}
+            ${this.wallpapers.map(w => {
+              const isSelected = activeWallpaper === w.url;
+              return `
+                <div 
+                  class="wallpaper-card ${isSelected ? 'active' : ''}" 
+                  data-url="${Utils.escapeHtml(w.url)}"
+                  style="height:68px;border-radius:8px;border:2px solid ${isSelected ? 'var(--cyan-accent, #35D8F2)' : 'var(--border-subtle)'};background:${w.preview || 'var(--bg-tertiary)'};background-image:${w.url ? `url('${w.url}')` : 'none'};background-size:cover;background-position:center;cursor:pointer;display:flex;align-items:flex-end;justify-content:space-between;padding:6px 8px;position:relative;overflow:hidden;box-shadow:${isSelected ? '0 0 14px rgba(53, 216, 242, 0.45)' : 'none'};transition:all 0.15s ease;"
+                >
+                  <span style="font-size:11px;font-weight:600;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,0.9);z-index:2;">${w.name}</span>
+                  ${isSelected ? `<span style="font-size:12px;color:var(--cyan-accent, #35D8F2);font-weight:800;text-shadow:0 1px 3px rgba(0,0,0,0.9);z-index:2;">✓</span>` : ''}
+                  <div style="position:absolute;inset:0;background:linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 60%);pointer-events:none;"></div>
+                </div>
+              `;
+            }).join('')}
           </div>
         </div>
 
@@ -620,6 +636,39 @@ const Homepage = {
         }
       }
     ]);
+
+    // Upload wallpaper from device button (Chrome-style local wallpaper picker)
+    const uploadBtn = document.getElementById('upload-wallpaper-btn');
+    const uploadInput = document.getElementById('upload-wallpaper-file');
+    if (uploadBtn && uploadInput) {
+      uploadBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        uploadInput.click();
+      });
+      uploadInput.addEventListener('change', (e) => {
+        const file = e.target.files?.[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (evt) => {
+            const dataUrl = evt.target?.result;
+            if (dataUrl) {
+              this.setWallpaper(dataUrl);
+              document.querySelectorAll('.wallpaper-card').forEach(c => {
+                c.classList.remove('active');
+                c.style.borderColor = 'var(--border-subtle)';
+                c.style.boxShadow = 'none';
+              });
+              const ntp = document.querySelector('.chrome-ntp');
+              if (ntp) {
+                ntp.classList.add('has-custom-wallpaper');
+                ntp.style.backgroundImage = `url('${dataUrl}')`;
+              }
+            }
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+    }
 
     // Wallpaper clicks (smooth in-place preview and selection without blinking or modal dismissal)
     document.querySelectorAll('.wallpaper-card').forEach(card => {
@@ -729,6 +778,16 @@ const Homepage = {
     } else {
       localStorage.removeItem('aether_ntp_wallpaper');
       localStorage.removeItem('amiyo_ntp_wallpaper');
+    }
+    const ntp = document.querySelector('.chrome-ntp');
+    if (ntp) {
+      if (url) {
+        ntp.classList.add('has-custom-wallpaper');
+        ntp.style.backgroundImage = `url('${url}')`;
+      } else {
+        ntp.classList.remove('has-custom-wallpaper');
+        ntp.style.backgroundImage = 'none';
+      }
     }
   },
 

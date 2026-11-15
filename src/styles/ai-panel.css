@@ -347,25 +347,45 @@
   fill: currentColor;
 }
 
-/* AI Sparkle Button in Header Toolbar */
+/* AI Sparkle Button in Header Toolbar (Chrome "Ask Gemini" Inspired) */
 .ai-sparkle-btn {
-  position: relative;
+  width: auto !important;
+  height: 30px !important;
+  padding: 0 10px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  border-radius: 15px !important;
   background: rgba(99, 102, 241, 0.12) !important;
   color: #8ab4f8 !important;
   border: 1px solid rgba(138, 180, 248, 0.25) !important;
   margin-right: 4px;
+  cursor: pointer;
+  transition: all var(--transition-fast) !important;
+}
+
+.ai-sparkle-btn .icon {
+  width: 14px;
+  height: 14px;
+}
+
+.ai-sparkle-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
 }
 
 .ai-sparkle-btn:hover {
   background: linear-gradient(135deg, rgba(121, 40, 202, 0.25) 0%, rgba(79, 70, 229, 0.25) 100%) !important;
   border-color: #8ab4f8 !important;
   color: #ffffff !important;
+  box-shadow: 0 0 10px rgba(138, 180, 248, 0.35) !important;
 }
 
 .ai-sparkle-btn.active {
   background: linear-gradient(135deg, #7928ca 0%, #4f46e5 100%) !important;
   color: #ffffff !important;
   border-color: transparent !important;
-  box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+  box-shadow: 0 0 12px rgba(99, 102, 241, 0.5) !important;
 }
 

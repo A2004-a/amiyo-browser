@@ -307,8 +307,13 @@ class TabController {
       }
     });
 
-    wc.on('did-fail-load', (event, errorCode, errorDescription, validatedURL) => {
-      if (errorCode === -3) return; // ABORTED
+    wc.on('did-fail-load', (event, errorCode, errorDescription, validatedURL, isMainFrame) => {
+      // Ignore subframe/iframe failures (e.g. ad trackers or blocked scripts)
+      if (isMainFrame === false) return;
+      // Ignore normal aborts/redirects/clean states
+      if (errorCode === -3 || errorCode === 0) return;
+      if (!validatedURL || validatedURL === 'about:blank' || validatedURL.startsWith('data:')) return;
+
       tab.isLoading = false;
       tab.title = 'Page could not load';
       if (validatedURL && !validatedURL.startsWith('data:')) {
@@ -316,7 +321,7 @@ class TabController {
       }
       this.notifyTabUpdated(tab);
 
-      const safeUrl = (validatedURL || '').replace(/"/g, '&quot;');
+      const safeUrl = (validatedURL || '').replace(/"/g, '&quot;').replace(/'/g, "\\'");
       const errorHtml = `
         <!DOCTYPE html>
         <html>
@@ -327,20 +332,21 @@ class TabController {
             body {
               margin: 0; padding: 0;
               font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-              background-color: #121316; color: #f3f4f6;
+              background-color: #0B0F14; color: #DCE3EB;
               display: flex; align-items: center; justify-content: center;
               height: 100vh; user-select: none;
             }
             .error-card {
               max-width: 480px; text-align: center; padding: 36px;
-              background: #18191d; border: 1px solid #292c34; border-radius: 12px;
-              box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+              background: #121B2B; border: 1px solid rgba(220, 227, 235, 0.12); border-radius: 12px;
+              box-shadow: 0 10px 30px rgba(0,0,0,0.6);
             }
-            .error-icon { width: 48px; height: 48px; margin: 0 auto 16px; fill: #ef4444; }
-            h1 { font-size: 18px; margin: 0 0 10px 0; color: #f3f4f6; }
-            p { font-size: 13px; color: #9ca3af; line-height: 1.5; margin: 0 0 24px 0; }
-            .btn { background: #6366f1; color: #fff; border: none; padding: 9px 20px; border-radius: 6px; font-size: 13px; cursor: pointer; font-weight: 500; }
-            .error-code { margin-top: 18px; font-size: 11px; color: #6b7280; }
+            .error-icon { width: 48px; height: 48px; margin: 0 auto 16px; fill: #F43F5E; }
+            h1 { font-size: 18px; margin: 0 0 10px 0; color: #DCE3EB; font-weight: 600; }
+            p { font-size: 13px; color: #8FA3B8; line-height: 1.5; margin: 0 0 24px 0; word-break: break-all; }
+            .btn { background: #35D8F2; color: #0B0F14; border: none; padding: 10px 24px; border-radius: 8px; font-size: 13px; cursor: pointer; font-weight: 600; transition: opacity 0.15s ease; }
+            .btn:hover { opacity: 0.9; }
+            .error-code { margin-top: 18px; font-size: 11px; color: #5B6E84; font-family: monospace; }
           </style>
         </head>
         <body>
@@ -348,9 +354,14 @@ class TabController {
             <svg class="error-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
             <h1>This site can’t be reached</h1>
             <p>AETHER Browser could not connect to <strong>${safeUrl}</strong>.<br>Please check your connection and try again.</p>
-            <button class="btn" onclick="window.location.href='${safeUrl}'">Try Again</button>
+            <button class="btn" id="retry-btn">Try Again</button>
             <div class="error-code">${errorDescription || 'Error'} (${errorCode})</div>
           </div>
+          <script>
+            document.getElementById('retry-btn')?.addEventListener('click', () => {
+              window.location.replace('${safeUrl}');
+            });
+          </script>
         </body>
         </html>
       `;

@@ -552,16 +552,15 @@
 /* Custom Wallpaper and Glassmorphism */
 .chrome-ntp.has-custom-wallpaper {
   background-size: cover;
-  background-position: center;
+  background-position: center center;
   background-repeat: no-repeat;
-  background-attachment: fixed;
 }
 
 .chrome-ntp.has-custom-wallpaper::before {
   content: "";
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.22);
+  background: rgba(0, 0, 0, 0.32);
   pointer-events: none;
 }
 

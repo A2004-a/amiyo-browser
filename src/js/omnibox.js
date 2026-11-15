@@ -381,8 +381,23 @@ const Omnibox = {
       this.securityBadgeEl.title = 'Connection is not secure (HTTP)';
     } else if (status.type === 'internal') {
       this.securityBadgeEl.classList.add('internal');
-      this.securityBadgeEl.innerHTML = Utils.icons.lock;
-      this.securityBadgeEl.title = 'AETHER System Page';
+      const activeEngine = (State.settings && State.settings.searchEngine ? State.settings.searchEngine : 'google').toLowerCase();
+      if (activeEngine === 'yahoo') {
+        this.securityBadgeEl.innerHTML = '<span style="background:#6001d2;color:#fff;font-weight:900;font-size:11px;border-radius:4px;padding:2px 4px;font-family:sans-serif;line-height:1;">y!</span>';
+        this.securityBadgeEl.title = 'Search with Yahoo';
+      } else if (activeEngine === 'duckduckgo') {
+        this.securityBadgeEl.innerHTML = '<span style="font-size:14px;line-height:1;">🦆</span>';
+        this.securityBadgeEl.title = 'Search with DuckDuckGo';
+      } else if (activeEngine === 'bing') {
+        this.securityBadgeEl.innerHTML = '<span style="background:#008373;color:#fff;font-weight:700;font-size:11px;border-radius:4px;padding:2px 5px;font-family:sans-serif;line-height:1;">b</span>';
+        this.securityBadgeEl.title = 'Search with Bing';
+      } else if (activeEngine === 'ecosia') {
+        this.securityBadgeEl.innerHTML = '<span style="font-size:14px;line-height:1;">🌿</span>';
+        this.securityBadgeEl.title = 'Search with Ecosia';
+      } else {
+        this.securityBadgeEl.innerHTML = `<svg viewBox="0 0 24 24" style="width:16px;height:16px;"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.34 24 12 24z"/><path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.14-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/></svg>`;
+        this.securityBadgeEl.title = 'Search with Google';
+      }
     } else {
       this.securityBadgeEl.innerHTML = Utils.icons.globe;
       this.securityBadgeEl.title = 'Web Page';
@@ -731,6 +746,7 @@ const Omnibox = {
     const tab = State.getActiveTab();
     if (!tab || tab.url === 'amiyo://newtab' || tab.url === 'aether://newtab') {
       this.inputEl.placeholder = `Search with ${label} or enter address`;
+      this.updateSecurityBadge(tab ? tab.url : 'aether://newtab');
     }
   },
 

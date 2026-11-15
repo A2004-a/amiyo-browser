@@ -62,7 +62,7 @@ if (typeof electron === 'string') {
   return;
 }
 
-const { app, BrowserWindow } = electron;
+const { app, BrowserWindow, session } = electron;
 process.noDeprecation = true;
 
 // Suppress internal Chromium DirectX/DirectComposition overlay notices and activate acceleration
@@ -83,8 +83,8 @@ if (app && app.commandLine) {
   app.commandLine.appendSwitch('enable-features', isGpuDisabled
     ? 'OverlayScrollbar,SmoothScrolling,ParallelDownloading'
     : 'VaapiVideoDecoder,OverlayScrollbar,CanvasOopRasterization,SmoothScrolling,ParallelDownloading');
-  app.commandLine.appendSwitch('disable-features', 'CalculateNativeWinOcclusion');
-  app.commandLine.appendSwitch('dns-prefetch-disable', 'false');
+  app.commandLine.appendSwitch('disable-features', 'CalculateNativeWinOcclusion,WinHttpProxyResolver');
+  app.commandLine.appendSwitch('disable-async-dns');
   app.commandLine.appendSwitch('js-flags', '--max-old-space-size=2048');
 }
 
@@ -119,6 +119,9 @@ const menuManager = require('./electron/menu-manager');
 const { registerIpcHandlers } = require('./electron/ipc-handlers');
 
 app.whenReady().then(() => {
+  try {
+    session.defaultSession.setProxy({ mode: 'system' }).catch(() => {});
+  } catch (e) {}
   registerIpcHandlers();
   menuManager.setupAppMenu(windowManager);
 

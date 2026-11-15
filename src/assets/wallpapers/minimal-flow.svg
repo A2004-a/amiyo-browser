@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%">
+  <defs>
+    <linearGradient id="flowBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#090d16" />
+      <stop offset="50%" stop-color="#111827" />
+      <stop offset="100%" stop-color="#030712" />
+    </linearGradient>
+    <linearGradient id="flowWave1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00f0ff" stop-opacity="0.2" />
+      <stop offset="50%" stop-color="#6366f1" stop-opacity="0.15" />
+      <stop offset="100%" stop-color="#a855f7" stop-opacity="0.05" />
+    </linearGradient>
+    <linearGradient id="flowWave2" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.22" />
+      <stop offset="60%" stop-color="#818cf8" stop-opacity="0.1" />
+      <stop offset="100%" stop-color="#c084fc" stop-opacity="0.02" />
+    </linearGradient>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#flowBg)" />
+  <path d="M-200,600 C300,300 700,900 1200,450 C1700,0 1900,600 2200,350 L2200,1200 L-200,1200 Z" fill="url(#flowWave1)" />
+  <path d="M-200,750 C400,500 800,1050 1350,600 C1750,250 1950,750 2200,500 L2200,1200 L-200,1200 Z" fill="url(#flowWave2)" />
+</svg>
