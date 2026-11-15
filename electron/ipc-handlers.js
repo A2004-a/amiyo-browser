@@ -314,6 +314,9 @@ function registerIpcHandlers() {
   ipcMain.handle('settings:save', (event, updates) => {
     if (typeof updates !== 'object') return null;
     const newSettings = storageManager.saveSettings(updates);
+    if (shieldsController && typeof shieldsController.updateSettings === 'function') {
+      shieldsController.updateSettings(updates);
+    }
     try {
       BrowserWindow.getAllWindows().forEach(win => {
         if (!win.isDestroyed()) {

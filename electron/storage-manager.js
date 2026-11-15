@@ -234,10 +234,16 @@ class StorageManager {
         }
       } catch (e) {}
     }
+    if (settings.homepage === 'amiyo://newtab' || !settings.homepage) {
+      settings.homepage = 'aether://newtab';
+    }
     return settings;
   }
 
   saveSettings(newSettings) {
+    if (newSettings && newSettings.homepage === 'amiyo://newtab') {
+      newSettings.homepage = 'aether://newtab';
+    }
     this.cache.settings = { ...this.cache.settings, ...newSettings };
     this.writeJson(this.files.settings, this.cache.settings);
     return this.cache.settings;

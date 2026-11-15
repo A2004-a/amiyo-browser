@@ -560,13 +560,13 @@ const Homepage = {
         <div>
           <h4 style="margin:0 0 10px;font-size:14px;color:var(--text-primary);">Color & Theme</h4>
           <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:10px;">
-            <button class="chrome-theme-choice ${currentTheme === 'dark' ? 'active' : ''}" id="choice-theme-dark" style="padding:14px;border-radius:8px;border:2px solid ${currentTheme === 'dark' ? 'var(--cyan-accent, #35D8F2)' : 'var(--border-subtle)'};background:#0B0F14;color:#DCE3EB;cursor:pointer;font-size:13px;font-weight:600;">
+            <button class="chrome-theme-choice ${currentTheme === 'dark' ? 'active' : ''}" id="choice-theme-dark" style="padding:14px;border-radius:8px;border:2px solid ${currentTheme === 'dark' ? 'var(--cyan-accent, #35D8F2)' : 'var(--border-subtle)'};background:#0B0F14;color:#DCE3EB;cursor:pointer;font-size:13px;font-weight:600;transition:all 0.2s ease;">
               🌙 Obsidian Dark
             </button>
-            <button class="chrome-theme-choice ${currentTheme === 'light' ? 'active' : ''}" id="choice-theme-light" style="padding:14px;border-radius:8px;border:2px solid ${currentTheme === 'light' ? 'var(--cyan-accent, #35D8F2)' : 'var(--border-subtle)'};background:#ffffff;color:#121B2B;cursor:pointer;font-size:13px;font-weight:600;">
+            <button class="chrome-theme-choice ${currentTheme === 'light' ? 'active' : ''}" id="choice-theme-light" style="padding:14px;border-radius:8px;border:2px solid ${currentTheme === 'light' ? 'var(--cyan-accent, #35D8F2)' : 'var(--border-subtle)'};background:#ffffff;color:#121B2B;cursor:pointer;font-size:13px;font-weight:600;transition:all 0.2s ease;">
               ☀️ Modern Light
             </button>
-            <button class="chrome-theme-choice" id="choice-theme-cyan" style="padding:14px;border-radius:8px;border:2px solid var(--border-subtle);background:#121B2B;color:#35D8F2;cursor:pointer;font-size:13px;font-weight:600;">
+            <button class="chrome-theme-choice ${currentTheme === 'cyan' ? 'active' : ''}" id="choice-theme-cyan" style="padding:14px;border-radius:8px;border:2px solid ${currentTheme === 'cyan' ? 'var(--cyan-accent, #35D8F2)' : 'var(--border-subtle)'};background:#050B14;color:#35D8F2;cursor:pointer;font-size:13px;font-weight:600;transition:all 0.2s ease;">
               ⚡ AETHER Cyan
             </button>
           </div>
@@ -620,36 +620,55 @@ const Homepage = {
       }
     ]);
 
-    // Wallpaper clicks
+    // Wallpaper clicks (smooth in-place preview and selection without blinking or modal dismissal)
     document.querySelectorAll('.wallpaper-card').forEach(card => {
       card.addEventListener('click', () => {
-        const url = card.dataset.url;
+        const url = card.dataset.url || '';
         this.setWallpaper(url);
-        App.closeModal();
-        this.render(document.getElementById('internal-page-container'));
+        
+        // Update active highlight on cards in the modal
+        document.querySelectorAll('.wallpaper-card').forEach(c => {
+          const isAct = (c.dataset.url || '') === url;
+          c.classList.toggle('active', isAct);
+          c.style.borderColor = isAct ? 'var(--cyan-accent, #35D8F2)' : 'var(--border-subtle)';
+        });
+
+        // Apply wallpaper directly to the underlying New Tab page smoothly
+        const ntp = document.querySelector('.chrome-ntp');
+        if (ntp) {
+          if (url) {
+            ntp.classList.add('has-custom-wallpaper');
+            ntp.style.backgroundImage = `url('${url}')`;
+          } else {
+            ntp.classList.remove('has-custom-wallpaper');
+            ntp.style.backgroundImage = '';
+          }
+        }
       });
     });
 
-    // Theme clicks
-    document.getElementById('choice-theme-dark')?.addEventListener('click', async () => {
-      ThemeManager.setTheme('dark');
-      await IpcClient.saveSettings({ theme: 'dark' });
-      this.render(document.getElementById('internal-page-container'));
-      App.closeModal();
+    // Theme clicks (smooth in-place color transitions without blinking, flash, or premature modal closing)
+    const applyThemeSelection = (theme) => {
+      ThemeManager.setTheme(theme);
+      ['dark', 'light', 'cyan'].forEach(t => {
+        const btn = document.getElementById(`choice-theme-${t}`);
+        if (btn) {
+          const isSelected = (t === theme);
+          btn.classList.toggle('active', isSelected);
+          btn.style.borderColor = isSelected ? 'var(--cyan-accent, #35D8F2)' : 'var(--border-subtle)';
+          btn.style.boxShadow = isSelected ? '0 0 14px rgba(53, 216, 242, 0.4)' : 'none';
+        }
+      });
+    };
+
+    document.getElementById('choice-theme-dark')?.addEventListener('click', () => {
+      applyThemeSelection('dark');
     });
-    document.getElementById('choice-theme-light')?.addEventListener('click', async () => {
-      ThemeManager.setTheme('light');
-      await IpcClient.saveSettings({ theme: 'light' });
-      this.render(document.getElementById('internal-page-container'));
-      App.closeModal();
+    document.getElementById('choice-theme-light')?.addEventListener('click', () => {
+      applyThemeSelection('light');
     });
-    document.getElementById('choice-theme-cyan')?.addEventListener('click', async () => {
-      ThemeManager.setTheme('dark');
-      document.documentElement.style.setProperty('--accent', '#35D8F2');
-      document.documentElement.style.setProperty('--border-focus', '#35D8F2');
-      await IpcClient.saveSettings({ theme: 'dark' });
-      this.render(document.getElementById('internal-page-container'));
-      App.closeModal();
+    document.getElementById('choice-theme-cyan')?.addEventListener('click', () => {
+      applyThemeSelection('cyan');
     });
 
     // Shortcuts toggle

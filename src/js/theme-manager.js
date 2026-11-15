@@ -26,6 +26,9 @@ const ThemeManager = {
 
   setTheme(theme) {
     this.applyTheme(theme);
+    if (typeof State !== 'undefined' && State.settings) {
+      State.settings.theme = theme;
+    }
     IpcClient.saveSettings({ theme });
   }
 };

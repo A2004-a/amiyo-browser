@@ -417,6 +417,17 @@ class ShieldsController {
     return this.mode;
   }
 
+  updateSettings(updates) {
+    if (!updates || typeof updates !== 'object') return;
+    if (updates.shieldsEnabled !== undefined) this.enabled = !!updates.shieldsEnabled;
+    if (updates.shieldsMode) this.mode = updates.shieldsMode === 'aggressive' ? 'aggressive' : 'standard';
+    if (updates.stripTrackingParams !== undefined) this.stripTrackingParams = !!updates.stripTrackingParams;
+    if (updates.antiFingerprinting !== undefined) this.antiFingerprinting = !!updates.antiFingerprinting;
+    if (updates.deAmpEnabled !== undefined) this.deAmpEnabled = !!updates.deAmpEnabled;
+    if (updates.blockCookieBanners !== undefined) this.blockCookieBanners = !!updates.blockCookieBanners;
+    this.decisionCache.clear();
+  }
+
   toggleSiteWhitelist(domain, allow) {
     if (!domain) return;
     const cleanDomain = domain.toLowerCase().replace(/^(https?:\/\/)?(www\.)?/, '').split('/')[0];

@@ -62,6 +62,16 @@
   --header-height: 84px;
 }
 
+/* Smooth Theme Transitions to Prevent Blinking / Flashing */
+html, body, #app, #toolbar, #tab-bar, #browser-content, #internal-page-container,
+.chrome-ntp, .modal-dialog, .settings-container, .settings-sidebar, .settings-content,
+.settings-card, .tab, .tab-title, .omnibox-container, .settings-input, .settings-select {
+  transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+              color 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 [data-theme="light"] {
   --bg-primary: #F8FAFC;
   --bg-secondary: #EDF2F7;
@@ -96,6 +106,43 @@
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
   --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.12);
+}
+
+/* Official AETHER Cyan Theme — Deep Obsidian with Electric Cyan Glow */
+[data-theme="cyan"] {
+  --bg-primary: #050B14;
+  --bg-secondary: #0A1424;
+  --bg-tertiary: #101E34;
+  --bg-card: #0D192C;
+  --bg-hover: rgba(53, 216, 242, 0.1);
+  --bg-active: rgba(53, 216, 242, 0.2);
+  --bg-input: #07101C;
+  
+  --border-subtle: rgba(53, 216, 242, 0.22);
+  --border-focus: #35D8F2;
+  --border-hover: rgba(53, 216, 242, 0.5);
+  
+  --text-primary: #E0F2FE;
+  --text-secondary: #7DD3FC;
+  --text-muted: #38BDF8;
+  --text-inverse: #050B14;
+  
+  --accent: #35D8F2;
+  --accent-hover: #67E8F9;
+  --accent-light: rgba(53, 216, 242, 0.18);
+  --accent-gradient: linear-gradient(135deg, #00D4FF 0%, #35D8F2 50%, #7AAEFF 100%);
+  --cyan-glow: 0 0 20px rgba(53, 216, 242, 0.5);
+  --arctic-glow: 0 0 20px rgba(122, 174, 255, 0.45);
+
+  --danger: #F43F5E;
+  --danger-hover: #E11D48;
+  --success: #10B981;
+  --warning: #F59E0B;
+  
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.6);
+  --shadow-md: 0 4px 10px -1px rgba(0, 0, 0, 0.7);
+  --shadow-lg: 0 10px 24px -3px rgba(0, 0, 0, 0.8);
+  --shadow-xl: 0 20px 32px -5px rgba(0, 0, 0, 0.9);
 }
 
 [data-private="true"] {

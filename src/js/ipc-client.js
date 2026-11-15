@@ -96,9 +96,10 @@ const IpcClient = {
     return () => {};
   },
 
-  // AMIYO Shields
+  // AETHER Shields
   getShieldsStatus() { return this.api.shields ? this.api.shields.getStatus() : Promise.resolve({ enabled: true, totalBlocked: 0 }); },
   toggleShields(enabled) { return this.api.shields ? this.api.shields.toggle(enabled) : Promise.resolve(true); },
+  setShieldsMode(mode) { return this.api.shields?.setMode ? this.api.shields.setMode(mode) : Promise.resolve(mode); },
   getShieldsTabStats(tabId) { return this.api.shields ? this.api.shields.getTabStats(tabId) : Promise.resolve({ total: 0 }); },
   toggleShieldsWhitelist(domain, allow) { return this.api.shields ? this.api.shields.toggleWhitelist(domain, allow) : Promise.resolve(false); },
 

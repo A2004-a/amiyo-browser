@@ -28,7 +28,7 @@ class WindowManager {
       trafficLightPosition: process.platform === 'darwin' ? { x: 14, y: 14 } : undefined,
       title: isPrivate ? 'AETHER Browser (Private)' : 'AETHER Browser',
       backgroundColor: '#0B0F14',
-      icon: path.join(__dirname, '..', 'assets', 'branding', 'aether-official-logo.jpg'),
+      icon: path.join(__dirname, '..', 'assets', 'branding', process.platform === 'win32' ? 'icon.ico' : 'icon.png'),
       webPreferences: {
         nodeIntegration: false,
         contextIsolation: true,

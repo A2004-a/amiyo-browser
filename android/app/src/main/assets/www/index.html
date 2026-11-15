@@ -6,61 +6,132 @@
   <title>AETHER Browser</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg-primary: #12141a;
+      --bg-secondary: #1a1d26;
+      --bg-card: #202430;
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --accent: #38bdf8;
+      --accent-glow: rgba(56, 189, 248, 0.25);
+      --border: rgba(255, 255, 255, 0.08);
+      --border-hover: rgba(56, 189, 248, 0.4);
+    }
+
+    body[data-theme="midnight"] {
+      --bg-primary: #000000;
+      --bg-secondary: #0a0a0a;
+      --bg-card: #141414;
+      --border: rgba(255, 255, 255, 0.12);
+    }
+    body[data-theme="cyberpunk"] {
+      --bg-primary: #0a0a14;
+      --bg-secondary: #121024;
+      --bg-card: #1c1538;
+      --accent: #00f0ff;
+      --accent-glow: rgba(0, 240, 255, 0.35);
+    }
+    body[data-theme="light"] {
+      --bg-primary: #f8fafc;
+      --bg-secondary: #f1f5f9;
+      --bg-card: #ffffff;
+      --text-primary: #0f172a;
+      --text-secondary: #64748b;
+      --border: rgba(0, 0, 0, 0.08);
+    }
+
     body {
-      background-color: #202124;
-      color: #ffffff;
-      font-family: -apple-system, BlinkMacSystemFont, "Roboto", "Segoe UI", sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      padding: 24px 16px 80px;
+      transition: background-color 0.25s, color 0.25s;
+      overflow-x: hidden;
     }
-    
+
+    .view-section {
+      width: 100%;
+      max-width: 600px;
+      min-height: 100vh;
+      display: none;
+      flex-direction: column;
+      padding: 20px 16px 80px;
+    }
+    .view-section.active {
+      display: flex;
+    }
+
+    /* Sub-page Top Header */
+    .page-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .back-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 18px;
+    }
+    .page-title {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
     /* Brand Emblem & Logo */
     .brand-container {
       display: flex;
       flex-direction: column;
       align-items: center;
+      margin-top: 36px;
       margin-bottom: 28px;
-      gap: 12px;
+      gap: 10px;
     }
-
     .brand-icon-circle {
-      width: 64px;
-      height: 64px;
+      width: 68px;
+      height: 68px;
       border-radius: 50%;
-      background: #18191a;
+      background: radial-gradient(circle at 35% 35%, #1e293b, #0f172a);
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+      box-shadow: 0 8px 24px var(--accent-glow), 0 0 0 1px rgba(255,255,255,0.06);
       position: relative;
     }
-
     .brand-icon-circle svg {
-      width: 48px;
-      height: 48px;
+      width: 52px;
+      height: 52px;
     }
-
     .brand-title {
-      font-size: 38px;
-      font-weight: 700;
-      letter-spacing: -0.5px;
-      background: linear-gradient(135deg, #ffffff 0%, #c7d2fe 40%, #38bdf8 100%);
+      font-size: 34px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 40%, var(--accent) 100%);
       background-clip: text;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       color: transparent;
       line-height: 1.1;
     }
-
     .brand-subtitle {
-      font-size: 13px;
+      font-size: 11px;
       font-weight: 600;
-      color: #94a3b8;
-      letter-spacing: 3px;
+      color: var(--text-secondary);
+      letter-spacing: 3.5px;
       text-transform: uppercase;
       margin-top: -2px;
     }
@@ -68,52 +139,48 @@
     /* Omnibox Search Box */
     .search-box {
       width: 100%;
-      max-width: 480px;
-      height: 48px;
-      background: #303134;
-      border-radius: 24px;
+      height: 50px;
+      background: var(--bg-card);
+      border-radius: 25px;
       display: flex;
       align-items: center;
       padding: 0 16px;
-      gap: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-      margin-bottom: 32px;
-      border: 1px solid rgba(255,255,255,0.08);
-      transition: box-shadow 0.2s, background-color 0.2s;
+      gap: 12px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+      margin-bottom: 30px;
+      border: 1px solid var(--border);
+      transition: all 0.2s ease;
     }
-
     .search-box:focus-within {
-      background: #35363a;
-      box-shadow: 0 3px 12px rgba(0,0,0,0.45);
-      border-color: rgba(255,255,255,0.18);
+      background: var(--bg-secondary);
+      border-color: var(--accent);
+      box-shadow: 0 4px 20px var(--accent-glow);
     }
-
     .search-input {
       flex: 1;
       height: 100%;
       background: transparent;
       border: none;
       outline: none;
-      color: #fff;
+      color: var(--text-primary);
       font-size: 15px;
     }
-    .search-input::placeholder { color: #9aa0a6; }
+    .search-input::placeholder { color: var(--text-secondary); }
 
     .search-tools {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
     }
-
     .icon-btn {
-      width: 28px;
-      height: 28px;
+      width: 30px;
+      height: 30px;
       background: transparent;
       border: none;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #9aa0a6;
+      color: var(--text-secondary);
       cursor: pointer;
       border-radius: 50%;
     }
@@ -122,9 +189,9 @@
     .shortcuts-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 20px 12px;
+      gap: 18px 12px;
       width: 100%;
-      max-width: 400px;
+      margin-bottom: 40px;
     }
     .shortcut {
       display: flex;
@@ -132,27 +199,28 @@
       align-items: center;
       gap: 8px;
       text-decoration: none;
-      color: #fff;
+      color: var(--text-primary);
     }
     .circle {
-      width: 48px;
-      height: 48px;
+      width: 50px;
+      height: 50px;
       border-radius: 50%;
-      background: #303134;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 20px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-      transition: transform 0.15s, background-color 0.15s;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+      transition: transform 0.15s, border-color 0.15s;
     }
     .shortcut:active .circle {
-      transform: scale(0.95);
-      background: #3c4043;
+      transform: scale(0.92);
+      border-color: var(--accent);
     }
     .label {
-      font-size: 12px;
-      color: #e8eaed;
+      font-size: 11px;
+      color: var(--text-secondary);
       text-align: center;
       max-width: 76px;
       overflow: hidden;
@@ -163,125 +231,451 @@
     /* Customize Pill */
     .customize-pill {
       position: fixed;
-      bottom: 18px;
-      right: 18px;
-      height: 36px;
-      padding: 0 16px;
-      background: #303134;
-      border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 18px;
-      color: #e8eaed;
+      bottom: 20px;
+      right: 20px;
+      height: 38px;
+      padding: 0 18px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      color: var(--text-primary);
       font-size: 12px;
-      font-weight: 500;
+      font-weight: 600;
       display: flex;
       align-items: center;
       gap: 8px;
       cursor: pointer;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.35);
+      box-shadow: 0 4px 14px rgba(0,0,0,0.4);
+      z-index: 50;
+      transition: transform 0.15s, border-color 0.15s;
+    }
+    .customize-pill:active {
+      transform: scale(0.96);
+      border-color: var(--accent);
+    }
+
+    /* Bottom Sheet Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(6px);
+      z-index: 100;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+    }
+    .modal-overlay.open {
+      display: flex;
+    }
+    .modal-sheet {
+      width: 100%;
+      max-width: 500px;
+      background: var(--bg-secondary);
+      border-top-left-radius: 24px;
+      border-top-right-radius: 24px;
+      border: 1px solid var(--border);
+      border-bottom: none;
+      padding: 24px 20px 32px;
+      box-shadow: 0 -8px 32px rgba(0,0,0,0.6);
+      max-height: 85vh;
+      overflow-y: auto;
+      animation: slideUp 0.25s ease-out;
+    }
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .modal-title {
+      font-size: 18px;
+      font-weight: 700;
+    }
+    .close-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 22px;
+      cursor: pointer;
+      padding: 4px;
+    }
+    .setting-group {
+      margin-bottom: 20px;
+    }
+    .setting-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .option-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+    .option-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.15s ease;
+    }
+    .option-card.selected {
+      border-color: var(--accent);
+      background: rgba(56, 189, 248, 0.12);
+      color: var(--accent);
+    }
+    .btn-primary {
+      width: 100%;
+      height: 44px;
+      border-radius: 22px;
+      background: var(--accent);
+      color: #0f172a;
+      border: none;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    /* List items for History / Bookmarks / Downloads */
+    .list-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+    .list-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      text-decoration: none;
+      color: var(--text-primary);
+    }
+    .list-item:last-child { border-bottom: none; }
+    .list-item-content {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      overflow: hidden;
+      flex: 1;
+      padding-right: 12px;
+    }
+    .item-title {
+      font-size: 14px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .item-url {
+      font-size: 12px;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .item-del-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 18px;
+      padding: 6px;
+      cursor: pointer;
+    }
+    .empty-state {
+      text-align: center;
+      padding: 48px 16px;
+      color: var(--text-secondary);
+      font-size: 14px;
     }
   </style>
 </head>
-<body>
+<body data-theme="dark">
 
-  <!-- AETHER Browser Emblem & Logo -->
-  <div class="brand-container">
-    <div class="brand-icon-circle">
-      <svg viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <linearGradient id="andChromeL" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#FFFFFF" />
-            <stop offset="100%" stop-color="#94A3B8" />
-          </linearGradient>
-          <linearGradient id="andChromeR" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#CBD5E1" />
-            <stop offset="100%" stop-color="#334155" />
-          </linearGradient>
-          <linearGradient id="andOrbit" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stop-color="#35D8F2" />
-            <stop offset="50%" stop-color="#FFFFFF" />
-            <stop offset="100%" stop-color="#94A3B8" />
-          </linearGradient>
-        </defs>
-        <path d="M 125 315 C 80 300 85 245 155 200 C 190 178 240 155 305 130" fill="none" stroke="#00D4FF" stroke-width="14" stroke-linecap="round" opacity="0.95" />
-        <path d="M 256 68 L 108 340 L 168 340 L 256 168 Z" fill="url(#andChromeL)" />
-        <path d="M 256 68 L 256 168 L 344 340 L 404 340 Z" fill="url(#andChromeR)" />
-        <polygon points="256,168 168,340 230,300 256,220" fill="#1E293B" />
-        <polygon points="256,168 256,220 282,300 344,340" fill="#475569" />
-        <circle cx="256" cy="68" r="4.5" fill="#FFFFFF" />
-        <path d="M 118 316 C 170 330 250 320 330 260 C 380 220 415 170 435 125 C 420 135 385 175 320 225 C 245 285 175 295 118 316 Z" fill="url(#andOrbit)" />
-        <circle cx="438" cy="122" r="18" fill="#00D4FF" />
-        <circle cx="434" cy="118" r="5" fill="#FFFFFF" />
+  <!-- ================= 1. HOME / NEW TAB VIEW ================= -->
+  <section id="view-home" class="view-section active">
+    <!-- AETHER 3D Orbital Emblem -->
+    <div class="brand-container">
+      <div class="brand-icon-circle">
+        <svg viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="andChromeL" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#FFFFFF" />
+              <stop offset="100%" stop-color="#94A3B8" />
+            </linearGradient>
+            <linearGradient id="andChromeR" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#CBD5E1" />
+              <stop offset="100%" stop-color="#334155" />
+            </linearGradient>
+            <linearGradient id="andOrbit" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#35D8F2" />
+              <stop offset="50%" stop-color="#FFFFFF" />
+              <stop offset="100%" stop-color="#94A3B8" />
+            </linearGradient>
+          </defs>
+          <path d="M 125 315 C 80 300 85 245 155 200 C 190 178 240 155 305 130" fill="none" stroke="#00D4FF" stroke-width="14" stroke-linecap="round" opacity="0.95" />
+          <path d="M 256 68 L 108 340 L 168 340 L 256 168 Z" fill="url(#andChromeL)" />
+          <path d="M 256 68 L 256 168 L 344 340 L 404 340 Z" fill="url(#andChromeR)" />
+          <polygon points="256,168 168,340 230,300 256,220" fill="#1E293B" />
+          <polygon points="256,168 256,220 282,300 344,340" fill="#475569" />
+          <circle cx="256" cy="68" r="4.5" fill="#FFFFFF" />
+          <path d="M 118 316 C 170 330 250 320 330 260 C 380 220 415 170 435 125 C 420 135 385 175 320 225 C 245 285 175 295 118 316 Z" fill="url(#andOrbit)" />
+          <circle cx="438" cy="122" r="18" fill="#00D4FF" />
+          <circle cx="434" cy="118" r="5" fill="#FFFFFF" />
+        </svg>
+      </div>
+      <div class="brand-title">Λ E T H E R</div>
+      <div class="brand-subtitle">EXPLORE WITHOUT LIMITS.</div>
+    </div>
+
+    <!-- Search Bar -->
+    <form class="search-box" id="android-search-form" onsubmit="handleSearch(event)">
+      <svg style="width:20px;height:20px;color:var(--text-secondary);flex-shrink:0;" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
       </svg>
+      <input type="text" id="android-search-input" name="q" class="search-input" placeholder="Search or type URL" autocomplete="off" />
+      <div class="search-tools">
+        <button type="button" class="icon-btn" title="Search by voice" onclick="location.href='https://www.google.com';">
+          <svg style="width:18px;height:18px;" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+            <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+          </svg>
+        </button>
+        <button type="button" class="icon-btn" title="Google Lens" onclick="location.href='https://lens.google.com';">
+          <svg style="width:18px;height:18px;" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6m0-2a5 5 0 1 1 0 10 5 5 0 0 1 0-10m-7 4a7 7 0 1 1 14 0 7 7 0 0 1-14 0"/>
+          </svg>
+        </button>
+      </div>
+    </form>
+
+    <!-- Shortcuts Grid -->
+    <div class="shortcuts-grid" id="shortcuts-container">
+      <a href="https://gemini.google.com" class="shortcut">
+        <div class="circle" style="color:#a855f7;background:rgba(168,85,247,0.15);">✨</div>
+        <span class="label">AETHER AI</span>
+      </a>
+      <a href="https://www.youtube.com" class="shortcut">
+        <div class="circle" style="color:#ff0000;">▶</div>
+        <span class="label">YouTube</span>
+      </a>
+      <a href="https://mail.google.com" class="shortcut">
+        <div class="circle" style="color:#ea4335;">✉</div>
+        <span class="label">Gmail</span>
+      </a>
+      <a href="https://www.wikipedia.org" class="shortcut">
+        <div class="circle" style="color:#fff;">W</div>
+        <span class="label">Wikipedia</span>
+      </a>
+      <a href="https://github.com" class="shortcut">
+        <div class="circle" style="color:#fff;">⌨</div>
+        <span class="label">GitHub</span>
+      </a>
+      <a href="https://x.com" class="shortcut">
+        <div class="circle" style="color:#1da1f2;">𝕏</div>
+        <span class="label">Twitter / X</span>
+      </a>
+      <a href="https://www.reddit.com" class="shortcut">
+        <div class="circle" style="color:#ff4500;">🤖</div>
+        <span class="label">Reddit</span>
+      </a>
+      <a href="https://news.google.com" class="shortcut">
+        <div class="circle" style="color:#4285f4;">📰</div>
+        <span class="label">News</span>
+      </a>
     </div>
-    <div class="brand-title">Λ E T H E R</div>
-    <div class="brand-subtitle">EXPLORE WITHOUT LIMITS.</div>
-  </div>
 
-  <!-- Search Bar -->
-  <form class="search-box" id="android-search-form" onsubmit="handleSearch(event)">
-    <svg style="width:20px;height:20px;color:#9aa0a6;flex-shrink:0;" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
-    </svg>
-    <input type="text" id="android-search-input" name="q" class="search-input" placeholder="Search or type URL" autocomplete="off" />
-    <div class="search-tools">
-      <button type="button" class="icon-btn" title="Search by voice" onclick="location.href='https://www.google.com';">
-        <svg style="width:18px;height:18px;" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
-          <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
-        </svg>
-      </button>
-      <button type="button" class="icon-btn" title="Google Lens" onclick="location.href='https://lens.google.com';">
-        <svg style="width:18px;height:18px;" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6m0-2a5 5 0 1 1 0 10 5 5 0 0 1 0-10m-7 4a7 7 0 1 1 14 0 7 7 0 0 1-14 0"/>
-        </svg>
-      </button>
+    <!-- Customize Button (Now fully functional!) -->
+    <div class="customize-pill" id="btn-open-customize" onclick="openCustomizeModal()">
+      <span>✏️ Customize AETHER Browser</span>
     </div>
-  </form>
+  </section>
 
-  <!-- Shortcuts Grid -->
-  <div class="shortcuts-grid">
-    <a href="https://gemini.google.com" class="shortcut">
-      <div class="circle" style="color:#a855f7;background:rgba(168,85,247,0.15);">✨</div>
-      <span class="label">AETHER AI</span>
-    </a>
-    <a href="https://www.youtube.com" class="shortcut">
-      <div class="circle" style="color:#ff0000;">▶</div>
-      <span class="label">YouTube</span>
-    </a>
-    <a href="https://mail.google.com" class="shortcut">
-      <div class="circle" style="color:#ea4335;">✉</div>
-      <span class="label">Gmail</span>
-    </a>
-    <a href="https://www.wikipedia.org" class="shortcut">
-      <div class="circle" style="color:#fff;">W</div>
-      <span class="label">Wikipedia</span>
-    </a>
-    <a href="https://github.com" class="shortcut">
-      <div class="circle" style="color:#fff;">⌨</div>
-      <span class="label">GitHub</span>
-    </a>
-    <a href="https://x.com" class="shortcut">
-      <div class="circle" style="color:#1da1f2;">𝕏</div>
-      <span class="label">Twitter / X</span>
-    </a>
-    <a href="https://www.reddit.com" class="shortcut">
-      <div class="circle" style="color:#ff4500;">🤖</div>
-      <span class="label">Reddit</span>
-    </a>
-    <a href="https://news.google.com" class="shortcut">
-      <div class="circle" style="color:#4285f4;">📰</div>
-      <span class="label">News</span>
-    </a>
+
+  <!-- ================= 2. HISTORY VIEW ================= -->
+  <section id="view-history" class="view-section">
+    <div class="page-header">
+      <button class="back-btn" onclick="navigateTo('#newtab')">←</button>
+      <h2 class="page-title">Browsing History</h2>
+    </div>
+    <div style="margin-bottom:14px;display:flex;gap:10px;">
+      <input type="text" id="history-search" class="search-input" placeholder="Search history..." style="background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:0 14px;height:42px;" oninput="filterHistory()" />
+      <button onclick="clearAllHistory()" style="background:#ef4444;color:#fff;border:none;border-radius:12px;padding:0 14px;font-size:12px;font-weight:600;white-space:nowrap;cursor:pointer;">Clear All</button>
+    </div>
+    <div class="list-card" id="history-list"></div>
+  </section>
+
+
+  <!-- ================= 3. BOOKMARKS VIEW ================= -->
+  <section id="view-bookmarks" class="view-section">
+    <div class="page-header">
+      <button class="back-btn" onclick="navigateTo('#newtab')">←</button>
+      <h2 class="page-title">Bookmarks</h2>
+    </div>
+    <div class="list-card" id="bookmarks-list"></div>
+  </section>
+
+
+  <!-- ================= 4. SETTINGS VIEW ================= -->
+  <section id="view-settings" class="view-section">
+    <div class="page-header">
+      <button class="back-btn" onclick="navigateTo('#newtab')">←</button>
+      <h2 class="page-title">Settings</h2>
+    </div>
+
+    <div class="list-card">
+      <div class="list-item" onclick="openCustomizeModal()">
+        <div class="list-item-content">
+          <span class="item-title">Search Engine &amp; Appearance</span>
+          <span class="item-url" id="settings-current-engine">Default: Google</span>
+        </div>
+        <span style="color:var(--text-secondary);">›</span>
+      </div>
+      <div class="list-item" onclick="toggleShieldsSetting()">
+        <div class="list-item-content">
+          <span class="item-title">Brave Shields (Ad &amp; Tracker Blocker)</span>
+          <span class="item-url" id="shields-status-desc">Active • High Protection</span>
+        </div>
+        <input type="checkbox" id="shields-toggle-checkbox" checked style="width:20px;height:20px;accent-color:var(--accent);" />
+      </div>
+      <div class="list-item" onclick="clearAllHistory()">
+        <div class="list-item-content">
+          <span class="item-title" style="color:#ef4444;">Clear Browsing Data</span>
+          <span class="item-url">Clear cache, cookies, and history</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align:center;padding:24px 0;color:var(--text-secondary);font-size:12px;">
+      AETHER Browser for Android • Version 1.1.0<br>Explore Without Limits.
+    </div>
+  </section>
+
+
+  <!-- ================= 5. DOWNLOADS VIEW ================= -->
+  <section id="view-downloads" class="view-section">
+    <div class="page-header">
+      <button class="back-btn" onclick="navigateTo('#newtab')">←</button>
+      <h2 class="page-title">Downloads</h2>
+    </div>
+    <div class="empty-state">
+      <div style="font-size:42px;margin-bottom:12px;">📥</div>
+      <p style="font-weight:600;font-size:15px;color:var(--text-primary);margin-bottom:6px;">Your Downloaded Files</p>
+      <p style="margin-bottom:20px;">Downloads are saved to your device's default Downloads folder.</p>
+      <button onclick="location.href='content://downloads/all_downloads'" class="btn-primary" style="max-width:240px;margin:0 auto;display:block;">Open Device Downloads</button>
+    </div>
+  </section>
+
+
+  <!-- ================= CUSTOMIZE BOTTOM SHEET MODAL ================= -->
+  <div class="modal-overlay" id="customize-modal" onclick="if(event.target===this) closeCustomizeModal()">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <h3 class="modal-title">Customize AETHER Browser</h3>
+        <button class="close-btn" onclick="closeCustomizeModal()">✕</button>
+      </div>
+
+      <!-- Search Engine -->
+      <div class="setting-group">
+        <div class="setting-label">Default Search Engine</div>
+        <div class="option-grid" id="engine-options">
+          <div class="option-card" data-engine="google" onclick="selectEngine('google')">🌐 Google</div>
+          <div class="option-card" data-engine="duckduckgo" onclick="selectEngine('duckduckgo')">🦆 DuckDuckGo</div>
+          <div class="option-card" data-engine="bing" onclick="selectEngine('bing')">🔷 Bing</div>
+          <div class="option-card" data-engine="yahoo" onclick="selectEngine('yahoo')">🟣 Yahoo</div>
+          <div class="option-card" data-engine="ecosia" onclick="selectEngine('ecosia')">🌿 Ecosia</div>
+        </div>
+      </div>
+
+      <!-- Color Theme -->
+      <div class="setting-group">
+        <div class="setting-label">Color Theme</div>
+        <div class="option-grid" id="theme-options">
+          <div class="option-card" data-theme="dark" onclick="selectTheme('dark')">🌑 Obsidian Dark</div>
+          <div class="option-card" data-theme="midnight" onclick="selectTheme('midnight')">⬛ Midnight OLED</div>
+          <div class="option-card" data-theme="cyberpunk" onclick="selectTheme('cyberpunk')">⚡ Cyberpunk Cyan</div>
+          <div class="option-card" data-theme="light" onclick="selectTheme('light')">☀️ Clean Light</div>
+        </div>
+      </div>
+
+      <!-- Shortcuts Toggle -->
+      <div class="setting-group">
+        <div class="setting-label">New Tab Shortcuts</div>
+        <div class="option-card" id="toggle-shortcuts-btn" onclick="toggleShortcutsVisibility()" style="width:100%;">
+          <span>Show Shortcuts Grid</span>
+          <span style="margin-left:auto;color:var(--accent);" id="shortcuts-state-text">Enabled</span>
+        </div>
+      </div>
+
+      <button class="btn-primary" onclick="closeCustomizeModal()">Done</button>
+    </div>
   </div>
 
-  <!-- Customize Button -->
-  <div class="customize-pill">
-    <span>✏️ Customize AMIYO Browser</span>
-  </div>
 
+  <!-- ================= JAVASCRIPT APP LOGIC ================= -->
   <script>
+    // 1. Hash Routing
+    function navigateTo(hash) {
+      window.location.hash = hash;
+    }
+
+    function renderRoute() {
+      const hash = (window.location.hash || '#newtab').toLowerCase();
+      document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
+
+      if (hash === '#history') {
+        document.getElementById('view-history').classList.add('active');
+        loadHistoryView();
+      } else if (hash === '#bookmarks') {
+        document.getElementById('view-bookmarks').classList.add('active');
+        loadBookmarksView();
+      } else if (hash === '#settings') {
+        document.getElementById('view-settings').classList.add('active');
+        loadSettingsView();
+      } else if (hash === '#downloads') {
+        document.getElementById('view-downloads').classList.add('active');
+      } else {
+        document.getElementById('view-home').classList.add('active');
+      }
+      window.scrollTo(0, 0);
+    }
+    window.addEventListener('hashchange', renderRoute);
+
+    // 2. Search & Direct URL Handling
+    function isDirectUrl(val) {
+      if (!val || val.includes(' ')) return false;
+      if (/^[a-zA-Z]+:\/\//.test(val)) return true;
+      if (/^localhost(:\d+)?(\/.*)?$/i.test(val) || /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/.test(val)) return true;
+      if (val.startsWith('www.')) return true;
+      const hostPart = val.split('/')[0].split('?')[0];
+      if (hostPart.includes('.') && !hostPart.startsWith('.') && !hostPart.endsWith('.')) {
+        const parts = hostPart.split('.');
+        const tld = parts[parts.length - 1];
+        if (tld.length >= 2) return true;
+      }
+      return false;
+    }
+
     function getSearchUrl(query) {
-      const engine = localStorage.getItem('amiyo_search_engine') || 'google';
+      const engine = localStorage.getItem('aether_search_engine') || localStorage.getItem('amiyo_search_engine') || 'google';
       const map = {
         google: 'https://www.google.com/search?q=',
         duckduckgo: 'https://duckduckgo.com/?q=',
@@ -293,22 +687,204 @@
       return base + encodeURIComponent(query);
     }
 
+    function recordHistoryItem(title, url) {
+      if (!url || url.startsWith('file://')) return;
+      try {
+        let history = JSON.parse(localStorage.getItem('aether_history') || '[]');
+        history = history.filter(h => h.url !== url);
+        history.unshift({ title: title || url, url: url, time: Date.now() });
+        localStorage.setItem('aether_history', JSON.stringify(history.slice(0, 100)));
+      } catch (e) {}
+    }
+
     function handleSearch(e) {
       e.preventDefault();
       const input = document.getElementById('android-search-input');
       const val = input ? input.value.trim() : '';
       if (!val) return;
+
       if (val.startsWith('@ai ') || val.startsWith('@gemini ')) {
         const q = val.replace(/^@(ai|gemini)\s*/i, '');
         location.href = 'https://gemini.google.com/app?q=' + encodeURIComponent(q);
         return;
       }
-      if (/^[a-zA-Z]+:\/\//.test(val) || (/^[a-zA-Z0-9][-a-zA-Z0-9]*\.[a-zA-Z0-9]+/.test(val) && !val.includes(' '))) {
-        location.href = val.startsWith('http') ? val : ('https://' + val);
+
+      if (isDirectUrl(val)) {
+        const dest = val.startsWith('http') ? val : ('https://' + val);
+        recordHistoryItem(val, dest);
+        location.href = dest;
       } else {
-        location.href = getSearchUrl(val);
+        const dest = getSearchUrl(val);
+        recordHistoryItem(`Search: ${val}`, dest);
+        location.href = dest;
       }
     }
+
+    // 3. Customize Modal Logic
+    function openCustomizeModal() {
+      document.getElementById('customize-modal').classList.add('open');
+      highlightCurrentSettings();
+    }
+    function closeCustomizeModal() {
+      document.getElementById('customize-modal').classList.remove('open');
+    }
+
+    function selectEngine(engine) {
+      localStorage.setItem('aether_search_engine', engine);
+      localStorage.setItem('amiyo_search_engine', engine);
+      highlightCurrentSettings();
+      loadSettingsView();
+    }
+
+    function selectTheme(theme) {
+      document.body.setAttribute('data-theme', theme);
+      localStorage.setItem('aether_theme', theme);
+      highlightCurrentSettings();
+    }
+
+    function toggleShortcutsVisibility() {
+      const current = localStorage.getItem('aether_show_shortcuts') !== 'false';
+      const next = !current;
+      localStorage.setItem('aether_show_shortcuts', next ? 'true' : 'false');
+      applyShortcutsVisibility();
+      highlightCurrentSettings();
+    }
+
+    function applyShortcutsVisibility() {
+      const show = localStorage.getItem('aether_show_shortcuts') !== 'false';
+      const container = document.getElementById('shortcuts-container');
+      if (container) container.style.display = show ? 'grid' : 'none';
+      const text = document.getElementById('shortcuts-state-text');
+      if (text) text.textContent = show ? 'Enabled' : 'Hidden';
+    }
+
+    function highlightCurrentSettings() {
+      const engine = localStorage.getItem('aether_search_engine') || 'google';
+      document.querySelectorAll('#engine-options .option-card').forEach(el => {
+        el.classList.toggle('selected', el.dataset.engine === engine);
+      });
+
+      const theme = localStorage.getItem('aether_theme') || 'dark';
+      document.querySelectorAll('#theme-options .option-card').forEach(el => {
+        el.classList.toggle('selected', el.dataset.theme === theme);
+      });
+    }
+
+    // 4. History View Logic
+    function loadHistoryView() {
+      const container = document.getElementById('history-list');
+      if (!container) return;
+      let history = [];
+      try { history = JSON.parse(localStorage.getItem('aether_history') || '[]'); } catch (e) {}
+
+      if (history.length === 0) {
+        container.innerHTML = '<div class="empty-state">No browsing history yet</div>';
+        return;
+      }
+
+      container.innerHTML = history.map((item, idx) => `
+        <div class="list-item">
+          <div class="list-item-content" onclick="location.href='${item.url.replace(/'/g, "\\'")}'">
+            <span class="item-title">${escapeHtml(item.title || item.url)}</span>
+            <span class="item-url">${escapeHtml(item.url)}</span>
+          </div>
+          <button class="item-del-btn" onclick="deleteHistoryItem(${idx})">✕</button>
+        </div>
+      `).join('');
+    }
+
+    function deleteHistoryItem(index) {
+      try {
+        let history = JSON.parse(localStorage.getItem('aether_history') || '[]');
+        history.splice(index, 1);
+        localStorage.setItem('aether_history', JSON.stringify(history));
+        loadHistoryView();
+      } catch (e) {}
+    }
+
+    function clearAllHistory() {
+      if (confirm('Clear all browsing history?')) {
+        localStorage.removeItem('aether_history');
+        loadHistoryView();
+      }
+    }
+
+    function filterHistory() {
+      const q = (document.getElementById('history-search')?.value || '').toLowerCase();
+      document.querySelectorAll('#history-list .list-item').forEach(el => {
+        const text = el.textContent.toLowerCase();
+        el.style.display = text.includes(q) ? 'flex' : 'none';
+      });
+    }
+
+    // 5. Bookmarks View Logic
+    function loadBookmarksView() {
+      const container = document.getElementById('bookmarks-list');
+      if (!container) return;
+      let bookmarks = [];
+      try {
+        bookmarks = JSON.parse(localStorage.getItem('aether_bookmarks') || '[]');
+      } catch (e) {}
+
+      // Default bookmarks if empty
+      if (bookmarks.length === 0) {
+        bookmarks = [
+          { title: 'Google', url: 'https://www.google.com' },
+          { title: 'YouTube', url: 'https://www.youtube.com' },
+          { title: 'Wikipedia', url: 'https://www.wikipedia.org' },
+          { title: 'GitHub', url: 'https://github.com' }
+        ];
+        localStorage.setItem('aether_bookmarks', JSON.stringify(bookmarks));
+      }
+
+      container.innerHTML = bookmarks.map((b, idx) => `
+        <div class="list-item">
+          <div class="list-item-content" onclick="location.href='${b.url.replace(/'/g, "\\'")}'">
+            <span class="item-title">${escapeHtml(b.title || b.url)}</span>
+            <span class="item-url">${escapeHtml(b.url)}</span>
+          </div>
+          <button class="item-del-btn" onclick="deleteBookmarkItem(${idx})">✕</button>
+        </div>
+      `).join('');
+    }
+
+    function deleteBookmarkItem(index) {
+      try {
+        let bookmarks = JSON.parse(localStorage.getItem('aether_bookmarks') || '[]');
+        bookmarks.splice(index, 1);
+        localStorage.setItem('aether_bookmarks', JSON.stringify(bookmarks));
+        loadBookmarksView();
+      } catch (e) {}
+    }
+
+    // 6. Settings View Logic
+    function loadSettingsView() {
+      const engine = localStorage.getItem('aether_search_engine') || 'google';
+      const label = engine.charAt(0).toUpperCase() + engine.slice(1);
+      const descEl = document.getElementById('settings-current-engine');
+      if (descEl) descEl.textContent = `Default: ${label}`;
+    }
+
+    function toggleShieldsSetting() {
+      const cb = document.getElementById('shields-toggle-checkbox');
+      if (!cb) return;
+      cb.checked = !cb.checked;
+      const desc = document.getElementById('shields-status-desc');
+      if (desc) desc.textContent = cb.checked ? 'Active • High Protection' : 'Disabled';
+      localStorage.setItem('aether_shields_enabled', cb.checked ? 'true' : 'false');
+    }
+
+    function escapeHtml(str) {
+      return (str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    // Initialize on page load
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedTheme = localStorage.getItem('aether_theme') || 'dark';
+      document.body.setAttribute('data-theme', savedTheme);
+      applyShortcutsVisibility();
+      renderRoute();
+    });
   </script>
 </body>
 </html>

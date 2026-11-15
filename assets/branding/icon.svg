@@ -1,12 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <defs>
-    <!-- Deep Obsidian Background -->
-    <radialGradient id="aetherBgGlow" cx="50%" cy="55%" r="65%">
-      <stop offset="0%" stop-color="#0E1A2E" />
-      <stop offset="50%" stop-color="#0B0F14" />
-      <stop offset="100%" stop-color="#05070A" />
-    </radialGradient>
-
     <!-- Chrome Left Facet (Direct Light) -->
     <linearGradient id="chromeLeft" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#FFFFFF" />
@@ -15,7 +8,7 @@
       <stop offset="100%" stop-color="#94A3B8" />
     </linearGradient>
 
-    <!-- Chrome Right Facet (Shadow & Reflect) -->
+    <!-- Chrome Right Facet (Shadow &amp; Reflect) -->
     <linearGradient id="chromeRight" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#CBD5E1" />
       <stop offset="30%" stop-color="#94A3B8" />
@@ -72,34 +65,15 @@
         <feMergeNode in="SourceGraphic" />
       </feMerge>
     </filter>
-
-    <filter id="softAura" x="-30%" y="-30%" width="160%" height="160%">
-      <feGaussianBlur stdDeviation="12" result="blur" />
-      <feComposite in="SourceGraphic" in2="blur" operator="over" />
-    </filter>
-
-    <filter id="horizonGlow" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="14" result="glow" />
-      <feComposite in="SourceGraphic" in2="glow" operator="over" />
-    </filter>
   </defs>
 
-  <!-- Canvas Background -->
-  <rect width="512" height="512" rx="112" fill="url(#aetherBgGlow)" />
-  <rect width="508" height="508" x="2" y="2" rx="110" fill="none" stroke="#1E293B" stroke-width="2" />
-
-  <!-- Planetary Horizon Arc at Bottom -->
-  <path d="M 0 460 Q 256 420 512 460 L 512 512 L 0 512 Z" fill="#020617" opacity="0.9" />
-  <path d="M -20 460 Q 256 420 532 460" fill="none" stroke="#00D4FF" stroke-width="4" opacity="0.8" filter="url(#horizonGlow)" />
-  <ellipse cx="256" cy="430" rx="90" ry="12" fill="#38BDF8" opacity="0.45" filter="url(#intenseCyanGlow)" />
-
-  <!-- ================= LOGO EMBLEM GROUP ================= -->
-  <g transform="translate(0, -10)">
+  <!-- ================= LOGO EMBLEM GROUP (100% TRANSPARENT BACKGROUND) ================= -->
+  <g transform="translate(0, 32)">
     <!-- 1. Rear Neon Glow of Orbital Ring (Behind Left Stem) -->
     <path d="M 125 315 C 80 300 85 245 155 200 C 190 178 240 155 305 130" 
           fill="none" 
           stroke="url(#orbitGlow)" 
-          stroke-width="12" 
+          stroke-width="14" 
           stroke-linecap="round" 
           opacity="0.95" 
           filter="url(#intenseCyanGlow)" />
@@ -130,10 +104,9 @@
     <path d="M 256 168 L 256 220 L 282 300 L 344 340 Z" fill="url(#innerCutRight)" />
 
     <!-- 7. Apex Diamond Highlight Flare -->
-    <circle cx="256" cy="68" r="4" fill="#FFFFFF" filter="url(#intenseCyanGlow)" />
+    <circle cx="256" cy="68" r="5" fill="#FFFFFF" filter="url(#intenseCyanGlow)" />
 
-    <!-- 8. Front Sweeping Metallic Blade of Orbit (Over Left Leg & Right Leg) -->
-    <!-- Front Blade Silhouette -->
+    <!-- 8. Front Sweeping Metallic Blade of Orbit (Over Left Leg &amp; Right Leg) -->
     <path d="M 118 316 
              C 170 330 250 320 330 260 
              C 380 220 415 170 435 125 
@@ -160,13 +133,13 @@
           opacity="0.8" 
           filter="url(#intenseCyanGlow)" />
 
-    <!-- Lens Flare at Intersection of Orbit & Left Stem -->
+    <!-- Lens Flare at Intersection of Orbit &amp; Left Stem -->
     <ellipse cx="196" cy="254" rx="28" ry="12" fill="#35D8F2" opacity="0.6" transform="rotate(-30 196 254)" filter="url(#intenseCyanGlow)" />
     <circle cx="196" cy="254" r="6" fill="#FFFFFF" />
 
     <!-- 9. Celestial Satellite Orb (Top Right of Orbit Track) -->
     <!-- Glow Aura -->
-    <circle cx="438" cy="122" r="22" fill="#00D4FF" opacity="0.35" filter="url(#intenseCyanGlow)" />
+    <circle cx="438" cy="122" r="26" fill="#00D4FF" opacity="0.45" filter="url(#intenseCyanGlow)" />
     <!-- Outer Rim -->
     <circle cx="438" cy="122" r="14" fill="url(#satelliteOrb)" />
     <!-- Specular Flare on Sphere -->
