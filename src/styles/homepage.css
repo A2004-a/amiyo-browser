@@ -24,17 +24,20 @@
 
 .chrome-nav-link {
   font-size: 13px;
-  color: var(--text-primary);
+  font-weight: 500;
+  color: var(--text-secondary);
   text-decoration: none;
-  opacity: 0.88;
-  padding: 4px 6px;
-  border-radius: 4px;
-  transition: opacity var(--transition-fast);
+  padding: 6px 10px;
+  border-radius: 6px;
+  transition: all var(--transition-fast);
+  display: inline-flex;
+  align-items: center;
 }
 
 .chrome-nav-link:hover {
-  opacity: 1;
-  text-decoration: underline;
+  color: var(--text-primary);
+  background: var(--bg-hover);
+  text-decoration: none;
 }
 
 .chrome-icon-btn {

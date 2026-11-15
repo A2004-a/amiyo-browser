@@ -49,14 +49,15 @@
 
 /* Tabs list */
 #tabs-strip {
-  flex: 1;
+  flex: 0 1 auto;
+  max-width: calc(100% - 220px);
   height: 100%;
   display: flex;
   align-items: flex-end;
   overflow-x: auto;
   overflow-y: hidden;
   gap: 4px;
-  padding-right: 8px;
+  padding-right: 4px;
   -webkit-app-region: no-drag;
 }
 
@@ -196,9 +197,12 @@
   color: var(--text-secondary);
   -webkit-app-region: no-drag;
   margin-bottom: 2px;
+  margin-left: 2px;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
+  transition: all var(--transition-fast);
 }
 
 #new-tab-btn:hover {
@@ -460,11 +464,13 @@
 }
 
 .tab-bar-spacer {
-  display: none;
+  flex: 1;
+  min-width: 40px;
+  height: 100%;
+  -webkit-app-region: drag;
 }
 
 #app.vertical-tabs-mode .tab-bar-spacer {
-  display: block;
   flex: 1;
 }
 

@@ -654,7 +654,9 @@
 /* Split screen button */
 #split-screen-btn.active {
   color: var(--accent);
-  background: var(--accent-light);
+  background: rgba(0, 240, 255, 0.12);
+  border: 1px solid rgba(0, 240, 255, 0.35);
+  box-shadow: 0 0 8px rgba(0, 240, 255, 0.2);
 }
 
 
