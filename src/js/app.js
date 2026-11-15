@@ -134,6 +134,9 @@ const App = {
 
     if (!tab || !tab.isInternal) {
       container.classList.add('hidden');
+      if (IpcClient.setViewVisible) {
+        IpcClient.setViewVisible(true);
+      }
       return;
     }
 

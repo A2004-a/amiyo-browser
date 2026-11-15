@@ -52,7 +52,25 @@ function run() {
   assert.strictEqual(sec4.isSecure, true);
   assert.strictEqual(sec4.type, 'internal');
 
-  // 5. Suggestions
+  // 5. Suggestions & Direct URL Resolution
+  assert.strictEqual(navigationController.isDirectUrl('https://scholarship.up.gov.in/'), true);
+  assert.strictEqual(navigationController.isDirectUrl('scholarship.up.gov.in'), true);
+  assert.strictEqual(navigationController.isDirectUrl('192.168.1.1:8080'), true);
+  assert.strictEqual(navigationController.isDirectUrl('scholarship status up 2026'), false);
+
+  assert.strictEqual(navigationController.resolveUrl('scholarship.up.gov.in'), 'https://scholarship.up.gov.in');
+  assert.strictEqual(
+    navigationController.resolveUrl('https://duckduckgo.com/?q=https%3A%2F%2Fscholarship.up.gov.in%2F&ia=web'),
+    'https://scholarship.up.gov.in/'
+  );
+
+  const directSuggestions = navigationController.getOmniboxSuggestions('https://scholarship.up.gov.in/');
+  assert.strictEqual(directSuggestions[0].type, 'navigate');
+  assert.strictEqual(directSuggestions[0].url, 'https://scholarship.up.gov.in/');
+
+  const searchSuggestions = navigationController.getOmniboxSuggestions('scholarship form status');
+  assert.strictEqual(searchSuggestions[0].type, 'search');
+
   const suggestions = navigationController.getOmniboxSuggestions('new');
   assert.ok(Array.isArray(suggestions));
   assert.ok(suggestions.length > 0);

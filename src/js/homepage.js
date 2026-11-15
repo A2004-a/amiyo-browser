@@ -254,7 +254,18 @@ const Homepage = {
           e.preventDefault();
           const val = searchInput.value.trim();
           if (val) {
-            IpcClient.navigateTab(State.activeTabId || '', val);
+            suggestionsEl?.classList.add('hidden');
+            let targetUrl = val;
+            if (targetUrl.includes('search?q=') || targetUrl.includes('duckduckgo.com/?q=') || targetUrl.includes('search?p=')) {
+              try {
+                const u = new URL(targetUrl);
+                const qParam = u.searchParams.get('q') || u.searchParams.get('p') || u.searchParams.get('text');
+                if (qParam && typeof Omnibox !== 'undefined' && Omnibox.isDirectUrl && Omnibox.isDirectUrl(qParam)) {
+                  targetUrl = qParam;
+                }
+              } catch (err) {}
+            }
+            IpcClient.navigateTab(State.activeTabId || '', targetUrl);
           }
         }
       });
@@ -270,15 +281,27 @@ const Homepage = {
           if (suggestions && suggestions.length > 0 && suggestionsEl) {
             suggestionsEl.innerHTML = suggestions.slice(0, 6).map(s => `
               <div class="ntp-suggestion-row" data-url="${Utils.escapeHtml(s.url)}">
-                <div class="sugg-icon">${s.type === 'bookmark' ? Utils.icons.bookmark : s.type === 'history' ? Utils.icons.history : Utils.icons.search}</div>
+                <div class="sugg-icon">${s.type === 'bookmark' ? Utils.icons.bookmark : s.type === 'history' ? Utils.icons.history : (s.type === 'navigate' || s.isDirect) ? Utils.icons.globe : Utils.icons.search}</div>
                 <span class="sugg-text">${Utils.escapeHtml(s.title || s.query)}</span>
               </div>
             `).join('');
 
             suggestionsEl.querySelectorAll('.ntp-suggestion-row').forEach(row => {
               row.addEventListener('click', () => {
-                const url = row.dataset.url;
-                if (url) IpcClient.navigateTab(State.activeTabId || '', url);
+                let url = row.dataset.url;
+                suggestionsEl?.classList.add('hidden');
+                if (url) {
+                  if (url.includes('search?q=') || url.includes('duckduckgo.com/?q=') || url.includes('search?p=')) {
+                    try {
+                      const u = new URL(url);
+                      const qParam = u.searchParams.get('q') || u.searchParams.get('p') || u.searchParams.get('text');
+                      if (qParam && typeof Omnibox !== 'undefined' && Omnibox.isDirectUrl && Omnibox.isDirectUrl(qParam)) {
+                        url = qParam;
+                      }
+                    } catch (err) {}
+                  }
+                  IpcClient.navigateTab(State.activeTabId || '', url);
+                }
               });
             });
 

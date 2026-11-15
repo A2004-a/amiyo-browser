@@ -21,8 +21,18 @@ const TabManager = {
     // Global dismiss for tab hover preview card
     this.stripEl?.addEventListener('mouseleave', () => this.hideHoverCard());
     document.addEventListener('mousedown', () => this.hideHoverCard());
+    document.addEventListener('click', () => this.hideHoverCard());
     window.addEventListener('blur', () => this.hideHoverCard());
     window.addEventListener('resize', () => this.hideHoverCard());
+    document.getElementById('toolbar')?.addEventListener('mouseenter', () => this.hideHoverCard());
+    document.getElementById('toolbar')?.addEventListener('mousemove', () => this.hideHoverCard());
+    document.getElementById('view-container')?.addEventListener('mouseenter', () => this.hideHoverCard());
+    document.getElementById('omnibox-input')?.addEventListener('focus', () => this.hideHoverCard());
+    window.addEventListener('mousemove', (e) => {
+      if (e.clientY > 44) {
+        this.hideHoverCard();
+      }
+    });
 
     if (newTabBtn) {
       newTabBtn.innerHTML = Utils.icons.plus;
@@ -209,9 +219,23 @@ const TabManager = {
       // Chrome Tab Hover Preview Card
       tabEl.addEventListener('mouseenter', () => {
         if (this.hoverTimer) clearTimeout(this.hoverTimer);
+        // Do NOT show hover preview card for the currently active tab or if omnibox has focus
+        if (tab.id === State.activeTabId) {
+          this.hideHoverCard();
+          return;
+        }
+        const omniboxInput = document.getElementById('omnibox-input');
+        if (omniboxInput && document.activeElement === omniboxInput) {
+          this.hideHoverCard();
+          return;
+        }
+
         this.hoveredTabId = tab.id;
         this.hoverTimer = setTimeout(() => {
-          if (this.hoveredTabId !== tab.id) return;
+          if (this.hoveredTabId !== tab.id || tab.id === State.activeTabId) return;
+          const omnibox = document.getElementById('omnibox-input');
+          if (omnibox && document.activeElement === omnibox) return;
+
           const card = document.getElementById('tab-hover-card');
           if (!card) return;
           const titleEl = document.getElementById('tab-hover-title');

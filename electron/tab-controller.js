@@ -199,6 +199,16 @@ class TabController {
       tab.isLoading = false;
       tab.canGoBack = this.canGoBack(wc);
       tab.canGoForward = this.canGoForward(wc);
+      if (!tab.isInternal && this.activeTabId === tab.id && tab.view) {
+        this.isViewVisible = true;
+        try {
+          if (!this.browserWindow.contentView.children.includes(tab.view)) {
+            this.browserWindow.contentView.addChildView(tab.view);
+          }
+          try { tab.view.setVisible(true); } catch (e) {}
+          this.updateActiveViewBounds();
+        } catch (e) {}
+      }
       this.notifyTabUpdated(tab);
     });
 
@@ -224,8 +234,14 @@ class TabController {
       tab.canGoBack = this.canGoBack(wc);
       tab.canGoForward = this.canGoForward(wc);
       tab.lastAccessed = Date.now();
-      if (!tab.isInternal && this.activeTabId === tab.id) {
+      if (!tab.isInternal && this.activeTabId === tab.id && tab.view) {
         this.isViewVisible = true;
+        try {
+          if (!this.browserWindow.contentView.children.includes(tab.view)) {
+            this.browserWindow.contentView.addChildView(tab.view);
+          }
+          try { tab.view.setVisible(true); } catch (e) {}
+        } catch (e) {}
         this.updateActiveViewBounds();
       }
       if (!tab.isInternal && !this.isPrivate) {

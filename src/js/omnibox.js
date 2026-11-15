@@ -403,7 +403,35 @@ const Omnibox = {
     }
   },
 
+  isDirectUrl(input) {
+    if (!input || typeof input !== 'string') return false;
+    const trimmed = input.trim();
+    if (!trimmed || trimmed.includes(' ')) return false;
+
+    // Has scheme: http://, https://, file://, ftp://, aether://, amiyo://
+    if (/^[a-zA-Z]+:\/\//i.test(trimmed)) return true;
+
+    // Localhost or IPv4 loopback / LAN
+    if (/^localhost(:\d+)?(\/.*)?$/i.test(trimmed) || /^127\.0\.0\.1(:\d+)?(\/.*)?$/.test(trimmed) || /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(:\d+)?(\/.*)?$/.test(trimmed)) return true;
+
+    // Starts with www.
+    if (/^www\./i.test(trimmed)) return true;
+
+    // Domain structure with valid dot: e.g. scholarship.up.gov.in, domain.com, sub.domain.co.uk/path
+    const hostPart = trimmed.split('/')[0].split('?')[0].split(':')[0];
+    if (hostPart.includes('.') && !hostPart.startsWith('.') && !hostPart.endsWith('.')) {
+      const parts = hostPart.split('.');
+      const tld = parts[parts.length - 1];
+      if (tld.length >= 2 && /^[a-zA-Z0-9]+$/.test(tld)) {
+        return true;
+      }
+    }
+
+    return false;
+  },
+
   async fetchSuggestions(query) {
+    const currentSeq = ++(this._suggestionSeq || (this._suggestionSeq = 0));
     if (!query || query.trim() === '') {
       this.closeSuggestions();
       return;
@@ -514,6 +542,9 @@ const Omnibox = {
     }
 
     const suggestions = await IpcClient.getSuggestions(query);
+    if (this._suggestionSeq !== currentSeq || !this.inputEl || document.activeElement !== this.inputEl) {
+      return;
+    }
     this.currentSuggestions = suggestions || [];
 
     if (isAiQuery) {
@@ -531,7 +562,7 @@ const Omnibox = {
 
   renderSuggestions() {
     if (!this.suggestionsEl) return;
-    if (this.currentSuggestions.length === 0) {
+    if (this.currentSuggestions.length === 0 || !this.inputEl || document.activeElement !== this.inputEl) {
       this.closeSuggestions();
       return;
     }
@@ -550,7 +581,7 @@ const Omnibox = {
       else if (item.type === 'history') iconHtml = Utils.icons.history;
       else if (item.type === 'tab') iconHtml = `<span style="font-size:14px;line-height:1;">📑</span>`;
       else if (item.type === 'keyword') iconHtml = `<span style="font-size:14px;line-height:1;">⚡</span>`;
-      else if (item.type === 'internal') iconHtml = Utils.icons.globe;
+      else if (item.type === 'internal' || item.type === 'navigate' || item.isDirect) iconHtml = Utils.icons.globe;
       else if (item.type === 'search') {
         const engineIcons = {
           duckduckgo: '🦆',
@@ -574,7 +605,7 @@ const Omnibox = {
           <span class="suggestion-title">${Utils.escapeHtml(item.title)}</span>
           <span class="suggestion-url">${Utils.escapeHtml(item.url)}</span>
         </div>
-        <span class="suggestion-type">${Utils.escapeHtml(item.type)}</span>
+        <span class="suggestion-type">${Utils.escapeHtml(item.isDirect ? 'open' : item.type)}</span>
       `;
 
       el.addEventListener('click', () => {
@@ -606,21 +637,36 @@ const Omnibox = {
   },
 
   handleEnter() {
-    console.log('[OMNIBOX] handleEnter called! selectedIndex:', this.selectedIndex, 'input value:', this.inputEl.value);
+    const rawVal = (this.inputEl?.value || '').trim();
+    console.log('[OMNIBOX] handleEnter called! selectedIndex:', this.selectedIndex, 'input value:', rawVal);
+
+    // If the user typed a direct URL or domain, open directly unless user explicitly selected a bookmark/tab/internal suggestion
+    if (this.isDirectUrl(rawVal)) {
+      if (this.selectedIndex >= 0 && this.currentSuggestions[this.selectedIndex]) {
+        const selected = this.currentSuggestions[this.selectedIndex];
+        if (selected.type === 'bookmark' || selected.type === 'internal' || selected.type === 'tab') {
+          this.navigateToUrl(selected.url, selected);
+          return;
+        }
+      }
+      this.navigateToUrl(rawVal);
+      return;
+    }
+
     if (this.selectedIndex >= 0 && this.currentSuggestions[this.selectedIndex]) {
       const selected = this.currentSuggestions[this.selectedIndex];
       console.log('[OMNIBOX] navigating to selected suggestion:', selected.url);
       this.navigateToUrl(selected.url, selected);
     } else {
-      const val = this.inputEl.value.trim();
-      console.log('[OMNIBOX] navigating to raw input:', val);
-      if (val) {
-        this.navigateToUrl(val);
+      console.log('[OMNIBOX] navigating to raw input:', rawVal);
+      if (rawVal) {
+        this.navigateToUrl(rawVal);
       }
     }
   },
 
   navigateToUrl(url, item) {
+    this._suggestionSeq = (this._suggestionSeq || 0) + 1;
     console.log('[OMNIBOX] navigateToUrl called with url:', url, 'activeTabId:', State.activeTabId);
     this.closeSuggestions();
     this.inputEl.blur();
@@ -630,8 +676,19 @@ const Omnibox = {
       return;
     }
 
-    const trimmed = (url || '').trim();
+    let trimmed = (url || '').trim();
     if (!trimmed) return;
+
+    // Unwrap search engine wrapper URLs if any
+    if (trimmed.includes('search?q=') || trimmed.includes('duckduckgo.com/?q=') || trimmed.includes('search?p=')) {
+      try {
+        const u = new URL(trimmed);
+        const qParam = u.searchParams.get('q') || u.searchParams.get('p') || u.searchParams.get('text');
+        if (qParam && this.isDirectUrl(qParam)) {
+          trimmed = qParam;
+        }
+      } catch (e) {}
+    }
 
     if (trimmed.startsWith('@ai') || trimmed.startsWith('@gemini')) {
       const prompt = trimmed.replace(/^@(ai|gemini)\s*/i, '').trim();
@@ -652,7 +709,7 @@ const Omnibox = {
     if (IpcClient.setViewVisible) {
       IpcClient.setViewVisible(true);
     }
-    IpcClient.navigateTab(State.activeTabId || '', url);
+    IpcClient.navigateTab(State.activeTabId || '', trimmed);
   },
 
   updateSearchEngine(engine) {
@@ -678,6 +735,7 @@ const Omnibox = {
 
   async ensureSuggestionsBackdrop() {
     if (this.isSuggestionsBackdropActive) return;
+    if (!this.inputEl || document.activeElement !== this.inputEl) return;
     const tab = State.getActiveTab();
     if (tab && !tab.isInternal && tab.url && tab.url.startsWith('http')) {
       this.isSuggestionsBackdropActive = true;
@@ -691,13 +749,16 @@ const Omnibox = {
           }
         }
       } catch (e) {}
-      if (IpcClient.setViewVisible) {
-        IpcClient.setViewVisible(false);
+      if (this.isSuggestionsBackdropActive && this.inputEl && document.activeElement === this.inputEl) {
+        if (IpcClient.setViewVisible) {
+          IpcClient.setViewVisible(false);
+        }
       }
     }
   },
 
   closeSuggestions() {
+    this._suggestionSeq = (this._suggestionSeq || 0) + 1;
     if (this.suggestionsEl) {
       this.suggestionsEl.classList.add('hidden');
       this.suggestionsEl.innerHTML = '';

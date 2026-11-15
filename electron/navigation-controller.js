@@ -17,6 +17,33 @@ class NavigationController {
     return url.startsWith('amiyo://') || url.startsWith('aether://');
   }
 
+  isDirectUrl(input) {
+    if (!input || typeof input !== 'string') return false;
+    const trimmed = input.trim();
+    if (!trimmed || trimmed.includes(' ')) return false;
+
+    // Has scheme: http://, https://, file://, ftp://, aether://, amiyo://
+    if (/^[a-zA-Z]+:\/\//i.test(trimmed)) return true;
+
+    // Localhost or IPv4 loopback / LAN
+    if (/^localhost(:\d+)?(\/.*)?$/i.test(trimmed) || /^127\.0\.0\.1(:\d+)?(\/.*)?$/.test(trimmed) || /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(:\d+)?(\/.*)?$/.test(trimmed)) return true;
+
+    // Starts with www.
+    if (/^www\./i.test(trimmed)) return true;
+
+    // Domain structure with valid dot: e.g. scholarship.up.gov.in, domain.com, sub.domain.co.uk/path
+    const hostPart = trimmed.split('/')[0].split('?')[0].split(':')[0];
+    if (hostPart.includes('.') && !hostPart.startsWith('.') && !hostPart.endsWith('.')) {
+      const parts = hostPart.split('.');
+      const tld = parts[parts.length - 1];
+      if (tld.length >= 2 && /^[a-zA-Z0-9]+$/.test(tld)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   resolveUrl(input, customSearchEngine) {
     if (!input || typeof input !== 'string') {
       return 'aether://newtab';
@@ -25,6 +52,17 @@ class NavigationController {
     const trimmed = input.trim();
     if (!trimmed) {
       return 'aether://newtab';
+    }
+
+    // Check if the URL is a search engine wrapper around a direct URL (e.g. https://duckduckgo.com/?q=https%3A%2F%2Fscholarship.up.gov.in%2F)
+    if (trimmed.includes('search?q=') || trimmed.includes('duckduckgo.com/?q=') || trimmed.includes('search?p=')) {
+      try {
+        const u = new URL(trimmed);
+        const qParam = u.searchParams.get('q') || u.searchParams.get('p') || u.searchParams.get('text');
+        if (qParam && this.isDirectUrl(qParam)) {
+          return this.resolveUrl(qParam);
+        }
+      } catch (e) {}
     }
 
     // Check for internal protocols
@@ -46,14 +84,18 @@ class NavigationController {
     }
 
     // Check for localhost or IP
-    if (/^localhost(:\d+)?(\/.*)?$/i.test(trimmed) || /^127\.0\.0\.1(:\d+)?(\/.*)?$/.test(trimmed)) {
+    if (/^localhost(:\d+)?(\/.*)?$/i.test(trimmed) || /^127\.0\.0\.1(:\d+)?(\/.*)?$/.test(trimmed) || /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(:\d+)?(\/.*)?$/.test(trimmed)) {
       return `http://${trimmed}`;
     }
 
+    // Check if starts with www.
+    if (/^www\./i.test(trimmed)) {
+      return `https://${trimmed}`;
+    }
+
     // Check if looks like a valid domain or IP
-    // e.g. domain.com, sub.domain.co.uk/path, 192.168.1.1:8080
-    const domainRegex = /^[a-zA-Z0-9][-a-zA-Z0-9]*(\.[a-zA-Z0-9][-a-zA-Z0-9]*)+(:\d+)?(\/.*)?$/;
-    if (!trimmed.includes(' ') && domainRegex.test(trimmed)) {
+    // e.g. scholarship.up.gov.in, domain.com, sub.domain.co.uk/path, 192.168.1.1:8080
+    if (!trimmed.includes(' ') && this.isDirectUrl(trimmed)) {
       return `https://${trimmed}`;
     }
 
@@ -155,26 +197,37 @@ class NavigationController {
       }
     }
 
-    // 4. Add Search Query item
-    const settings = storageManager.getSettings();
-    const currentEngine = (settings.searchEngine || 'google').toLowerCase();
-    const searchUrl = this.buildSearchUrl(q, currentEngine);
-    const engineNames = {
-      google: 'Google',
-      duckduckgo: 'DuckDuckGo',
-      bing: 'Bing',
-      yahoo: 'Yahoo',
-      ecosia: 'Ecosia',
-      yandex: 'Yandex'
-    };
-    const engineName = engineNames[currentEngine] || 'Web';
-    suggestions.unshift({
-      type: 'search',
-      title: `Search ${engineName} for "${query}"`,
-      url: searchUrl,
-      query: query,
-      engine: currentEngine
-    });
+    // 4. Add Search Query or Direct Navigate item
+    if (this.isDirectUrl(query)) {
+      const directUrl = this.resolveUrl(query);
+      suggestions.unshift({
+        type: 'navigate',
+        title: `🌐 Open ${query} directly`,
+        url: directUrl,
+        query: query,
+        isDirect: true
+      });
+    } else {
+      const settings = storageManager.getSettings();
+      const currentEngine = (settings.searchEngine || 'google').toLowerCase();
+      const searchUrl = this.buildSearchUrl(q, currentEngine);
+      const engineNames = {
+        google: 'Google',
+        duckduckgo: 'DuckDuckGo',
+        bing: 'Bing',
+        yahoo: 'Yahoo',
+        ecosia: 'Ecosia',
+        yandex: 'Yandex'
+      };
+      const engineName = engineNames[currentEngine] || 'Web';
+      suggestions.unshift({
+        type: 'search',
+        title: `Search ${engineName} for "${query}"`,
+        url: searchUrl,
+        query: query,
+        engine: currentEngine
+      });
+    }
 
     return suggestions.slice(0, 8);
   }
