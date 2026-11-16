@@ -52,6 +52,15 @@ const App = {
         resizeRaf = requestAnimationFrame(() => {
           resizeRaf = null;
           this.updateTopOffset();
+          // Keep side drawer offsets responsive: Overlay on mobile (< 768px), docked on desktop
+          const isMobile = window.innerWidth < 768;
+          const isNotesOpen = typeof KeepNotes !== 'undefined' && KeepNotes.isOpen && KeepNotes.isOpen();
+          const isAiOpen = typeof AiPanel !== 'undefined' && AiPanel.isOpen;
+          if (isNotesOpen) {
+            IpcClient.setSideOffset(isMobile ? 0 : 360);
+          } else if (isAiOpen) {
+            IpcClient.setSideOffset(isMobile ? 0 : 380);
+          }
         });
       });
 
@@ -581,6 +590,11 @@ const App = {
       this.toggleSplitScreen();
     });
 
+    document.getElementById('menu-device-mode')?.addEventListener('click', () => {
+      this.closeChromeMenu();
+      this.toggleDeviceMode();
+    });
+
     document.getElementById('menu-reading-list')?.addEventListener('click', () => {
       this.closeChromeMenu();
       this.openReadingList();
@@ -1103,6 +1117,12 @@ const App = {
     splitBtn?.addEventListener('click', (e) => {
       e.stopPropagation();
       this.toggleSplitPopover();
+    });
+
+    const deviceModeBtn = document.getElementById('device-mode-btn');
+    deviceModeBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.toggleDeviceMode();
     });
 
     document.getElementById('split-swap-btn')?.addEventListener('click', () => IpcClient.swapSplit());
@@ -1658,6 +1678,26 @@ const App = {
   toggleQuickNotes() {
     if (typeof KeepNotes !== 'undefined' && KeepNotes.toggle) {
       KeepNotes.toggle();
+    }
+  },
+
+  async toggleDeviceMode() {
+    const tab = State.getActiveTab();
+    if (!tab || tab.isInternal) return;
+    const isMobile = await IpcClient.toggleMobileMode(tab.id);
+    tab.isMobileMode = isMobile;
+    this.updateDeviceModeUI(isMobile);
+  },
+
+  updateDeviceModeUI(isMobile) {
+    const btn = document.getElementById('device-mode-btn');
+    const label = document.getElementById('menu-device-label');
+    if (btn) {
+      btn.classList.toggle('active-tool', !!isMobile);
+      btn.title = isMobile ? 'Request Desktop Site (Ctrl+Shift+M)' : 'Request Mobile Site (Ctrl+Shift+M)';
+    }
+    if (label) {
+      label.textContent = isMobile ? '💻 Request Desktop Site' : '📱 Request Mobile Site';
     }
   },
 

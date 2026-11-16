@@ -228,12 +228,17 @@ const KeepNotes = {
     }
   },
 
+  isOpen() {
+    return !!(this.panelEl && !this.panelEl.classList.contains('hidden'));
+  },
+
   toggle() {
     if (!this.panelEl) return;
     const isHidden = this.panelEl.classList.toggle('hidden');
     this.notesBtn?.classList.toggle('active', !isHidden);
+    const isMobile = window.innerWidth < 768;
     if (typeof IpcClient !== 'undefined' && IpcClient.setSideOffset) {
-      IpcClient.setSideOffset(!isHidden ? 360 : 0);
+      IpcClient.setSideOffset(!isHidden && !isMobile ? 360 : 0);
     }
     if (!isHidden) {
       this.render();

@@ -206,6 +206,26 @@ app.whenReady().then(async () => {
     win.setFullScreen(isFsBefore);
     reportTest('Fullscreen mode restored to original state', win.isFullScreen() === isFsBefore);
 
+    // ----------------------------------------------------
+    // TEST 16: Mobile / Desktop Site Mode Toggle (Device Emulation)
+    // ----------------------------------------------------
+    const activeTab = tabCtrl.getActiveTab();
+    const isMobileInitial = tabCtrl.isMobileMode(activeTab.id);
+    const toggledMobile = tabCtrl.toggleMobileMode(activeTab.id);
+    reportTest('Mobile site mode toggles on with device emulation', toggledMobile === true && tabCtrl.isMobileMode(activeTab.id) === true);
+    const toggledBack = tabCtrl.toggleMobileMode(activeTab.id);
+    reportTest('Desktop site mode restores cleanly', toggledBack === false && tabCtrl.isMobileMode(activeTab.id) === false);
+
+    // ----------------------------------------------------
+    // TEST 17: Responsive Window Resizing & View Bounds Calculation
+    // ----------------------------------------------------
+    tabCtrl.setSideOffset(360);
+    tabCtrl.updateActiveViewBounds();
+    reportTest('Side offset updates bounds without throwing', typeof tabCtrl.sideOffset === 'number' && tabCtrl.sideOffset === 360);
+    tabCtrl.setSideOffset(0);
+    tabCtrl.updateActiveViewBounds();
+    reportTest('Side offset restores to full desktop width', tabCtrl.sideOffset === 0);
+
     console.log('\n====================================================');
     console.log(`  E2E TEST SUMMARY: ${passedTests} / ${totalTests} TESTS PASSED!`);
     console.log('====================================================');

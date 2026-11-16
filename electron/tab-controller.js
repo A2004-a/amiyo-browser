@@ -164,6 +164,7 @@ class TabController {
       zoomFactor: t.zoomFactor,
       groupId: t.groupId || null,
       isSuspended: !!t.isSuspended,
+      isMobileMode: !!t.isMobileMode,
       lastAccessed: t.lastAccessed || Date.now()
     }));
   }
@@ -213,6 +214,7 @@ class TabController {
       zoomFactor: 1.0,
       groupId: options.groupId || null,
       isSuspended: false,
+      isMobileMode: !!options.isMobileMode,
       lastAccessed: Date.now()
     };
 
@@ -716,7 +718,8 @@ class TabController {
         isInternal: targetTab.isInternal,
         zoomFactor: targetTab.zoomFactor,
         groupId: targetTab.groupId || null,
-        isSuspended: !!targetTab.isSuspended
+        isSuspended: !!targetTab.isSuspended,
+        isMobileMode: !!targetTab.isMobileMode
       }
     });
 
@@ -1209,6 +1212,63 @@ class TabController {
     this.requestUpdateActiveViewBounds(false);
   }
 
+  toggleMobileMode(tabId) {
+    const tab = this.getTab(tabId || this.activeTabId);
+    if (!tab || !tab.view) return false;
+    return this.setMobileMode(tab.id, !tab.isMobileMode);
+  }
+
+  setMobileMode(tabId, enabled) {
+    const tab = this.getTab(tabId || this.activeTabId);
+    if (!tab) return false;
+
+    tab.isMobileMode = !!enabled;
+    if (tab.view && !tab.isInternal) {
+      const wc = tab.view.webContents;
+      if (!this.defaultUserAgent) {
+        try {
+          this.defaultUserAgent = this.session ? this.session.getUserAgent() : (wc.getUserAgent() || '');
+        } catch (e) {
+          this.defaultUserAgent = '';
+        }
+      }
+
+      if (tab.isMobileMode) {
+        const mobileUA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Mobile/15E148 Safari/604.1';
+        try { wc.setUserAgent(mobileUA); } catch (e) {}
+        try {
+          wc.enableDeviceEmulation({
+            screenPosition: 'mobile',
+            screenSize: { width: 412, height: 915 },
+            viewSize: { width: 412, height: 915 },
+            deviceScaleFactor: 2,
+            scale: 1
+          });
+        } catch (e) {
+          console.warn('Device emulation warning:', e.message);
+        }
+      } else {
+        try { wc.setUserAgent(this.defaultUserAgent || ''); } catch (e) {}
+        try {
+          wc.disableDeviceEmulation();
+        } catch (e) {
+          console.warn('Disable device emulation warning:', e.message);
+        }
+      }
+
+      try { wc.reload(); } catch (e) {}
+    }
+
+    this.requestUpdateActiveViewBounds(true);
+    this.notifyTabsList();
+    return tab.isMobileMode;
+  }
+
+  isMobileMode(tabId) {
+    const tab = this.getTab(tabId || this.activeTabId);
+    return tab ? !!tab.isMobileMode : false;
+  }
+
   async getActiveTabContent(tabId) {
     const tab = this.getTab(tabId || this.activeTabId);
     if (!tab || !tab.view) {
@@ -1261,7 +1321,18 @@ class TabController {
       const topOffset = baseTopOffset + splitBarHeight;
       const leftOffset = typeof this.leftOffset === 'number' && this.leftOffset > 0 ? this.leftOffset : 0;
       const sideOffset = typeof this.sideOffset === 'number' && this.sideOffset > 0 ? this.sideOffset : 0;
-      const availableWidth = Math.max(0, width - sideOffset - leftOffset);
+
+      // Responsive side-offset protection: On narrow/mobile windows (< 768px), don't crush the webview
+      let effectiveSideOffset = sideOffset;
+      if (width < 768 && sideOffset > 0) {
+        if (width < 500) {
+          effectiveSideOffset = 0; // drawer overlays on mobile screen sizes
+        } else if (width - sideOffset < 320) {
+          effectiveSideOffset = Math.max(0, width - 320);
+        }
+      }
+
+      const availableWidth = Math.max(0, width - effectiveSideOffset - leftOffset);
       const availableHeight = Math.max(0, height - topOffset);
       const ratio = typeof this.splitRatio === 'number' && this.splitRatio >= 0.2 && this.splitRatio <= 0.8 ? this.splitRatio : 0.5;
       const leftPaneWidth = Math.floor(availableWidth * ratio);
@@ -1295,10 +1366,12 @@ class TabController {
         // Left pane (activeTab)
         if (activeTab && activeTab.view && !activeTab.isInternal) {
           try { activeTab.view.setVisible(true); } catch (e) {}
+          const pWidth = activeTab.isMobileMode ? Math.min(412, leftPaneWidth) : leftPaneWidth;
+          const pX = activeTab.isMobileMode ? leftOffset + Math.max(0, Math.floor((leftPaneWidth - pWidth) / 2)) : leftOffset;
           activeTab.view.setBounds({
-            x: leftOffset,
+            x: pX,
             y: topOffset,
-            width: leftPaneWidth,
+            width: pWidth,
             height: availableHeight
           });
         } else if (activeTab && activeTab.view) {
@@ -1309,10 +1382,12 @@ class TabController {
         // Right pane (splitTab)
         if (splitTab && splitTab.view && !splitTab.isInternal) {
           try { splitTab.view.setVisible(true); } catch (e) {}
+          const pWidth = splitTab.isMobileMode ? Math.min(412, rightPaneWidth) : rightPaneWidth;
+          const pX = splitTab.isMobileMode ? (leftOffset + leftPaneWidth) + Math.max(0, Math.floor((rightPaneWidth - pWidth) / 2)) : (leftOffset + leftPaneWidth);
           splitTab.view.setBounds({
-            x: leftOffset + leftPaneWidth,
+            x: pX,
             y: topOffset,
-            width: rightPaneWidth,
+            width: pWidth,
             height: availableHeight
           });
         } else if (splitTab && splitTab.view) {
@@ -1340,12 +1415,23 @@ class TabController {
       }
 
       try { activeTab.view.setVisible(true); } catch (e) {}
-      activeTab.view.setBounds({
-        x: leftOffset,
-        y: topOffset,
-        width: availableWidth,
-        height: availableHeight
-      });
+      if (activeTab.isMobileMode) {
+        const mobileWidth = Math.min(412, availableWidth);
+        const mobileX = leftOffset + Math.max(0, Math.floor((availableWidth - mobileWidth) / 2));
+        activeTab.view.setBounds({
+          x: mobileX,
+          y: topOffset,
+          width: mobileWidth,
+          height: availableHeight
+        });
+      } else {
+        activeTab.view.setBounds({
+          x: leftOffset,
+          y: topOffset,
+          width: availableWidth,
+          height: availableHeight
+        });
+      }
     } catch (e) {
       console.error('Error updating view bounds:', e);
     }

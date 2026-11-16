@@ -83,6 +83,7 @@ public class MainActivity extends AppCompatActivity {
         public String title;
         public String url;
         public boolean isIncognito;
+        public boolean isDesktopSite = false;
 
         public TabItem(String title, String url, boolean isIncognito) {
             this.id = "tab_" + System.currentTimeMillis() + "_" + (int)(Math.random() * 1000);
@@ -528,6 +529,7 @@ public class MainActivity extends AppCompatActivity {
             activeTabIndex = index;
             TabItem t = tabs.get(index);
             applyIncognitoSettings(t.isIncognito);
+            applyDesktopSiteSettings(t.isDesktopSite);
             if (t.url != null && !t.url.isEmpty()) {
                 loadTarget(t.url);
             } else {
@@ -765,21 +767,43 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void toggleDesktopSite() {
+    public void applyDesktopSiteSettings(boolean enableDesktop) {
+        this.isDesktopSite = enableDesktop;
+        if (webView == null) return;
         WebSettings settings = webView.getSettings();
-        isDesktopSite = !isDesktopSite;
-        if (isDesktopSite) {
+        if (enableDesktop) {
             settings.setUserAgentString("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
             settings.setUseWideViewPort(true);
             settings.setLoadWithOverviewMode(true);
-            Toast.makeText(this, "Desktop site enabled", Toast.LENGTH_SHORT).show();
+            settings.setSupportZoom(true);
+            settings.setBuiltInZoomControls(true);
+            settings.setDisplayZoomControls(false);
         } else {
             settings.setUserAgentString(defaultUserAgent != null ? defaultUserAgent + " AETHERBrowser/0.0.1" : null);
-            settings.setUseWideViewPort(true);
-            settings.setLoadWithOverviewMode(true);
-            Toast.makeText(this, "Mobile site enabled", Toast.LENGTH_SHORT).show();
+            settings.setUseWideViewPort(false);
+            settings.setLoadWithOverviewMode(false);
         }
-        webView.reload();
+    }
+
+    private void toggleDesktopSite() {
+        isDesktopSite = !isDesktopSite;
+        if (activeTabIndex >= 0 && activeTabIndex < tabs.size()) {
+            tabs.get(activeTabIndex).isDesktopSite = isDesktopSite;
+        }
+        applyDesktopSiteSettings(isDesktopSite);
+        Toast.makeText(this, isDesktopSite ? "Desktop site enabled" : "Mobile site enabled", Toast.LENGTH_SHORT).show();
+        if (webView != null) webView.reload();
+    }
+
+    @Override
+    public void onConfigurationChanged(android.content.res.Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        if (webView != null) {
+            webView.post(() -> {
+                webView.requestLayout();
+                webView.invalidate();
+            });
+        }
     }
 
     private void toggleMobileVpn() {

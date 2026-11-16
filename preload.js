@@ -29,6 +29,7 @@ const api = {
     toggleFullscreen: () => ipcRenderer.invoke('window:toggle-fullscreen'),
     setTopOffset: (offset) => ipcRenderer.invoke('window:set-top-offset', offset),
     setLeftOffset: (offset) => ipcRenderer.invoke('window:set-left-offset', offset),
+    setSideOffset: (offset) => ipcRenderer.invoke('window:set-side-offset', offset),
     print: (tabId) => ipcRenderer.invoke('window:print', tabId),
     printToPdf: (tabId) => ipcRenderer.invoke('window:print-to-pdf', tabId),
     onMaximizedChanged: (callback) => {
@@ -69,6 +70,8 @@ const api = {
     closeMultiple: (tabIds) => ipcRenderer.invoke('tabs:close-multiple', tabIds),
     muteMultiple: (tabIds, isMuted) => ipcRenderer.invoke('tabs:mute-multiple', tabIds, isMuted),
     setViewVisible: (visible) => ipcRenderer.invoke('tabs:set-view-visible', visible),
+    toggleMobileMode: (tabId) => ipcRenderer.invoke('tab:toggle-mobile-mode', tabId),
+    setMobileMode: (tabId, enabled) => ipcRenderer.invoke('tab:set-mobile-mode', tabId, enabled),
     onGroupsUpdated: (callback) => {
       const listener = (event, data) => callback(data);
       ipcRenderer.on('tab-groups-updated', listener);

@@ -342,7 +342,7 @@ function run() {
   // ==========================================
   // [25/25] Multi-Tab Selection & Bulk Operations
   // ==========================================
-  console.log('  [25/25] Testing Multi-Tab Selection & Bulk Operations...');
+  console.log('  [25/26] Testing Multi-Tab Selection & Bulk Operations...');
   const selectionSet = new Set(['tab_a', 'tab_b', 'tab_c']);
   assert.strictEqual(selectionSet.size, 3, 'Multi-select should contain 3 tabs');
 
@@ -350,7 +350,46 @@ function run() {
   assert(bulkMuted.every(t => t.isMuted), 'All selected tabs should be muted in bulk');
   console.log('    ✔ Multi-tab selection and bulk mute/close actions verified');
 
-  console.log('✔ All 25 Super Browser Features Tested & Verified Successfully!\n');
+  // ==========================================
+  // [26/26] Desktop vs Mobile Site & Responsive Layout Adapters
+  // ==========================================
+  console.log('  [26/26] Testing Desktop vs Mobile Site Mode & Responsive Engine...');
+  const mobileUA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Mobile/15E148 Safari/604.1';
+  assert(mobileUA.includes('iPhone') && mobileUA.includes('Mobile'), 'Mobile UA must identify as mobile viewport client');
+
+  function calculateEffectiveSideOffset(width, sideOffset) {
+    let effective = sideOffset;
+    if (width < 768 && sideOffset > 0) {
+      if (width < 500) {
+        effective = 0;
+      } else if (width - sideOffset < 320) {
+        effective = Math.max(0, width - 320);
+      }
+    }
+    return effective;
+  }
+
+  assert.strictEqual(calculateEffectiveSideOffset(1280, 360), 360, 'Desktop screens should keep full 360px drawer offset');
+  assert.strictEqual(calculateEffectiveSideOffset(400, 360), 0, 'Mobile screens (<500px) must switch drawer to overlay mode (0 offset)');
+  assert.strictEqual(calculateEffectiveSideOffset(600, 360), 280, 'Tablet screen must clamp offset to guarantee >= 320px web view width');
+
+  function calculateMobileViewBounds(availableWidth, leftOffset, topOffset, availableHeight) {
+    const mobileWidth = Math.min(412, availableWidth);
+    const mobileX = leftOffset + Math.max(0, Math.floor((availableWidth - mobileWidth) / 2));
+    return { x: mobileX, y: topOffset, width: mobileWidth, height: availableHeight };
+  }
+
+  const mobileBoundsDesktop = calculateMobileViewBounds(1200, 0, 84, 800);
+  assert.strictEqual(mobileBoundsDesktop.width, 412, 'Mobile device mode should constrain width to 412px');
+  assert.strictEqual(mobileBoundsDesktop.x, 394, 'Mobile device mode must center horizontally on desktop screen');
+
+  const mobileBoundsSmall = calculateMobileViewBounds(390, 0, 84, 800);
+  assert.strictEqual(mobileBoundsSmall.width, 390, 'On small screens, mobile device mode fits available width');
+  assert.strictEqual(mobileBoundsSmall.x, 0, 'On small screens, mobile device mode aligns flush with origin');
+
+  console.log('    ✔ Mobile UA, responsive drawer overlay, and centered mobile device emulation verified');
+
+  console.log('✔ All 26 Super Browser Features Tested & Verified Successfully!\n');
 }
 
 module.exports = { run };

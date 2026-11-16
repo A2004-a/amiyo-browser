@@ -32,6 +32,7 @@ const CommandPalette = {
       { id: 'settings', title: 'Open Browser Settings', category: 'Navigation', icon: '⚙️', run: () => IpcClient.createTab('aether://settings') },
       { id: 'web-capture', title: 'AETHER Prism Web Capture (Screenshot)', category: 'Tools', icon: '📸', shortcut: 'Ctrl+Shift+S', run: () => App.openWebCapture() },
       { id: 'split-screen', title: 'Toggle Split Screen Dual View', category: 'View', icon: '🪟', run: () => App.toggleSplitScreen() },
+      { id: 'device-mode', title: 'Toggle Mobile / Desktop Site (Device View)', category: 'View', icon: '📱', shortcut: 'Ctrl+Shift+M', run: () => App.toggleDeviceMode() },
       { id: 'reader-mode', title: 'Toggle Distraction-Free Reader Mode', category: 'View', icon: '📖', shortcut: 'Ctrl+Alt+R', run: () => App.toggleReaderMode(State.activeTabId) },
       { id: 'read-aloud', title: 'Edge Read Aloud (Speech Synthesizer)', category: 'Accessibility', icon: '🔊', shortcut: 'Ctrl+Shift+U', run: () => SpeechEngine.togglePlayPause() },
       { id: 'ai-panel', title: 'AETHER Intelligence Side Panel', category: 'AI', icon: '✨', shortcut: 'Ctrl+Shift+A', run: () => AiPanel.toggle() },

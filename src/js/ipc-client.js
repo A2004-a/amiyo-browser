@@ -28,6 +28,8 @@ const IpcClient = {
   navigateTab(tabId, url) { return this.api.tabs.navigate(tabId, url); },
   getTabs() { return this.api.tabs.list(); },
   setViewVisible(visible) { return this.api.tabs && this.api.tabs.setViewVisible ? this.api.tabs.setViewVisible(visible) : Promise.resolve(); },
+  toggleMobileMode(tabId) { return this.api.tabs?.toggleMobileMode ? this.api.tabs.toggleMobileMode(tabId) : Promise.resolve(false); },
+  setMobileMode(tabId, enabled) { return this.api.tabs?.setMobileMode ? this.api.tabs.setMobileMode(tabId, enabled) : Promise.resolve(false); },
 
   // Navigation
   goBack(tabId) { return this.api.navigation.back(tabId); },
@@ -85,7 +87,11 @@ const IpcClient = {
   aiChat(data) { return this.api.ai ? this.api.ai.chat(data) : Promise.resolve('AI service unavailable'); },
   aiSummarize(tabId) { return this.api.ai ? this.api.ai.summarize(tabId) : Promise.resolve({ summary: 'Unavailable' }); },
   aiGetPageContent(tabId) { return this.api.ai ? this.api.ai.getPageContent(tabId) : Promise.resolve({ title: '', url: '', text: '' }); },
-  setSideOffset(offset) { return this.api.ai ? this.api.ai.setSideOffset(offset) : Promise.resolve(); },
+  setSideOffset(offset) {
+    if (this.api.window && this.api.window.setSideOffset) return this.api.window.setSideOffset(offset);
+    if (this.api.ai && this.api.ai.setSideOffset) return this.api.ai.setSideOffset(offset);
+    return Promise.resolve();
+  },
   onAiAskSelection(callback) {
     if (this.api.ai && this.api.ai.onAskSelection) {
       return this.api.ai.onAskSelection(callback);

@@ -190,6 +190,16 @@ function registerIpcHandlers() {
     return tabCtrl ? tabCtrl.getTabsSummary() : [];
   });
 
+  ipcMain.handle('tab:toggle-mobile-mode', (event, tabId) => {
+    const tabCtrl = getTabControllerForSender(event);
+    return tabCtrl ? tabCtrl.toggleMobileMode(tabId) : false;
+  });
+
+  ipcMain.handle('tab:set-mobile-mode', (event, tabId, enabled) => {
+    const tabCtrl = getTabControllerForSender(event);
+    return tabCtrl ? tabCtrl.setMobileMode(tabId, enabled) : false;
+  });
+
   // --- Navigation Controls ---
   ipcMain.handle('nav:back', (event, tabId) => {
     const tabCtrl = getTabControllerForSender(event);

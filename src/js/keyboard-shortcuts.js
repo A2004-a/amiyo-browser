@@ -116,6 +116,15 @@ const KeyboardShortcuts = {
         return;
       }
 
+      // Ctrl + Shift + M: Toggle Mobile / Desktop Site (Device Mode)
+      if (isCtrlOrCmd && e.shiftKey && e.key.toLowerCase() === 'm') {
+        e.preventDefault();
+        if (typeof App !== 'undefined' && App.toggleDeviceMode) {
+          App.toggleDeviceMode();
+        }
+        return;
+      }
+
       // Ctrl + Alt + R: Toggle Reader Mode
       if (isCtrlOrCmd && e.altKey && e.key.toLowerCase() === 'r') {
         e.preventDefault();

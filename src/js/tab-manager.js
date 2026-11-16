@@ -166,6 +166,9 @@ const TabManager = {
         Navigation.updateToolbar();
         Omnibox.update();
         App.handleInternalPage(tab);
+        if (typeof App !== 'undefined' && App.updateDeviceModeUI) {
+          App.updateDeviceModeUI(!!tab.isMobileMode);
+        }
         if (typeof AiPanel !== 'undefined' && AiPanel.updateActivePageContext) {
           AiPanel.updateActivePageContext();
         }
