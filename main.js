@@ -44,6 +44,7 @@ if (typeof electron === 'string') {
   const explicitDisableGpu = process.argv.includes('--disable-gpu') || process.env.AETHER_DISABLE_GPU === '1';
   const flags = [
     '--no-sandbox',
+    '--log-level=3',
     ...(explicitDisableGpu ? ['--disable-gpu'] : []),
     '--no-deprecation',
     '.',

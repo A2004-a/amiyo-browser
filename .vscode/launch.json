@@ -12,6 +12,7 @@
       },
       "runtimeArgs": [
         "--no-sandbox",
+        "--log-level=3",
         "--no-deprecation",
         "."
       ],
@@ -33,6 +34,7 @@
       },
       "runtimeArgs": [
         "--no-sandbox",
+        "--log-level=3",
         "--disable-gpu",
         "--no-deprecation",
         "."
