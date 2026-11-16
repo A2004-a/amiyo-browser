@@ -24,6 +24,7 @@
   <link rel="stylesheet" href="styles/downloads.css">
   <link rel="stylesheet" href="styles/settings.css">
   <link rel="stylesheet" href="styles/ai-panel.css">
+  <link rel="stylesheet" href="styles/keep-notes.css">
 </head>
 <body>
   <div id="app">
@@ -636,8 +637,8 @@
             <svg class="icon" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
             <span class="badge-counter hidden" id="dl-badge">0</span>
           </button>
-          <button class="nav-btn" id="notes-tool-btn" title="AETHER Scratchpad &amp; Quick Notes (Ctrl+Alt+N)">
-            <svg class="icon" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+          <button class="nav-btn" id="notes-tool-btn" title="AETHER Keep Notes (Ctrl+Alt+N)">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7zm2.85 11.1l-.85.6V16h-4v-1.3l-.85-.6A5.003 5.003 0 0 1 7 9c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.63-.8 3.16-2.15 4.1z"/></svg>
           </button>
           <button class="nav-btn" id="chrome-menu-btn" title="AETHER Nexus Menu">
             <svg class="icon" viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
@@ -721,7 +722,7 @@
             <span class="menu-label">↗️ Safari Share Sheet &amp; QR Code</span>
           </div>
           <div class="chrome-menu-item" id="menu-quick-notes">
-            <span class="menu-label">📝 Edge Scratchpad (Quick Notes)</span>
+            <span class="menu-label">💡 AETHER Keep Notes</span>
             <span class="menu-shortcut">Ctrl+Alt+N</span>
           </div>
           <div class="chrome-menu-item" id="menu-eyedropper">
@@ -929,25 +930,135 @@
           </div>
         </aside>
 
-        <!-- Microsoft Edge-style Quick Notes / Scratchpad Drawer -->
+        <!-- AETHER Keep Notes — Google Keep-style Notes & Checklists Drawer -->
         <aside id="quick-notes-panel" class="quick-notes-panel hidden">
-          <div class="quick-notes-header">
-            <div class="quick-notes-title">
-              <svg class="icon" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
-              <span>Edge Scratchpad</span>
+          <!-- Keep Notes Header -->
+          <div class="keep-notes-header">
+            <div class="keep-notes-title-group">
+              <div class="keep-notes-logo">
+                <svg class="keep-bulb-icon" viewBox="0 0 24 24">
+                  <path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7zm2.85 11.1l-.85.6V16h-4v-1.3l-.85-.6A5.003 5.003 0 0 1 7 9c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.63-.8 3.16-2.15 4.1z"/>
+                </svg>
+                <span class="keep-notes-title">Keep Notes</span>
+              </div>
+              <span class="keep-notes-badge" id="keep-notes-count-badge">0</span>
             </div>
-            <div class="quick-notes-actions">
-              <button class="ai-btn-icon" id="notes-insert-link-btn" title="Insert active page link">📌</button>
-              <button class="ai-btn-icon" id="notes-copy-btn" title="Copy all notes">📋</button>
-              <button class="ai-btn-icon" id="notes-export-btn" title="Export as text file">💾</button>
-              <button class="ai-btn-icon" id="notes-clear-btn" title="Clear notes">🗑️</button>
-              <button class="ai-btn-icon" id="notes-close-btn" title="Close notes">✕</button>
+            <div class="keep-notes-header-actions">
+              <button class="keep-icon-btn" id="keep-export-btn" title="Export Notes (Markdown / JSON)">💾</button>
+              <button class="keep-icon-btn" id="keep-close-btn" title="Close Notes">✕</button>
             </div>
           </div>
-          <textarea id="quick-notes-textarea" class="quick-notes-textarea" placeholder="Jot down research notes, thoughts, or ideas while browsing... (auto-saved)"></textarea>
-          <div class="quick-notes-footer">
-            <span id="notes-count-info">0 words • 0 chars</span>
-            <span class="notes-sync-status">✓ Saved locally</span>
+
+          <!-- Search & Filter Bar -->
+          <div class="keep-search-box">
+            <svg class="keep-search-icon" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+            <input type="text" id="keep-search-input" class="keep-search-input" placeholder="Search notes..." autocomplete="off" />
+            <button id="keep-search-clear" class="keep-search-clear hidden">✕</button>
+          </div>
+
+          <!-- Category Filter Pills -->
+          <div class="keep-filter-pills">
+            <button class="keep-pill active" data-filter="all">All</button>
+            <button class="keep-pill" data-filter="pinned">📌 Pinned</button>
+            <button class="keep-pill" data-filter="checklist">☑️ Todo</button>
+            <button class="keep-pill" data-filter="webclip">🔗 Web Clips</button>
+          </div>
+
+          <!-- Note Creator Box ("Take a note...") -->
+          <div class="keep-create-card" id="keep-create-card">
+            <!-- Collapsed View -->
+            <div class="keep-create-collapsed" id="keep-create-collapsed" tabindex="0">
+              <span class="keep-create-placeholder">Take a note...</span>
+              <div class="keep-create-quick-actions">
+                <button class="keep-quick-btn" id="quick-new-list-btn" title="New checklist">☑️</button>
+                <button class="keep-quick-btn" id="quick-clip-page-btn" title="Clip active web page">🔗</button>
+              </div>
+            </div>
+
+            <!-- Expanded View -->
+            <div class="keep-create-expanded hidden" id="keep-create-expanded">
+              <div class="keep-create-title-row">
+                <input type="text" id="keep-input-title" class="keep-input-title" placeholder="Title" autocomplete="off" />
+                <button class="keep-pin-btn" id="keep-create-pin-btn" title="Pin note">📌</button>
+              </div>
+
+              <!-- Text Note Input -->
+              <textarea id="keep-input-body" class="keep-input-body" placeholder="Take a note..." rows="3"></textarea>
+
+              <!-- Checklist Items Container -->
+              <div id="keep-checklist-container" class="keep-checklist-container hidden">
+                <div id="keep-checklist-items" class="keep-checklist-items"></div>
+                <div class="keep-checklist-add-row">
+                  <span class="keep-checklist-plus">+</span>
+                  <input type="text" id="keep-checklist-new-input" class="keep-checklist-new-input" placeholder="List item" />
+                </div>
+              </div>
+
+              <!-- Web Clip Attached Preview -->
+              <div id="keep-attached-clip" class="keep-attached-clip hidden">
+                <div class="keep-clip-icon">🔗</div>
+                <div class="keep-clip-info">
+                  <div class="keep-clip-title" id="keep-clip-title">Page Title</div>
+                  <div class="keep-clip-url" id="keep-clip-url">https://example.com</div>
+                </div>
+                <button class="keep-clip-remove" id="keep-clip-remove-btn" title="Remove page clip">✕</button>
+              </div>
+
+              <!-- Note Creator Action Footer -->
+              <div class="keep-create-footer">
+                <div class="keep-create-tools">
+                  <div class="keep-color-picker-wrapper">
+                    <button class="keep-tool-btn" id="keep-color-palette-btn" title="Change color">🎨</button>
+                    <div class="keep-color-menu hidden" id="keep-color-menu">
+                      <div class="keep-color-circle active" data-color="default" title="Default"></div>
+                      <div class="keep-color-circle" data-color="coral" title="Coral" style="background:#5C2B29;"></div>
+                      <div class="keep-color-circle" data-color="peach" title="Peach" style="background:#614A19;"></div>
+                      <div class="keep-color-circle" data-color="sand" title="Sand" style="background:#635D19;"></div>
+                      <div class="keep-color-circle" data-color="mint" title="Mint" style="background:#345920;"></div>
+                      <div class="keep-color-circle" data-color="sage" title="Sage" style="background:#16504B;"></div>
+                      <div class="keep-color-circle" data-color="fog" title="Fog" style="background:#2D555E;"></div>
+                      <div class="keep-color-circle" data-color="storm" title="Storm" style="background:#1E3A5F;"></div>
+                      <div class="keep-color-circle" data-color="blossom" title="Blossom" style="background:#42275E;"></div>
+                      <div class="keep-color-circle" data-color="clay" title="Clay" style="background:#442F19;"></div>
+                    </div>
+                  </div>
+                  <button class="keep-tool-btn" id="keep-toggle-checklist-btn" title="Toggle checkboxes">☑️</button>
+                  <button class="keep-tool-btn" id="keep-attach-tab-btn" title="Attach active web page">🔗</button>
+                </div>
+                <div class="keep-create-actions">
+                  <button class="keep-text-btn" id="keep-cancel-btn">Cancel</button>
+                  <button class="keep-btn-primary" id="keep-save-btn">Save</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Scrollable Notes List -->
+          <div class="keep-notes-scroll" id="keep-notes-scroll">
+            <!-- Pinned Notes Section -->
+            <div id="keep-pinned-section" class="keep-section hidden">
+              <div class="keep-section-title">PINNED</div>
+              <div class="keep-notes-grid" id="keep-pinned-grid"></div>
+            </div>
+
+            <!-- Others Section -->
+            <div id="keep-others-section" class="keep-section">
+              <div class="keep-section-title" id="keep-others-title" style="display:none;">OTHERS</div>
+              <div class="keep-notes-grid" id="keep-others-grid"></div>
+            </div>
+
+            <!-- Empty State -->
+            <div class="keep-empty-state hidden" id="keep-empty-state">
+              <div class="keep-empty-icon">💡</div>
+              <div class="keep-empty-title">Notes you add appear here</div>
+              <div class="keep-empty-subtitle">Capture thoughts, tasks, and web research on the fly</div>
+            </div>
+          </div>
+
+          <!-- Footer Stats -->
+          <div class="keep-notes-footer">
+            <span id="keep-status-text">✓ Saved locally in AETHER Vault</span>
+            <button class="keep-link-btn" id="keep-clear-all-btn">Clear All</button>
           </div>
         </aside>
 
@@ -987,6 +1098,7 @@
   <script src="js/ai-panel.js"></script>
   <script src="js/keyboard-shortcuts.js"></script>
   <script src="js/command-palette.js"></script>
+  <script src="js/keep-notes.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

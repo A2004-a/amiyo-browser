@@ -1650,90 +1650,14 @@ const App = {
   },
 
   initQuickNotes() {
-    const notesBtn = document.getElementById('notes-tool-btn');
-    const panel = document.getElementById('quick-notes-panel');
-    const textarea = document.getElementById('quick-notes-textarea');
-    const countInfo = document.getElementById('notes-count-info');
-    const closeBtn = document.getElementById('notes-close-btn');
-    const insertLinkBtn = document.getElementById('notes-insert-link-btn');
-    const copyBtn = document.getElementById('notes-copy-btn');
-    const exportBtn = document.getElementById('notes-export-btn');
-    const clearBtn = document.getElementById('notes-clear-btn');
-
-    if (!panel || !textarea) return;
-
-    // Load saved notes
-    textarea.value = localStorage.getItem('aether_quick_notes') || '';
-    const updateCounts = () => {
-      const val = textarea.value;
-      const chars = val.length;
-      const words = val.trim() ? val.trim().split(/\s+/).length : 0;
-      if (countInfo) countInfo.textContent = `${words} words • ${chars} chars`;
-    };
-    updateCounts();
-
-    textarea.addEventListener('input', () => {
-      localStorage.setItem('aether_quick_notes', textarea.value);
-      updateCounts();
-    });
-
-    notesBtn?.addEventListener('click', () => {
-      this.toggleQuickNotes();
-    });
-
-    closeBtn?.addEventListener('click', () => {
-      panel.classList.add('hidden');
-      notesBtn?.classList.remove('active');
-      if (IpcClient.setSideOffset) {
-        IpcClient.setSideOffset(0);
-      }
-    });
-
-    insertLinkBtn?.addEventListener('click', () => {
-      const tab = State.getActiveTab();
-      if (!tab) return;
-      const snippet = `\n[${tab.title || 'Link'}](${tab.url})\n`;
-      const pos = textarea.selectionStart || textarea.value.length;
-      textarea.value = textarea.value.slice(0, pos) + snippet + textarea.value.slice(pos);
-      localStorage.setItem('aether_quick_notes', textarea.value);
-      updateCounts();
-      textarea.focus();
-    });
-
-    copyBtn?.addEventListener('click', async () => {
-      await navigator.clipboard.writeText(textarea.value);
-      copyBtn.textContent = '✓';
-      setTimeout(() => { copyBtn.textContent = '📋'; }, 1500);
-    });
-
-    exportBtn?.addEventListener('click', () => {
-      const blob = new Blob([textarea.value], { type: 'text/plain;charset=utf-8' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = `aether-quick-notes-${new Date().toISOString().slice(0, 10)}.txt`;
-      a.click();
-    });
-
-    clearBtn?.addEventListener('click', () => {
-      if (textarea.value && confirm('Are you sure you want to clear your scratchpad notes?')) {
-        textarea.value = '';
-        localStorage.setItem('aether_quick_notes', '');
-        updateCounts();
-      }
-    });
+    if (typeof KeepNotes !== 'undefined' && KeepNotes.init) {
+      KeepNotes.init();
+    }
   },
 
   toggleQuickNotes() {
-    const panel = document.getElementById('quick-notes-panel');
-    const notesBtn = document.getElementById('notes-tool-btn');
-    if (!panel) return;
-    const isHidden = panel.classList.toggle('hidden');
-    notesBtn?.classList.toggle('active', !isHidden);
-    if (IpcClient.setSideOffset) {
-      IpcClient.setSideOffset(!isHidden ? 320 : 0);
-    }
-    if (!isHidden) {
-      document.getElementById('quick-notes-textarea')?.focus();
+    if (typeof KeepNotes !== 'undefined' && KeepNotes.toggle) {
+      KeepNotes.toggle();
     }
   },
 
