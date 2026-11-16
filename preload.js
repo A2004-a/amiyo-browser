@@ -301,7 +301,17 @@ const api = {
     setAutoConnect: (val) => ipcRenderer.invoke('vpn:set-auto-connect', val),
     addBypassDomain: (dom) => ipcRenderer.invoke('vpn:add-bypass-domain', dom),
     removeBypassDomain: (dom) => ipcRenderer.invoke('vpn:remove-bypass-domain', dom),
-    measureLatency: () => ipcRenderer.invoke('vpn:measure-latency')
+    measureLatency: () => ipcRenderer.invoke('vpn:measure-latency'),
+    setMultiHop: (enabled, entryId, exitId) => ipcRenderer.invoke('vpn:set-multihop', enabled, entryId, exitId),
+    setRotatingIp: (enabled, interval) => ipcRenderer.invoke('vpn:set-rotating-ip', enabled, interval),
+    rotateIpNow: () => ipcRenderer.invoke('vpn:rotate-ip-now'),
+    setThreatProtection: (enabled) => ipcRenderer.invoke('vpn:set-threat-protection', enabled),
+    setObfuscation: (enabled) => ipcRenderer.invoke('vpn:set-obfuscation', enabled),
+    setTorOverVpn: (enabled) => ipcRenderer.invoke('vpn:set-tor-over-vpn', enabled),
+    setSplitTunnelMode: (mode) => ipcRenderer.invoke('vpn:set-split-tunnel-mode', mode),
+    addOnlyVpnDomain: (dom) => ipcRenderer.invoke('vpn:add-only-vpn-domain', dom),
+    removeOnlyVpnDomain: (dom) => ipcRenderer.invoke('vpn:remove-only-vpn-domain', dom),
+    setProtocol: (proto) => ipcRenderer.invoke('vpn:set-protocol', proto)
   },
 
   // --- Triggers ---

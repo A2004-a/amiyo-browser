@@ -310,13 +310,64 @@ const Omnibox = {
       if (latencyVal) latencyVal.textContent = status.connected ? `${status.latency} ms` : '-- ms';
       if (trafficVal) trafficVal.textContent = status.stats?.bytesFormatted || '0 KB';
 
+      // Protocol indicator
+      const activeProtoVal = document.getElementById('vpn-active-proto-val');
+      if (activeProtoVal) {
+        activeProtoVal.textContent = status.protocol === 'stealth-tls' ? 'Stealth TLS' : (status.protocol === 'openvpn' ? 'OpenVPN' : 'WireGuard');
+      }
+
+      // Protocol Tabs active state
+      ['wireguard', 'stealth', 'openvpn'].forEach(p => {
+        const btn = document.getElementById(`vpn-proto-${p}`);
+        if (btn) {
+          const match = (p === 'stealth' && status.protocol === 'stealth-tls') || (p === status.protocol);
+          btn.classList.toggle('active', match);
+        }
+      });
+
+      // Multi-Hop (Double VPN)
+      const multihopToggle = document.getElementById('vpn-multihop-toggle');
+      const multihopDetails = document.getElementById('vpn-multihop-details');
+      const exitSelect = document.getElementById('vpn-exit-select');
+      if (multihopToggle) multihopToggle.checked = !!status.multiHop?.enabled;
+      if (multihopDetails) multihopDetails.classList.toggle('hidden', !status.multiHop?.enabled);
+      if (exitSelect && status.multiHop?.exit) {
+        exitSelect.value = status.multiHop.exit.id;
+      }
+
+      // Rotating IP
+      const rotatingToggle = document.getElementById('vpn-rotating-toggle');
+      const rotationStatus = document.getElementById('vpn-rotation-status');
+      if (rotatingToggle) rotatingToggle.checked = !!status.rotatingIp?.enabled;
+      if (rotationStatus) {
+        rotationStatus.textContent = status.rotatingIp?.enabled ? `Rotated ${status.rotatingIp.rotationCount || 0}x` : 'Static';
+      }
+
+      // Threat, Stealth, Tor toggles
+      const threatToggle = document.getElementById('vpn-threat-toggle');
+      const stealthToggle = document.getElementById('vpn-stealth-toggle');
+      const torToggle = document.getElementById('vpn-tor-toggle');
+      if (threatToggle) threatToggle.checked = status.threatProtection?.enabled !== false;
+      if (stealthToggle) stealthToggle.checked = !!status.obfuscation;
+      if (torToggle) torToggle.checked = !!status.torOverVpn;
+
+      // Split Tunnel Mode
+      const splitModeSelect = document.getElementById('vpn-split-mode-select');
+      if (splitModeSelect && status.splitTunnel?.mode) {
+        splitModeSelect.value = status.splitTunnel.mode;
+      }
+
       if (killswitch) killswitch.checked = status.killSwitch !== false;
       if (dnsleak) dnsleak.checked = status.dnsLeakProtection !== false;
       if (webrtc) webrtc.checked = status.webRtcProtection !== false;
       if (autoconnect) autoconnect.checked = !!status.autoConnectPublicWifi;
 
-      if (chipsEl && Array.isArray(status.bypassDomains)) {
-        chipsEl.innerHTML = status.bypassDomains.map(d => `
+      if (chipsEl) {
+        const currentDomains = (status.splitTunnel?.mode === 'only_vpn')
+          ? (status.splitTunnel?.onlyVpnDomains || [])
+          : (status.bypassDomains || []);
+
+        chipsEl.innerHTML = currentDomains.map(d => `
           <span class="vpn-chip">
             ${Utils.escapeHtml(d)}
             <span class="vpn-chip-del" data-domain="${Utils.escapeHtml(d)}">&times;</span>
@@ -327,7 +378,11 @@ const Omnibox = {
           btn.onclick = async (e) => {
             e.stopPropagation();
             const dom = btn.getAttribute('data-domain');
-            await IpcClient.removeVpnBypassDomain(dom);
+            if (status.splitTunnel?.mode === 'only_vpn') {
+              await IpcClient.removeVpnOnlyDomain(dom);
+            } else {
+              await IpcClient.removeVpnBypassDomain(dom);
+            }
             renderVpnUi();
           };
         });
@@ -347,6 +402,119 @@ const Omnibox = {
     const autoconnect = document.getElementById('vpn-autoconnect-toggle');
     const addBtn = document.getElementById('vpn-add-bypass-btn');
     const addInput = document.getElementById('vpn-new-bypass-input');
+
+    // Protocol Tabs Listeners
+    const btnWg = document.getElementById('vpn-proto-wireguard');
+    const btnStealth = document.getElementById('vpn-proto-stealth');
+    const btnOpenvpn = document.getElementById('vpn-proto-openvpn');
+    if (btnWg) btnWg.onclick = async () => { await IpcClient.setVpnProtocol('wireguard'); await renderVpnUi(); };
+    if (btnStealth) btnStealth.onclick = async () => { await IpcClient.setVpnProtocol('stealth-tls'); await renderVpnUi(); };
+    if (btnOpenvpn) btnOpenvpn.onclick = async () => { await IpcClient.setVpnProtocol('openvpn'); await renderVpnUi(); };
+
+    // Multi-Hop Listeners
+    const multihopToggle = document.getElementById('vpn-multihop-toggle');
+    const exitSelect = document.getElementById('vpn-exit-select');
+    if (multihopToggle) {
+      multihopToggle.onchange = async () => {
+        const exitNode = exitSelect ? exitSelect.value : 'nl-ams';
+        await IpcClient.setVpnMultiHop(multihopToggle.checked, 'ch-zrh', exitNode);
+        await renderVpnUi();
+      };
+    }
+    if (exitSelect) {
+      exitSelect.onchange = async () => {
+        await IpcClient.setVpnMultiHop(true, 'ch-zrh', exitSelect.value);
+        await renderVpnUi();
+      };
+    }
+
+    // Rotating IP Listeners
+    const rotatingToggle = document.getElementById('vpn-rotating-toggle');
+    const rotateNowBtn = document.getElementById('vpn-rotate-now-btn');
+    if (rotatingToggle) {
+      rotatingToggle.onchange = async () => {
+        await IpcClient.setVpnRotatingIp(rotatingToggle.checked, 10);
+        await renderVpnUi();
+      };
+    }
+    if (rotateNowBtn) {
+      rotateNowBtn.onclick = async () => {
+        await IpcClient.rotateVpnIpNow();
+        await renderVpnUi();
+      };
+    }
+
+    // Threat, Stealth, Tor Listeners
+    const threatToggle = document.getElementById('vpn-threat-toggle');
+    const stealthToggle = document.getElementById('vpn-stealth-toggle');
+    const torToggle = document.getElementById('vpn-tor-toggle');
+    if (threatToggle) threatToggle.onchange = async () => { await IpcClient.setVpnThreatProtection(threatToggle.checked); };
+    if (stealthToggle) stealthToggle.onchange = async () => { await IpcClient.setVpnObfuscation(stealthToggle.checked); };
+    if (torToggle) torToggle.onchange = async () => { await IpcClient.setVpnTorOverVpn(torToggle.checked); };
+
+    // Split Tunnel Mode Listener
+    const splitModeSelect = document.getElementById('vpn-split-mode-select');
+    if (splitModeSelect) {
+      splitModeSelect.onchange = async () => {
+        await IpcClient.setVpnSplitTunnelMode(splitModeSelect.value);
+        await renderVpnUi();
+      };
+    }
+
+    if (masterToggle) {
+      masterToggle.onchange = async () => {
+        const targetLoc = locSelect ? locSelect.value : null;
+        await IpcClient.toggleVpn(targetLoc);
+        await renderVpnUi();
+      };
+    }
+
+    if (locSelect) {
+      locSelect.onchange = async () => {
+        await IpcClient.setVpnLocation(locSelect.value);
+        await renderVpnUi();
+      };
+    }
+
+    if (killswitch) {
+      killswitch.onchange = async () => {
+        await IpcClient.setVpnKillSwitch(killswitch.checked);
+      };
+    }
+
+    if (dnsleak) {
+      dnsleak.onchange = async () => {
+        await IpcClient.setVpnDnsLeakProtection(dnsleak.checked);
+      };
+    }
+
+    if (webrtc) {
+      webrtc.onchange = async () => {
+        await IpcClient.setVpnWebRtcProtection(webrtc.checked);
+      };
+    }
+
+    if (autoconnect) {
+      autoconnect.onchange = async () => {
+        await IpcClient.setVpnAutoConnect(autoconnect.checked);
+      };
+    }
+
+    if (addBtn && addInput) {
+      addBtn.onclick = async () => {
+        const val = addInput.value.trim();
+        if (val) {
+          const mode = splitModeSelect ? splitModeSelect.value : 'bypass';
+          if (mode === 'only_vpn') {
+            await IpcClient.addVpnOnlyDomain(val);
+          } else {
+            await IpcClient.addVpnBypassDomain(val);
+          }
+          addInput.value = '';
+          await renderVpnUi();
+        }
+      };
+    }
 
     if (masterToggle) {
       masterToggle.onchange = async () => {

@@ -204,6 +204,16 @@ const IpcClient = {
   setVpnAutoConnect(val) { return this.api.vpn?.setAutoConnect ? this.api.vpn.setAutoConnect(val) : Promise.resolve(); },
   addVpnBypassDomain(dom) { return this.api.vpn?.addBypassDomain ? this.api.vpn.addBypassDomain(dom) : Promise.resolve([]); },
   removeVpnBypassDomain(dom) { return this.api.vpn?.removeBypassDomain ? this.api.vpn.removeBypassDomain(dom) : Promise.resolve([]); },
-  measureVpnLatency() { return this.api.vpn?.measureLatency ? this.api.vpn.measureLatency() : Promise.resolve(20); }
+  measureVpnLatency() { return this.api.vpn?.measureLatency ? this.api.vpn.measureLatency() : Promise.resolve(20); },
+  setVpnMultiHop(enabled, entryId, exitId) { return this.api.vpn?.setMultiHop ? this.api.vpn.setMultiHop(enabled, entryId, exitId) : Promise.resolve(); },
+  setVpnRotatingIp(enabled, interval) { return this.api.vpn?.setRotatingIp ? this.api.vpn.setRotatingIp(enabled, interval) : Promise.resolve(); },
+  rotateVpnIpNow() { return this.api.vpn?.rotateIpNow ? this.api.vpn.rotateIpNow() : Promise.resolve(null); },
+  setVpnThreatProtection(enabled) { return this.api.vpn?.setThreatProtection ? this.api.vpn.setThreatProtection(enabled) : Promise.resolve(); },
+  setVpnObfuscation(enabled) { return this.api.vpn?.setObfuscation ? this.api.vpn.setObfuscation(enabled) : Promise.resolve(); },
+  setVpnTorOverVpn(enabled) { return this.api.vpn?.setTorOverVpn ? this.api.vpn.setTorOverVpn(enabled) : Promise.resolve(); },
+  setVpnSplitTunnelMode(mode) { return this.api.vpn?.setSplitTunnelMode ? this.api.vpn.setSplitTunnelMode(mode) : Promise.resolve(); },
+  addVpnOnlyDomain(dom) { return this.api.vpn?.addOnlyVpnDomain ? this.api.vpn.addOnlyVpnDomain(dom) : Promise.resolve([]); },
+  removeVpnOnlyDomain(dom) { return this.api.vpn?.removeOnlyVpnDomain ? this.api.vpn.removeOnlyVpnDomain(dom) : Promise.resolve([]); },
+  setVpnProtocol(proto) { return this.api.vpn?.setProtocol ? this.api.vpn.setProtocol(proto) : Promise.resolve(); }
 };
 

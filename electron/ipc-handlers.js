@@ -845,6 +845,47 @@ function registerIpcHandlers() {
   ipcMain.handle('vpn:measure-latency', () => {
     return vpnController.measureLatency();
   });
+
+  // --- Advanced Popular VPN Features ---
+  ipcMain.handle('vpn:set-multihop', (event, enabled, entryId, exitId) => {
+    return vpnController.setMultiHop(enabled, entryId, exitId);
+  });
+
+  ipcMain.handle('vpn:set-rotating-ip', (event, enabled, interval) => {
+    return vpnController.setRotatingIp(enabled, interval);
+  });
+
+  ipcMain.handle('vpn:rotate-ip-now', () => {
+    return vpnController.rotateVirtualIpNow();
+  });
+
+  ipcMain.handle('vpn:set-threat-protection', (event, enabled) => {
+    return vpnController.setThreatProtection(enabled);
+  });
+
+  ipcMain.handle('vpn:set-obfuscation', (event, enabled) => {
+    return vpnController.setObfuscation(enabled);
+  });
+
+  ipcMain.handle('vpn:set-tor-over-vpn', (event, enabled) => {
+    return vpnController.setTorOverVpn(enabled);
+  });
+
+  ipcMain.handle('vpn:set-split-tunnel-mode', (event, mode) => {
+    return vpnController.setSplitTunnelMode(mode);
+  });
+
+  ipcMain.handle('vpn:add-only-vpn-domain', (event, domain) => {
+    return vpnController.addOnlyVpnDomain(domain);
+  });
+
+  ipcMain.handle('vpn:remove-only-vpn-domain', (event, domain) => {
+    return vpnController.removeOnlyVpnDomain(domain);
+  });
+
+  ipcMain.handle('vpn:set-protocol', (event, proto) => {
+    return vpnController.setProtocol(proto);
+  });
 }
 
 module.exports = { registerIpcHandlers };
