@@ -142,6 +142,12 @@ const App = {
             app?.classList.remove('split-view-mode');
             splitBar?.classList.add('hidden');
             splitDivider?.classList.add('hidden');
+            const internalContainer = document.getElementById('internal-page-container');
+            if (internalContainer) {
+              internalContainer.style.left = '';
+              internalContainer.style.width = '';
+              internalContainer.style.right = '';
+            }
             this.closeSplitPopover();
           }
           if (typeof TabManager !== 'undefined') {
@@ -952,6 +958,23 @@ const App = {
     const leftTab = State.tabs.find(t => t.id === (activeTabId || State.activeTabId));
     const rightTab = State.tabs.find(t => t.id === splitTabId);
 
+    const internalContainer = document.getElementById('internal-page-container');
+    if (internalContainer) {
+      if (leftTab && leftTab.isInternal && (!rightTab || !rightTab.isInternal)) {
+        internalContainer.style.left = '0px';
+        internalContainer.style.width = 'var(--split-left-width, 50%)';
+        internalContainer.style.right = 'auto';
+      } else if (rightTab && rightTab.isInternal && (!leftTab || !leftTab.isInternal)) {
+        internalContainer.style.left = 'var(--split-left-width, 50%)';
+        internalContainer.style.width = 'calc(100% - var(--split-left-width, 50%))';
+        internalContainer.style.right = '0px';
+      } else {
+        internalContainer.style.left = '0px';
+        internalContainer.style.width = 'var(--split-left-width, 50%)';
+        internalContainer.style.right = 'auto';
+      }
+    }
+
     const leftTitle = document.getElementById('split-left-title');
     const rightTitle = document.getElementById('split-right-title');
     if (leftTitle) leftTitle.textContent = leftTab?.title || 'Left Pane';
@@ -1097,6 +1120,7 @@ const App = {
 
     if (divider && viewContainer && app) {
       let isDragging = false;
+      let dragRaf = null;
 
       divider.addEventListener('mousedown', (e) => {
         isDragging = true;
@@ -1110,11 +1134,21 @@ const App = {
           const clientX = moveEvent.clientX;
           const ratio = Math.max(0.2, Math.min(0.8, (clientX - rect.left) / rect.width));
           app.style.setProperty('--split-left-width', `${(ratio * 100).toFixed(1)}%`);
+          if (!dragRaf) {
+            dragRaf = requestAnimationFrame(() => {
+              dragRaf = null;
+              if (isDragging) IpcClient.setSplitRatio(ratio);
+            });
+          }
         };
 
         const onMouseUp = (upEvent) => {
           if (!isDragging) return;
           isDragging = false;
+          if (dragRaf) {
+            cancelAnimationFrame(dragRaf);
+            dragRaf = null;
+          }
           divider.classList.remove('dragging');
           document.body.style.cursor = '';
           document.body.style.userSelect = '';
@@ -1464,7 +1498,17 @@ const App = {
     if (!tab) return;
     const rawUrl = tab.url || '';
     if (!rawUrl || rawUrl.startsWith('amiyo://') || rawUrl.startsWith('aether://')) {
-      alert('Internal browser pages cannot be shared.');
+      this.showModal('Share Page & QR Code', `
+        <div style="padding: 24px; text-align: center;">
+          <div style="font-size: 38px; margin-bottom: 12px;">📱</div>
+          <h3 style="margin-bottom: 8px; color: var(--text-primary);">External Web Page Required</h3>
+          <p style="color: var(--text-muted); font-size: 13px; line-height: 1.5; max-width: 320px; margin: 0 auto;">
+            Mobile Handoff and QR sharing work with live web destinations (news, articles, videos). Open any website and try sharing again!
+          </p>
+        </div>
+      `, [
+        { label: 'Close', class: 'btn-secondary', click: () => this.closeModal() }
+      ]);
       return;
     }
 

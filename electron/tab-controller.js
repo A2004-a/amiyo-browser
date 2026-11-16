@@ -1280,19 +1280,34 @@ class TabController {
       }
 
       // Check for active split-screen dual view
-      if (splitTab && splitTab.view && !splitTab.isInternal && splitTab.id !== (activeTab ? activeTab.id : null)) {
-        if (!this.browserWindow.contentView.children.includes(splitTab.view)) {
+      if (this.splitTabId && splitTab && splitTab.id !== (activeTab ? activeTab.id : null)) {
+        if (splitTab.view && !splitTab.isInternal && !this.browserWindow.contentView.children.includes(splitTab.view)) {
           try {
             this.browserWindow.contentView.addChildView(splitTab.view);
           } catch (e) {}
         }
+        if (activeTab && activeTab.view && !activeTab.isInternal && !this.browserWindow.contentView.children.includes(activeTab.view)) {
+          try {
+            this.browserWindow.contentView.addChildView(activeTab.view);
+          } catch (e) {}
+        }
 
-        // If activeTab is internal (e.g. New Tab page), hide activeTab.view, but position splitTab.view on the right half
-        if (!activeTab || !activeTab.view || activeTab.isInternal) {
-          if (activeTab && activeTab.view) {
-            try { activeTab.view.setVisible(false); } catch (e) {}
-            activeTab.view.setBounds({ x: 0, y: 0, width: 0, height: 0 });
-          }
+        // Left pane (activeTab)
+        if (activeTab && activeTab.view && !activeTab.isInternal) {
+          try { activeTab.view.setVisible(true); } catch (e) {}
+          activeTab.view.setBounds({
+            x: leftOffset,
+            y: topOffset,
+            width: leftPaneWidth,
+            height: availableHeight
+          });
+        } else if (activeTab && activeTab.view) {
+          try { activeTab.view.setVisible(false); } catch (e) {}
+          activeTab.view.setBounds({ x: 0, y: 0, width: 0, height: 0 });
+        }
+
+        // Right pane (splitTab)
+        if (splitTab && splitTab.view && !splitTab.isInternal) {
           try { splitTab.view.setVisible(true); } catch (e) {}
           splitTab.view.setBounds({
             x: leftOffset + leftPaneWidth,
@@ -1300,25 +1315,10 @@ class TabController {
             width: rightPaneWidth,
             height: availableHeight
           });
-          return;
+        } else if (splitTab && splitTab.view) {
+          try { splitTab.view.setVisible(false); } catch (e) {}
+          splitTab.view.setBounds({ x: 0, y: 0, width: 0, height: 0 });
         }
-
-        // Both activeTab and splitTab are external web views: side-by-side
-        try { activeTab.view.setVisible(true); } catch (e) {}
-        activeTab.view.setBounds({
-          x: leftOffset,
-          y: topOffset,
-          width: leftPaneWidth,
-          height: availableHeight
-        });
-
-        try { splitTab.view.setVisible(true); } catch (e) {}
-        splitTab.view.setBounds({
-          x: leftOffset + leftPaneWidth,
-          y: topOffset,
-          width: rightPaneWidth,
-          height: availableHeight
-        });
         return;
       }
 

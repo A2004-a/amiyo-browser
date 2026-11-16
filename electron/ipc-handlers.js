@@ -581,28 +581,31 @@ function registerIpcHandlers() {
 
   // --- Web Capture / Screenshot ---
   ipcMain.handle('capture:viewport', async (event, tabId) => {
+    const win = BrowserWindow.fromWebContents(event.sender);
     const tabCtrl = getTabControllerForSender(event);
-    if (!tabCtrl) return { success: false, error: 'Tab controller not found' };
-    const tab = tabCtrl.getTab(tabId || tabCtrl.activeTabId);
-    if (!tab || !tab.view) return { success: false, error: 'Tab not found' };
-    return await captureController.captureViewport(tab.view.webContents);
+    if (!tabCtrl && !win) return { success: false, error: 'Tab controller not found' };
+    const tab = tabCtrl ? tabCtrl.getTab(tabId || tabCtrl.activeTabId) : null;
+    const targetContents = (tab && tab.view && !tab.isInternal) ? tab.view.webContents : (win ? win.webContents : null);
+    if (!targetContents) return { success: false, error: 'Target contents not found' };
+    return await captureController.captureViewport(targetContents);
   });
 
   ipcMain.handle('capture:clipboard', async (event, tabId) => {
+    const win = BrowserWindow.fromWebContents(event.sender);
     const tabCtrl = getTabControllerForSender(event);
-    if (!tabCtrl) return false;
-    const tab = tabCtrl.getTab(tabId || tabCtrl.activeTabId);
-    if (!tab || !tab.view) return false;
-    return await captureController.copyToClipboard(tab.view.webContents);
+    const tab = tabCtrl ? tabCtrl.getTab(tabId || tabCtrl.activeTabId) : null;
+    const targetContents = (tab && tab.view && !tab.isInternal) ? tab.view.webContents : (win ? win.webContents : null);
+    if (!targetContents) return false;
+    return await captureController.copyToClipboard(targetContents);
   });
 
   ipcMain.handle('capture:save', async (event, tabId, defaultName) => {
     const win = BrowserWindow.fromWebContents(event.sender);
     const tabCtrl = getTabControllerForSender(event);
-    if (!win || !tabCtrl) return false;
-    const tab = tabCtrl.getTab(tabId || tabCtrl.activeTabId);
-    if (!tab || !tab.view) return false;
-    return await captureController.saveToFile(win, tab.view.webContents, defaultName);
+    if (!win) return false;
+    const tab = tabCtrl ? tabCtrl.getTab(tabId || tabCtrl.activeTabId) : null;
+    const targetContents = (tab && tab.view && !tab.isInternal) ? tab.view.webContents : win.webContents;
+    return await captureController.saveToFile(win, targetContents, defaultName);
   });
 
   // --- Browser Task Manager ---
