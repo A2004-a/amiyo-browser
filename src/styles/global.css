@@ -24,6 +24,10 @@ input, button, select, textarea {
   outline: none;
 }
 
+select, option {
+  color-scheme: inherit;
+}
+
 button {
   cursor: pointer;
   display: inline-flex;

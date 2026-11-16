@@ -1,4 +1,6 @@
 :root, [data-theme="dark"] {
+  color-scheme: dark;
+
   /* ========================================================
      AETHER Official Design Tokens — Obsidian + Electric Cyan
      ======================================================== */
@@ -74,6 +76,7 @@ html, body, #app, #browser-header, #tab-bar-container, #tabs-strip, #toolbar, #o
 }
 
 [data-theme="light"] {
+  color-scheme: light;
   --bg-primary: #F8FAFC;
   --bg-secondary: #EDF2F7;
   --bg-tertiary: #E2E8F0;
@@ -111,6 +114,7 @@ html, body, #app, #browser-header, #tab-bar-container, #tabs-strip, #toolbar, #o
 
 /* Official AETHER Cyan Theme — Deep Obsidian with Electric Cyan Glow */
 [data-theme="cyan"] {
+  color-scheme: dark;
   --bg-primary: #050B14;
   --bg-secondary: #0A1424;
   --bg-tertiary: #101E34;

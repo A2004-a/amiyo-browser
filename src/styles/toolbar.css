@@ -818,15 +818,53 @@
   border-color: rgba(220, 227, 235, 0.15);
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7);
 }
+[data-theme="dark"] .vpn-select,
+[data-theme="dark"] .vpn-mini-select {
+  color-scheme: dark;
+  background-color: #162234;
+  border-color: rgba(220, 227, 235, 0.15);
+  color: #DCE3EB;
+}
+[data-theme="dark"] .vpn-select option,
+[data-theme="dark"] .vpn-mini-select option {
+  background-color: #121B2B;
+  color: #DCE3EB;
+}
+
 [data-theme="light"] .vpn-popover {
   background: #FFFFFF;
   border-color: #CBD5E1;
   box-shadow: 0 16px 40px rgba(15, 23, 42, 0.15);
 }
+[data-theme="light"] .vpn-select,
+[data-theme="light"] .vpn-mini-select {
+  color-scheme: light;
+  background-color: #F8FAFC;
+  border-color: #CBD5E1;
+  color: #0F172A;
+}
+[data-theme="light"] .vpn-select option,
+[data-theme="light"] .vpn-mini-select option {
+  background-color: #FFFFFF;
+  color: #0F172A;
+}
+
 [data-theme="cyan"] .vpn-popover {
   background: #0A1424;
   border-color: rgba(53, 216, 242, 0.35);
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8), 0 0 24px rgba(53, 216, 242, 0.25);
+}
+[data-theme="cyan"] .vpn-select,
+[data-theme="cyan"] .vpn-mini-select {
+  color-scheme: dark;
+  background-color: #0A1424;
+  border-color: rgba(53, 216, 242, 0.35);
+  color: #E0F2FE;
+}
+[data-theme="cyan"] .vpn-select option,
+[data-theme="cyan"] .vpn-mini-select option {
+  background-color: #07101C;
+  color: #E0F2FE;
 }
 
 .vpn-header {
@@ -931,6 +969,19 @@
   font-weight: 500;
   cursor: pointer;
   outline: none;
+  color-scheme: dark;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.vpn-select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(53, 216, 242, 0.25);
+}
+
+.vpn-select option {
+  background-color: #121B2B;
+  color: #DCE3EB;
+  padding: 8px 10px;
 }
 
 .vpn-stat-grid {
@@ -1131,6 +1182,12 @@
   font-size: 10px;
   font-weight: 500;
   outline: none;
+  color-scheme: dark;
+}
+
+.vpn-mini-select option {
+  background-color: #121B2B;
+  color: #DCE3EB;
 }
 
 /* Rotating IP Card */
