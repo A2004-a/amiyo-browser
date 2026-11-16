@@ -287,6 +287,23 @@ const api = {
     ping: () => ipcRenderer.invoke('diagnostics:ping')
   },
 
+  // --- AETHER Secure VPN ---
+  vpn: {
+    getStatus: () => ipcRenderer.invoke('vpn:get-status'),
+    connect: (locId) => ipcRenderer.invoke('vpn:connect', locId),
+    disconnect: () => ipcRenderer.invoke('vpn:disconnect'),
+    toggle: (locId) => ipcRenderer.invoke('vpn:toggle', locId),
+    setLocation: (locId) => ipcRenderer.invoke('vpn:set-location', locId),
+    getLocations: () => ipcRenderer.invoke('vpn:get-locations'),
+    setKillSwitch: (val) => ipcRenderer.invoke('vpn:set-killswitch', val),
+    setDnsLeakProtection: (val) => ipcRenderer.invoke('vpn:set-dns-leak-protection', val),
+    setWebRtcProtection: (val) => ipcRenderer.invoke('vpn:set-webrtc-protection', val),
+    setAutoConnect: (val) => ipcRenderer.invoke('vpn:set-auto-connect', val),
+    addBypassDomain: (dom) => ipcRenderer.invoke('vpn:add-bypass-domain', dom),
+    removeBypassDomain: (dom) => ipcRenderer.invoke('vpn:remove-bypass-domain', dom),
+    measureLatency: () => ipcRenderer.invoke('vpn:measure-latency')
+  },
+
   // --- Triggers ---
   triggers: {
     onFindInPage: (callback) => {

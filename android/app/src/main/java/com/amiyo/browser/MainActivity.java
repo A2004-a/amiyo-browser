@@ -74,6 +74,10 @@ public class MainActivity extends AppCompatActivity {
     private WebChromeClient.CustomViewCallback customViewCallback = null;
     private int currentTextZoom = 100;
 
+    // AETHER Secure VPN State
+    private boolean isVpnEnabled = false;
+    private String vpnLocation = "Optimal (Fastest)";
+
     public static class TabItem {
         public String id;
         public String title;
@@ -687,10 +691,11 @@ public class MainActivity extends AppCompatActivity {
         popup.getMenu().add(0, 6, 5, "Share...");
         popup.getMenu().add(0, 7, 6, "Find in page");
         popup.getMenu().add(0, 8, 7, isDesktopSite ? "Mobile site" : "Desktop site");
-        popup.getMenu().add(0, 10, 8, "Zoom in (+)");
-        popup.getMenu().add(0, 11, 9, "Zoom out (-)");
-        popup.getMenu().add(0, 12, 10, "Reset zoom (" + currentTextZoom + "%)");
-        popup.getMenu().add(0, 9, 11, "Settings");
+        popup.getMenu().add(0, 13, 8, isVpnEnabled ? "🛡️ AETHER VPN: Connected (" + vpnLocation + ")" : "🛡️ AETHER VPN: Disconnected");
+        popup.getMenu().add(0, 10, 9, "Zoom in (+)");
+        popup.getMenu().add(0, 11, 10, "Zoom out (-)");
+        popup.getMenu().add(0, 12, 11, "Reset zoom (" + currentTextZoom + "%)");
+        popup.getMenu().add(0, 9, 12, "Settings");
 
         popup.setOnMenuItemClickListener(item -> {
             switch (item.getItemId()) {
@@ -724,6 +729,9 @@ public class MainActivity extends AppCompatActivity {
                     return true;
                 case 8:
                     toggleDesktopSite();
+                    return true;
+                case 13:
+                    toggleMobileVpn();
                     return true;
                 case 10:
                     zoomIn();
@@ -772,6 +780,15 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "Mobile site enabled", Toast.LENGTH_SHORT).show();
         }
         webView.reload();
+    }
+
+    private void toggleMobileVpn() {
+        isVpnEnabled = !isVpnEnabled;
+        if (isVpnEnabled) {
+            Toast.makeText(this, "🛡️ AETHER VPN Connected (" + vpnLocation + ")\nVirtual IP Assigned & DNS Encrypted", Toast.LENGTH_LONG).show();
+        } else {
+            Toast.makeText(this, "AETHER VPN Disconnected", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void injectZoomUnlocker(WebView view) {

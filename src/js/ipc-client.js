@@ -189,6 +189,21 @@ const IpcClient = {
   deleteCustomEngine(kw) { return this.api.customEngines?.delete ? this.api.customEngines.delete(kw) : Promise.resolve(true); },
 
   // Network Diagnostics
-  pingDiagnostics() { return this.api.diagnostics?.ping ? this.api.diagnostics.ping() : Promise.resolve({ online: navigator.onLine }); }
+  pingDiagnostics() { return this.api.diagnostics?.ping ? this.api.diagnostics.ping() : Promise.resolve({ online: navigator.onLine }); },
+
+  // AETHER Secure VPN
+  getVpnStatus() { return this.api.vpn?.getStatus ? this.api.vpn.getStatus() : Promise.resolve({ connected: false }); },
+  connectVpn(locId) { return this.api.vpn?.connect ? this.api.vpn.connect(locId) : Promise.resolve({ connected: false }); },
+  disconnectVpn() { return this.api.vpn?.disconnect ? this.api.vpn.disconnect() : Promise.resolve({ connected: false }); },
+  toggleVpn(locId) { return this.api.vpn?.toggle ? this.api.vpn.toggle(locId) : Promise.resolve({ connected: false }); },
+  setVpnLocation(locId) { return this.api.vpn?.setLocation ? this.api.vpn.setLocation(locId) : Promise.resolve(); },
+  getVpnLocations() { return this.api.vpn?.getLocations ? this.api.vpn.getLocations() : Promise.resolve([]); },
+  setVpnKillSwitch(val) { return this.api.vpn?.setKillSwitch ? this.api.vpn.setKillSwitch(val) : Promise.resolve(); },
+  setVpnDnsLeakProtection(val) { return this.api.vpn?.setDnsLeakProtection ? this.api.vpn.setDnsLeakProtection(val) : Promise.resolve(); },
+  setVpnWebRtcProtection(val) { return this.api.vpn?.setWebRtcProtection ? this.api.vpn.setWebRtcProtection(val) : Promise.resolve(); },
+  setVpnAutoConnect(val) { return this.api.vpn?.setAutoConnect ? this.api.vpn.setAutoConnect(val) : Promise.resolve(); },
+  addVpnBypassDomain(dom) { return this.api.vpn?.addBypassDomain ? this.api.vpn.addBypassDomain(dom) : Promise.resolve([]); },
+  removeVpnBypassDomain(dom) { return this.api.vpn?.removeBypassDomain ? this.api.vpn.removeBypassDomain(dom) : Promise.resolve([]); },
+  measureVpnLatency() { return this.api.vpn?.measureLatency ? this.api.vpn.measureLatency() : Promise.resolve(20); }
 };
 

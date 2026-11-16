@@ -36,7 +36,14 @@ class StorageManager {
       askDownloadPath: false,
       hardwareAcceleration: true,
       blockPopups: true,
-      doNotTrack: true
+      doNotTrack: true,
+      vpnEnabled: false,
+      vpnLocation: 'optimal',
+      vpnKillSwitch: true,
+      vpnDnsLeakProtection: true,
+      vpnWebRtcProtection: true,
+      vpnAutoConnectPublicWifi: false,
+      vpnBypassList: ['localhost', '127.0.0.1', '*.local', '192.168.*', '10.*']
     };
 
     this.defaultBookmarks = [

@@ -12,31 +12,37 @@ const featureTests = require('./browser-features.test');
 const incognitoTests = require('./incognito.test');
 const superFeatureTests = require('./browser-super-features.test');
 const aetherShieldSuperTests = require('./aether-shield-and-super-features.test');
+const vpnTests = require('./vpn-controller.test');
 
 console.log('========================================');
 console.log('       AETHER Browser Test Suite       ');
 console.log('========================================\n');
 
-try {
-  navTests.run();
-  bmTests.run();
-  histTests.run();
-  setTests.run();
-  tabTests.run();
-  aiTests.run();
-  shieldsTests.run();
-  groupTests.run();
-  memoryTests.run();
-  readerTests.run();
-  featureTests.run();
-  incognitoTests.run();
-  superFeatureTests.run();
-  aetherShieldSuperTests.run();
+async function main() {
+  try {
+    navTests.run();
+    bmTests.run();
+    histTests.run();
+    setTests.run();
+    tabTests.run();
+    aiTests.run();
+    shieldsTests.run();
+    groupTests.run();
+    memoryTests.run();
+    readerTests.run();
+    featureTests.run();
+    incognitoTests.run();
+    superFeatureTests.run();
+    aetherShieldSuperTests.run();
+    await vpnTests.run();
 
-  console.log('\n========================================');
-  console.log('  ALL UNIT TEST SUITES PASSED (14/14)!  ');
-  console.log('========================================');
-} catch (err) {
-  console.error('\n❌ Test failure:', err);
-  process.exit(1);
+    console.log('\n========================================');
+    console.log('  ALL UNIT TEST SUITES PASSED (15/15)!  ');
+    console.log('========================================');
+  } catch (err) {
+    console.error('\n❌ Test failure:', err);
+    process.exit(1);
+  }
 }
+
+main();

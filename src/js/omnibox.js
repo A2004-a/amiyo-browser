@@ -53,6 +53,18 @@ const Omnibox = {
       });
     }
 
+    this.vpnBtnEl = document.getElementById('vpn-tool-btn');
+    this.vpnBadgeEl = document.getElementById('vpn-badge');
+    this.vpnPopoverEl = document.getElementById('vpn-popover');
+
+    if (this.vpnBtnEl) {
+      this.vpnBtnEl.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.toggleVpnPopover();
+      });
+      this.updateVpnBadge();
+    }
+
     this.shieldsBtnEl = document.getElementById('shields-tool-btn');
     this.shieldsBadgeEl = document.getElementById('shields-badge');
     this.shieldsPopoverEl = document.getElementById('shields-popover');
@@ -195,6 +207,207 @@ const Omnibox = {
       this.inputEl.focus();
       this.inputEl.select();
     }
+  },
+
+  closeVpnPopover() {
+    if (!this.vpnPopoverEl) return;
+    this.vpnPopoverEl.classList.add('hidden');
+    const freeze = document.getElementById('freeze-backdrop');
+    if (freeze) {
+      freeze.classList.add('hidden');
+      freeze.style.backgroundImage = '';
+    }
+    if (IpcClient.setViewVisible) {
+      IpcClient.setViewVisible(true);
+    }
+  },
+
+  async updateVpnBadge() {
+    if (!this.vpnBtnEl || !this.vpnBadgeEl) return;
+    try {
+      const status = await IpcClient.getVpnStatus();
+      if (status && status.connected) {
+        this.vpnBtnEl.classList.add('active');
+        this.vpnBadgeEl.classList.remove('hidden');
+        this.vpnBadgeEl.classList.add('active');
+        this.vpnBadgeEl.textContent = status.location ? status.location.country : 'ON';
+        this.vpnBtnEl.title = `AETHER Secure VPN: Connected to ${status.location?.name || 'VPN'}`;
+      } else {
+        this.vpnBtnEl.classList.remove('active');
+        this.vpnBadgeEl.classList.remove('active');
+        this.vpnBadgeEl.classList.add('hidden');
+        this.vpnBtnEl.title = 'AETHER Secure VPN — Encrypted Tunnel & Virtual Location';
+      }
+    } catch (e) {}
+  },
+
+  async toggleVpnPopover() {
+    if (!this.vpnPopoverEl) return;
+    const isHidden = this.vpnPopoverEl.classList.contains('hidden');
+    if (!isHidden) {
+      this.closeVpnPopover();
+      return;
+    }
+
+    // Freeze-frame snapshot backdrop to prevent WebContentsView clipping
+    const tab = State.getActiveTab();
+    const isWeb = tab && !tab.isInternal && tab.url && tab.url.startsWith('http');
+    if (isWeb) {
+      try {
+        const res = await IpcClient.captureViewport(tab.id);
+        if (res && res.dataUrl) {
+          const freeze = document.getElementById('freeze-backdrop');
+          if (freeze) {
+            freeze.style.backgroundImage = `url(${res.dataUrl})`;
+            freeze.classList.remove('hidden');
+          }
+        }
+      } catch (e) {}
+      if (IpcClient.setViewVisible) {
+        await IpcClient.setViewVisible(false);
+      }
+    }
+
+    // Populate VPN UI with live status
+    const renderVpnUi = async () => {
+      const status = await IpcClient.getVpnStatus();
+      if (!status) return;
+
+      const statusText = document.getElementById('vpn-status-text');
+      const masterToggle = document.getElementById('vpn-master-toggle');
+      const locSelect = document.getElementById('vpn-location-select');
+      const ipVal = document.getElementById('vpn-ip-val');
+      const latencyVal = document.getElementById('vpn-latency-val');
+      const trafficVal = document.getElementById('vpn-traffic-val');
+      const emblem = this.vpnPopoverEl.querySelector('.vpn-emblem');
+      const killswitch = document.getElementById('vpn-killswitch-toggle');
+      const dnsleak = document.getElementById('vpn-dnsleak-toggle');
+      const webrtc = document.getElementById('vpn-webrtc-toggle');
+      const autoconnect = document.getElementById('vpn-autoconnect-toggle');
+      const chipsEl = document.getElementById('vpn-bypass-chips');
+
+      if (masterToggle) masterToggle.checked = !!status.connected;
+      if (emblem) emblem.classList.toggle('active', !!status.connected);
+
+      if (statusText) {
+        if (status.connected) {
+          statusText.textContent = `Connected (${status.location?.name || 'Secure'})`;
+          statusText.style.color = '#10B981';
+        } else if (status.connecting) {
+          statusText.textContent = 'Securing tunnel...';
+          statusText.style.color = '#38BDF8';
+        } else {
+          statusText.textContent = 'Disconnected';
+          statusText.style.color = 'var(--text-muted)';
+        }
+      }
+
+      if (locSelect && status.location) {
+        locSelect.value = status.location.id || 'optimal';
+      }
+
+      if (ipVal) ipVal.textContent = status.connected ? status.virtualIp : 'Protected';
+      if (latencyVal) latencyVal.textContent = status.connected ? `${status.latency} ms` : '-- ms';
+      if (trafficVal) trafficVal.textContent = status.stats?.bytesFormatted || '0 KB';
+
+      if (killswitch) killswitch.checked = status.killSwitch !== false;
+      if (dnsleak) dnsleak.checked = status.dnsLeakProtection !== false;
+      if (webrtc) webrtc.checked = status.webRtcProtection !== false;
+      if (autoconnect) autoconnect.checked = !!status.autoConnectPublicWifi;
+
+      if (chipsEl && Array.isArray(status.bypassDomains)) {
+        chipsEl.innerHTML = status.bypassDomains.map(d => `
+          <span class="vpn-chip">
+            ${Utils.escapeHtml(d)}
+            <span class="vpn-chip-del" data-domain="${Utils.escapeHtml(d)}">&times;</span>
+          </span>
+        `).join('');
+
+        chipsEl.querySelectorAll('.vpn-chip-del').forEach(btn => {
+          btn.onclick = async (e) => {
+            e.stopPropagation();
+            const dom = btn.getAttribute('data-domain');
+            await IpcClient.removeVpnBypassDomain(dom);
+            renderVpnUi();
+          };
+        });
+      }
+
+      this.updateVpnBadge();
+    };
+
+    await renderVpnUi();
+
+    // Wire listeners once
+    const masterToggle = document.getElementById('vpn-master-toggle');
+    const locSelect = document.getElementById('vpn-location-select');
+    const killswitch = document.getElementById('vpn-killswitch-toggle');
+    const dnsleak = document.getElementById('vpn-dnsleak-toggle');
+    const webrtc = document.getElementById('vpn-webrtc-toggle');
+    const autoconnect = document.getElementById('vpn-autoconnect-toggle');
+    const addBtn = document.getElementById('vpn-add-bypass-btn');
+    const addInput = document.getElementById('vpn-new-bypass-input');
+
+    if (masterToggle) {
+      masterToggle.onchange = async () => {
+        const targetLoc = locSelect ? locSelect.value : null;
+        await IpcClient.toggleVpn(targetLoc);
+        await renderVpnUi();
+      };
+    }
+
+    if (locSelect) {
+      locSelect.onchange = async () => {
+        await IpcClient.setVpnLocation(locSelect.value);
+        await renderVpnUi();
+      };
+    }
+
+    if (killswitch) {
+      killswitch.onchange = async () => {
+        await IpcClient.setVpnKillSwitch(killswitch.checked);
+      };
+    }
+
+    if (dnsleak) {
+      dnsleak.onchange = async () => {
+        await IpcClient.setVpnDnsLeakProtection(dnsleak.checked);
+      };
+    }
+
+    if (webrtc) {
+      webrtc.onchange = async () => {
+        await IpcClient.setVpnWebRtcProtection(webrtc.checked);
+      };
+    }
+
+    if (autoconnect) {
+      autoconnect.onchange = async () => {
+        await IpcClient.setVpnAutoConnect(autoconnect.checked);
+      };
+    }
+
+    if (addBtn && addInput) {
+      addBtn.onclick = async () => {
+        const val = addInput.value.trim();
+        if (val) {
+          await IpcClient.addVpnBypassDomain(val);
+          addInput.value = '';
+          await renderVpnUi();
+        }
+      };
+    }
+
+    this.vpnPopoverEl.classList.remove('hidden');
+
+    // Close on click outside
+    const closeListener = (e) => {
+      if (!this.vpnPopoverEl.contains(e.target) && !this.vpnBtnEl.contains(e.target)) {
+        this.closeVpnPopover();
+        document.removeEventListener('click', closeListener);
+      }
+    };
+    setTimeout(() => document.addEventListener('click', closeListener), 0);
   },
 
   closeShieldsPopover() {

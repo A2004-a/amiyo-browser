@@ -10,6 +10,7 @@ const shieldsController = require('./shields-controller');
 const readerController = require('./reader-controller');
 const captureController = require('./capture-controller');
 const pipController = require('./pip-controller');
+const vpnController = require('./vpn-controller');
 
 function getTabControllerForSender(event) {
   const win = BrowserWindow.fromWebContents(event.sender);
@@ -790,6 +791,59 @@ function registerIpcHandlers() {
     const playingTabs = tabCtrl.tabs.filter(t => t.isPlayingAudio);
     playingTabs.forEach(t => tabCtrl.muteTab(t.id, mute));
     return true;
+  });
+
+  // --- AETHER Secure VPN Controls ---
+  ipcMain.handle('vpn:get-status', () => {
+    return vpnController.getStatus();
+  });
+
+  ipcMain.handle('vpn:connect', async (event, locationId) => {
+    return await vpnController.connect(locationId);
+  });
+
+  ipcMain.handle('vpn:disconnect', async () => {
+    return await vpnController.disconnect();
+  });
+
+  ipcMain.handle('vpn:toggle', async (event, locationId) => {
+    return await vpnController.toggle(locationId);
+  });
+
+  ipcMain.handle('vpn:set-location', async (event, locationId) => {
+    return await vpnController.setLocation(locationId);
+  });
+
+  ipcMain.handle('vpn:get-locations', () => {
+    return vpnController.getLocations();
+  });
+
+  ipcMain.handle('vpn:set-killswitch', (event, enabled) => {
+    return vpnController.setKillSwitch(enabled);
+  });
+
+  ipcMain.handle('vpn:set-dns-leak-protection', (event, enabled) => {
+    return vpnController.setDnsLeakProtection(enabled);
+  });
+
+  ipcMain.handle('vpn:set-webrtc-protection', (event, enabled) => {
+    return vpnController.setWebRtcProtection(enabled);
+  });
+
+  ipcMain.handle('vpn:set-auto-connect', (event, enabled) => {
+    return vpnController.setAutoConnect(enabled);
+  });
+
+  ipcMain.handle('vpn:add-bypass-domain', (event, domain) => {
+    return vpnController.addBypassDomain(domain);
+  });
+
+  ipcMain.handle('vpn:remove-bypass-domain', (event, domain) => {
+    return vpnController.removeBypassDomain(domain);
+  });
+
+  ipcMain.handle('vpn:measure-latency', () => {
+    return vpnController.measureLatency();
   });
 }
 
