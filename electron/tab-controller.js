@@ -19,6 +19,7 @@ class TabController {
     this.sideOffset = 0; // AI sidebar offset
     this.isViewVisible = true; // WebContentsView visibility flag
     this.splitTabId = null; // Split view dual display
+    this.splitRatio = 0.5; // Split view ratio (left pane proportion, default 50/50)
     this.groups = new Map(); // groupId -> { id, title, color, isCollapsed }
 
     // Automatic Memory Saver / Inactive Tab Suspension sweep
@@ -849,8 +850,47 @@ class TabController {
     this.splitTabId = tabId;
     this.updateActiveViewBounds();
     this.windowManager.broadcast('split-view-changed', {
-      splitTabId: this.splitTabId
+      splitTabId: this.splitTabId,
+      ratio: this.splitRatio || 0.5,
+      activeTabId: this.activeTabId
     });
+  }
+
+  setSplitRatio(ratio) {
+    if (typeof ratio !== 'number' || isNaN(ratio)) return;
+    this.splitRatio = Math.max(0.2, Math.min(0.8, ratio));
+    this.updateActiveViewBounds();
+    this.windowManager.broadcast('split-view-changed', {
+      splitTabId: this.splitTabId,
+      ratio: this.splitRatio,
+      activeTabId: this.activeTabId
+    });
+  }
+
+  swapSplitTabs() {
+    if (!this.splitTabId) return;
+    const oldActiveId = this.activeTabId;
+    const oldSplitId = this.splitTabId;
+    this.activeTabId = oldSplitId;
+    this.splitTabId = oldActiveId;
+    this.updateActiveViewBounds();
+    const newActiveTab = this.getTab(this.activeTabId);
+    this.windowManager.broadcast('tab-switched', {
+      activeTabId: this.activeTabId,
+      tab: newActiveTab
+    });
+    this.windowManager.broadcast('split-view-changed', {
+      splitTabId: this.splitTabId,
+      ratio: this.splitRatio || 0.5,
+      activeTabId: this.activeTabId
+    });
+  }
+
+  focusSplitTab(tabId) {
+    if (!this.splitTabId) return;
+    if (tabId === this.splitTabId) {
+      this.swapSplitTabs();
+    }
   }
 
   closeSplitTab() {
@@ -864,7 +904,9 @@ class TabController {
     this.splitTabId = null;
     this.updateActiveViewBounds();
     this.windowManager.broadcast('split-view-changed', {
-      splitTabId: null
+      splitTabId: null,
+      ratio: this.splitRatio || 0.5,
+      activeTabId: this.activeTabId
     });
   }
 
@@ -1194,12 +1236,16 @@ class TabController {
 
     try {
       const [width, height] = this.browserWindow.getContentSize();
-      const topOffset = typeof this.topOffset === 'number' && this.topOffset > 0 ? this.topOffset : 84;
+      const baseTopOffset = typeof this.topOffset === 'number' && this.topOffset > 0 ? this.topOffset : 84;
+      const splitBarHeight = this.splitTabId ? 38 : 0;
+      const topOffset = baseTopOffset + splitBarHeight;
       const leftOffset = typeof this.leftOffset === 'number' && this.leftOffset > 0 ? this.leftOffset : 0;
       const sideOffset = typeof this.sideOffset === 'number' && this.sideOffset > 0 ? this.sideOffset : 0;
       const availableWidth = Math.max(0, width - sideOffset - leftOffset);
       const availableHeight = Math.max(0, height - topOffset);
-      const halfWidth = Math.floor(availableWidth / 2);
+      const ratio = typeof this.splitRatio === 'number' && this.splitRatio >= 0.2 && this.splitRatio <= 0.8 ? this.splitRatio : 0.5;
+      const leftPaneWidth = Math.floor(availableWidth * ratio);
+      const rightPaneWidth = availableWidth - leftPaneWidth;
 
       if (this.isViewVisible === false) {
         if (activeTab && activeTab.view) {
@@ -1229,9 +1275,9 @@ class TabController {
           }
           try { splitTab.view.setVisible(true); } catch (e) {}
           splitTab.view.setBounds({
-            x: leftOffset + halfWidth,
+            x: leftOffset + leftPaneWidth,
             y: topOffset,
-            width: availableWidth - halfWidth,
+            width: rightPaneWidth,
             height: availableHeight
           });
           return;
@@ -1242,15 +1288,15 @@ class TabController {
         activeTab.view.setBounds({
           x: leftOffset,
           y: topOffset,
-          width: halfWidth,
+          width: leftPaneWidth,
           height: availableHeight
         });
 
         try { splitTab.view.setVisible(true); } catch (e) {}
         splitTab.view.setBounds({
-          x: leftOffset + halfWidth,
+          x: leftOffset + leftPaneWidth,
           y: topOffset,
-          width: availableWidth - halfWidth,
+          width: rightPaneWidth,
           height: availableHeight
         });
         return;

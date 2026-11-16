@@ -546,6 +546,30 @@ function registerIpcHandlers() {
     return tabCtrl ? tabCtrl.getSplitTabId() : null;
   });
 
+  ipcMain.handle('tabs:set-split-ratio', (event, ratio) => {
+    const tabCtrl = getTabControllerForSender(event);
+    if (tabCtrl && typeof tabCtrl.setSplitRatio === 'function') {
+      tabCtrl.setSplitRatio(ratio);
+    }
+    return true;
+  });
+
+  ipcMain.handle('tabs:swap-split', (event) => {
+    const tabCtrl = getTabControllerForSender(event);
+    if (tabCtrl && typeof tabCtrl.swapSplitTabs === 'function') {
+      tabCtrl.swapSplitTabs();
+    }
+    return true;
+  });
+
+  ipcMain.handle('tabs:focus-split', (event, tabId) => {
+    const tabCtrl = getTabControllerForSender(event);
+    if (tabCtrl && typeof tabCtrl.focusSplitTab === 'function') {
+      tabCtrl.focusSplitTab(tabId);
+    }
+    return true;
+  });
+
   // --- Reading Mode ---
   ipcMain.handle('reader:extract', async (event, tabId) => {
     const tabCtrl = getTabControllerForSender(event);

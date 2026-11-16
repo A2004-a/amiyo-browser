@@ -179,8 +179,9 @@ const TabManager = {
     this.stripEl.innerHTML = '';
 
     State.tabs.forEach((tab, index) => {
+      const isSplit = tab.id === State.splitTabId;
       const tabEl = document.createElement('div');
-      tabEl.className = `browser-tab ${tab.id === State.activeTabId ? 'active' : ''} ${tab.isPinned ? 'pinned' : ''} ${tab.isSuspended ? 'suspended' : ''}`;
+      tabEl.className = `browser-tab ${tab.id === State.activeTabId ? 'active' : ''} ${isSplit ? 'split-active' : ''} ${tab.isPinned ? 'pinned' : ''} ${tab.isSuspended ? 'suspended' : ''}`;
       tabEl.dataset.tabId = tab.id;
       tabEl.dataset.index = index;
       tabEl.draggable = true;
@@ -213,10 +214,12 @@ const TabManager = {
       }
 
       const sleepBadge = tab.isSuspended ? `<span class="tab-sleep-badge" title="Sleeping tab (Memory Saved)">💤</span>` : '';
+      const splitBadge = isSplit ? `<span class="tab-split-badge" title="Split Screen Active">◫</span>` : '';
 
       tabEl.innerHTML = `
         ${iconHtml}
         <span class="tab-title">${Utils.escapeHtml(tab.title || 'New Tab')}</span>
+        ${splitBadge}
         ${sleepBadge}
         ${audioHtml}
         <button class="tab-close-btn" title="Close tab">${Utils.icons.close}</button>

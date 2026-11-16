@@ -135,6 +135,9 @@ const IpcClient = {
   closeSplitTab() { return this.api.tabs ? this.api.tabs.closeSplit() : Promise.resolve(true); },
   getSplitTab() { return this.api.tabs ? this.api.tabs.getSplit() : Promise.resolve(null); },
   getSplitId() { return this.getSplitTab(); },
+  setSplitRatio(ratio) { return this.api.tabs?.setSplitRatio ? this.api.tabs.setSplitRatio(ratio) : Promise.resolve(true); },
+  swapSplit() { return this.api.tabs?.swapSplit ? this.api.tabs.swapSplit() : Promise.resolve(true); },
+  focusSplit(tabId) { return this.api.tabs?.focusSplit ? this.api.tabs.focusSplit(tabId) : Promise.resolve(true); },
 
   // Reading Mode
   extractArticle(tabId) { return this.api.reader ? this.api.reader.extract(tabId) : Promise.resolve({ success: false }); },

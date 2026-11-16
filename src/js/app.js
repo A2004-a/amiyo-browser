@@ -40,9 +40,7 @@ const App = {
       try { this.initQuickNotes(); } catch (e) { console.warn('initQuickNotes error:', e); }
       try { this.updateTopOffset(); } catch (e) {}
 
-      document.getElementById('split-screen-btn')?.addEventListener('click', () => {
-        this.toggleSplitScreen();
-      });
+      try { this.initSplitScreenControls(); } catch (e) { console.warn('initSplitScreenControls error:', e); }
 
       window.addEventListener('resize', () => {
         this.updateTopOffset();
@@ -103,15 +101,27 @@ const App = {
       // Listen for split screen view changes
       const tabsBridge = window.aetherAPI?.tabs || window.amiyoAPI?.tabs;
       if (tabsBridge?.onSplitViewChanged) {
-        tabsBridge.onSplitViewChanged(({ splitTabId }) => {
+        tabsBridge.onSplitViewChanged(({ splitTabId, ratio, activeTabId }) => {
+          State.splitTabId = splitTabId;
           const splitBtn = document.getElementById('split-screen-btn');
           const app = document.getElementById('app');
+          const splitBar = document.getElementById('split-screen-bar');
+          const splitDivider = document.getElementById('split-divider');
           if (splitTabId) {
             splitBtn?.classList.add('active');
             app?.classList.add('split-view-mode');
+            splitBar?.classList.remove('hidden');
+            splitDivider?.classList.remove('hidden');
+            this.updateSplitViewUI(splitTabId, ratio, activeTabId);
           } else {
             splitBtn?.classList.remove('active');
             app?.classList.remove('split-view-mode');
+            splitBar?.classList.add('hidden');
+            splitDivider?.classList.add('hidden');
+            this.closeSplitPopover();
+          }
+          if (typeof TabManager !== 'undefined') {
+            TabManager.render();
           }
         });
       }
@@ -905,6 +915,200 @@ const App = {
       }
     } catch (e) {
       console.warn('Reader mode extraction failed:', e);
+    }
+  },
+
+  updateSplitViewUI(splitTabId, ratio, activeTabId) {
+    const app = document.getElementById('app');
+    const r = typeof ratio === 'number' ? ratio : 0.5;
+    if (app) {
+      app.style.setProperty('--split-left-width', `${(r * 100).toFixed(1)}%`);
+    }
+
+    const leftTab = State.tabs.find(t => t.id === (activeTabId || State.activeTabId));
+    const rightTab = State.tabs.find(t => t.id === splitTabId);
+
+    const leftTitle = document.getElementById('split-left-title');
+    const rightTitle = document.getElementById('split-right-title');
+    if (leftTitle) leftTitle.textContent = leftTab?.title || 'Left Pane';
+    if (rightTitle) rightTitle.textContent = rightTab?.title || 'Right Pane';
+
+    const headerLeft = document.getElementById('split-header-left');
+    const headerRight = document.getElementById('split-header-right');
+    const isLeftActive = (activeTabId || State.activeTabId) !== splitTabId;
+    headerLeft?.classList.toggle('active', isLeftActive);
+    headerRight?.classList.toggle('active', !isLeftActive);
+
+    // Sync ratio pills
+    document.querySelectorAll('.split-pill-btn').forEach(btn => {
+      const btnRatio = parseFloat(btn.dataset.ratio);
+      btn.classList.toggle('active', Math.abs(btnRatio - r) < 0.05);
+    });
+  },
+
+  toggleSplitPopover() {
+    const popover = document.getElementById('split-screen-popover');
+    const btn = document.getElementById('split-screen-btn');
+    if (!popover) return;
+    const isHidden = popover.classList.contains('hidden');
+    if (!isHidden) {
+      this.closeSplitPopover();
+      return;
+    }
+
+    // Freeze-frame snapshot if web tab is active
+    const tab = State.getActiveTab();
+    const isWeb = tab && !tab.isInternal && tab.url && tab.url.startsWith('http');
+    if (isWeb) {
+      IpcClient.captureViewport(tab.id).then(res => {
+        if (res && res.dataUrl) {
+          const freeze = document.getElementById('freeze-backdrop');
+          if (freeze) {
+            freeze.style.backgroundImage = `url(${res.dataUrl})`;
+            freeze.classList.remove('hidden');
+          }
+        }
+      }).catch(() => {});
+      IpcClient.setViewVisible?.(false);
+    }
+
+    // Populate tabs list
+    const tabList = document.getElementById('split-popover-tab-list');
+    if (tabList) {
+      const otherTabs = State.tabs.filter(t => t.id !== State.activeTabId);
+      if (otherTabs.length === 0) {
+        tabList.innerHTML = `<div style="font-size:11px;color:var(--text-muted);padding:6px;">No other open tabs</div>`;
+      } else {
+        tabList.innerHTML = otherTabs.map(t => `
+          <button class="split-tab-item ${t.id === State.splitTabId ? 'selected' : ''}" data-tab-id="${t.id}">
+            <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${Utils.escapeHtml(t.title || 'New Tab')}</span>
+          </button>
+        `).join('');
+
+        tabList.querySelectorAll('.split-tab-item').forEach(item => {
+          item.onclick = async () => {
+            const tid = item.dataset.tabId;
+            await IpcClient.setSplitTab(tid);
+            this.closeSplitPopover();
+          };
+        });
+      }
+    }
+
+    popover.classList.remove('hidden');
+
+    if (!this._splitCloseHandler) {
+      this._splitCloseHandler = (e) => {
+        if (!popover.contains(e.target) && e.target !== btn && !btn.contains(e.target)) {
+          this.closeSplitPopover();
+        }
+      };
+      setTimeout(() => document.addEventListener('click', this._splitCloseHandler), 0);
+    }
+  },
+
+  closeSplitPopover() {
+    const popover = document.getElementById('split-screen-popover');
+    if (!popover || popover.classList.contains('hidden')) return;
+    popover.classList.add('hidden');
+
+    if (this._splitCloseHandler) {
+      document.removeEventListener('click', this._splitCloseHandler);
+      this._splitCloseHandler = null;
+    }
+
+    const freeze = document.getElementById('freeze-backdrop');
+    if (freeze) {
+      freeze.classList.add('hidden');
+      freeze.style.backgroundImage = '';
+    }
+    const tab = State.getActiveTab();
+    if (tab && !tab.isInternal && IpcClient.setViewVisible) {
+      IpcClient.setViewVisible(true);
+    }
+  },
+
+  initSplitScreenControls() {
+    const splitBtn = document.getElementById('split-screen-btn');
+    splitBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.toggleSplitPopover();
+    });
+
+    document.getElementById('split-swap-btn')?.addEventListener('click', () => IpcClient.swapSplit());
+    document.getElementById('popover-split-swap')?.addEventListener('click', () => {
+      IpcClient.swapSplit();
+      this.closeSplitPopover();
+    });
+
+    document.getElementById('split-close-bar-btn')?.addEventListener('click', () => IpcClient.closeSplitTab());
+    document.getElementById('popover-split-close')?.addEventListener('click', () => {
+      IpcClient.closeSplitTab();
+      this.closeSplitPopover();
+    });
+    document.getElementById('split-right-close-tab')?.addEventListener('click', () => IpcClient.closeSplitTab());
+
+    document.getElementById('split-header-left')?.addEventListener('click', () => {
+      const leftTabId = State.activeTabId;
+      if (leftTabId) IpcClient.focusSplit(leftTabId);
+    });
+
+    document.getElementById('split-header-right')?.addEventListener('click', () => {
+      if (State.splitTabId) IpcClient.focusSplit(State.splitTabId);
+    });
+
+    document.querySelectorAll('.split-pill-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const ratio = parseFloat(e.currentTarget.dataset.ratio);
+        if (!isNaN(ratio)) {
+          IpcClient.setSplitRatio(ratio);
+        }
+      });
+    });
+
+    // Draggable Divider
+    const divider = document.getElementById('split-divider');
+    const viewContainer = document.getElementById('view-container');
+    const app = document.getElementById('app');
+
+    if (divider && viewContainer && app) {
+      let isDragging = false;
+
+      divider.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        divider.classList.add('dragging');
+        document.body.style.cursor = 'col-resize';
+        document.body.style.userSelect = 'none';
+
+        const onMouseMove = (moveEvent) => {
+          if (!isDragging) return;
+          const rect = viewContainer.getBoundingClientRect();
+          const clientX = moveEvent.clientX;
+          const ratio = Math.max(0.2, Math.min(0.8, (clientX - rect.left) / rect.width));
+          app.style.setProperty('--split-left-width', `${(ratio * 100).toFixed(1)}%`);
+        };
+
+        const onMouseUp = (upEvent) => {
+          if (!isDragging) return;
+          isDragging = false;
+          divider.classList.remove('dragging');
+          document.body.style.cursor = '';
+          document.body.style.userSelect = '';
+          window.removeEventListener('mousemove', onMouseMove);
+          window.removeEventListener('mouseup', onMouseUp);
+
+          const rect = viewContainer.getBoundingClientRect();
+          const ratio = Math.max(0.2, Math.min(0.8, (upEvent.clientX - rect.left) / rect.width));
+          IpcClient.setSplitRatio(ratio);
+        };
+
+        window.addEventListener('mousemove', onMouseMove);
+        window.addEventListener('mouseup', onMouseUp);
+      });
+
+      divider.addEventListener('dblclick', () => {
+        IpcClient.setSplitRatio(0.5);
+      });
     }
   },
 

@@ -598,6 +598,36 @@
           <button class="nav-btn" id="split-screen-btn" title="Toggle Split Screen dual view">
             <svg class="icon" viewBox="0 0 24 24"><path d="M3 5v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2zm8 14H5V5h6v14zm8 0h-6V5h6v14z"/></svg>
           </button>
+
+          <!-- Split Screen Quick Flyout / Popover -->
+          <div id="split-screen-popover" class="split-popover hidden">
+            <div class="split-popover-header">
+              <span class="split-popover-title">Split Screen Dual View</span>
+              <span class="split-popover-badge" id="split-popover-status">Active</span>
+            </div>
+            <div class="split-popover-body">
+              <button class="split-popover-btn" id="popover-split-swap">
+                <svg viewBox="0 0 24 24" class="icon"><path d="M6.99 11L3 15l3.99 4v-3H14v-2H6.99v-3zM21 9l-3.99-4v3H10v2h7.01v3L21 9z"/></svg>
+                <span>Swap Left &amp; Right Panes</span>
+              </button>
+              <div class="split-ratio-selector">
+                <span class="split-ratio-lbl">Pane Layout:</span>
+                <div class="split-ratio-pills">
+                  <button class="split-pill-btn" data-ratio="0.33">1:2 (33%)</button>
+                  <button class="split-pill-btn active" data-ratio="0.5">1:1 (50%)</button>
+                  <button class="split-pill-btn" data-ratio="0.67">2:1 (67%)</button>
+                </div>
+              </div>
+              <div class="split-popover-divider"></div>
+              <div class="split-popover-subhead">Switch Secondary Pane:</div>
+              <div class="split-popover-tabs" id="split-popover-tab-list"></div>
+              <div class="split-popover-divider"></div>
+              <button class="split-popover-btn danger" id="popover-split-close">
+                <svg viewBox="0 0 24 24" class="icon"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+                <span>Exit Split Screen</span>
+              </button>
+            </div>
+          </div>
           <button class="nav-btn ai-sparkle-btn" id="ai-tool-btn" title="AETHER Intelligence (Ctrl+Shift+A)">
             <svg class="icon" viewBox="0 0 24 24"><path d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5zM19 15l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 19l-2.75-1.25L19 15z"/></svg>
             <span class="ai-sparkle-label">Ask AETHER</span>
@@ -755,6 +785,46 @@
 
       <!-- Main View Container -->
       <main id="view-container">
+        <!-- Split Screen Dual Header Bar -->
+        <div id="split-screen-bar" class="split-screen-bar hidden">
+          <div class="split-pane-header left active" id="split-header-left" title="Click to focus Left screen">
+            <span class="split-active-indicator" id="split-indicator-left"></span>
+            <span class="split-pane-tag">LEFT</span>
+            <span class="split-pane-title" id="split-left-title">New Tab</span>
+          </div>
+
+          <div class="split-center-controls">
+            <button class="split-action-btn" id="split-swap-btn" title="Swap Left and Right Sides">
+              <svg viewBox="0 0 24 24" class="icon"><path d="M6.99 11L3 15l3.99 4v-3H14v-2H6.99v-3zM21 9l-3.99-4v3H10v2h7.01v3L21 9z"/></svg>
+              <span>Swap</span>
+            </button>
+            <div class="split-ratio-pills">
+              <button class="split-pill-btn" data-ratio="0.33" title="33% / 67% layout">1:2</button>
+              <button class="split-pill-btn active" data-ratio="0.5" title="50% / 50% layout">1:1</button>
+              <button class="split-pill-btn" data-ratio="0.67" title="67% / 33% layout">2:1</button>
+            </div>
+            <button class="split-action-btn close" id="split-close-bar-btn" title="Exit Split Screen">
+              <svg viewBox="0 0 24 24" class="icon"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+              <span>Close</span>
+            </button>
+          </div>
+
+          <div class="split-pane-header right" id="split-header-right" title="Click to focus Right screen">
+            <span class="split-active-indicator" id="split-indicator-right"></span>
+            <span class="split-pane-tag">RIGHT</span>
+            <span class="split-pane-title" id="split-right-title">Secondary Tab</span>
+            <button class="split-pane-close-btn" id="split-right-close-tab" title="Close this split pane">✕</button>
+          </div>
+        </div>
+
+        <!-- Draggable Resizing Split Divider -->
+        <div id="split-divider" class="split-divider hidden">
+          <div class="split-divider-line"></div>
+          <div class="split-divider-handle" title="Drag to resize split view / Double click to reset 50:50">
+            <span class="split-handle-grip"></span>
+          </div>
+        </div>
+
         <!-- Internal Pages Container (New Tab, History, Settings, etc.) -->
         <div id="internal-page-container"></div>
 
