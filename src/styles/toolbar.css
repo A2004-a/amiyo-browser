@@ -867,9 +867,6 @@
   height: 14px;
   fill: currentColor;
 }
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--border-subtle);
-}
 
 .vpn-brand {
   display: flex;
