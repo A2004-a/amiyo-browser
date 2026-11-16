@@ -532,7 +532,7 @@ class MenuManager {
     }));
 
     menu.append(new MenuItem({
-      label: '📝 Edge Scratchpad (Quick Notes)',
+      label: '💡 AETHER Keep Notes',
       accelerator: 'CmdOrCtrl+Alt+N',
       click: () => browserWindow.webContents.send('trigger-quick-notes')
     }));

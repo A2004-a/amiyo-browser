@@ -1040,20 +1040,12 @@ const App = {
       return;
     }
 
-    // Freeze-frame snapshot if web tab is active
-    const tab = State.getActiveTab();
-    const isWeb = tab && !tab.isInternal && tab.url && tab.url.startsWith('http');
-    if (isWeb) {
-      IpcClient.captureViewport(tab.id).then(res => {
-        if (res && res.dataUrl) {
-          const freeze = document.getElementById('freeze-backdrop');
-          if (freeze) {
-            freeze.style.backgroundImage = `url(${res.dataUrl})`;
-            freeze.classList.remove('hidden');
-          }
-        }
-      }).catch(() => {});
-      IpcClient.setViewVisible?.(false);
+    // Update status badge dynamically
+    const statusBadge = document.getElementById('split-popover-status');
+    if (statusBadge) {
+      const isActive = !!State.splitTabId;
+      statusBadge.textContent = isActive ? 'Active' : 'Inactive';
+      statusBadge.className = `split-popover-badge ${isActive ? 'active' : ''}`;
     }
 
     // Populate tabs list
@@ -1100,21 +1092,20 @@ const App = {
       document.removeEventListener('click', this._splitCloseHandler);
       this._splitCloseHandler = null;
     }
-
-    const freeze = document.getElementById('freeze-backdrop');
-    if (freeze) {
-      freeze.classList.add('hidden');
-      freeze.style.backgroundImage = '';
-    }
-    const tab = State.getActiveTab();
-    if (tab && !tab.isInternal && IpcClient.setViewVisible) {
-      IpcClient.setViewVisible(true);
-    }
   },
 
   initSplitScreenControls() {
     const splitBtn = document.getElementById('split-screen-btn');
     splitBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (!State.splitTabId) {
+        this.toggleSplitScreen();
+      } else {
+        this.toggleSplitPopover();
+      }
+    });
+    splitBtn?.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
       e.stopPropagation();
       this.toggleSplitPopover();
     });

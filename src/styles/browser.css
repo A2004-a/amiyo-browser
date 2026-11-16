@@ -340,11 +340,17 @@
 .split-popover-badge {
   font-size: 9px;
   font-weight: 700;
-  color: var(--accent);
-  background: var(--accent-light);
-  border: 1px solid var(--border-focus);
+  color: var(--text-muted);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border-subtle);
   padding: 1px 6px;
   border-radius: 4px;
+}
+
+.split-popover-badge.active {
+  color: var(--accent);
+  background: var(--accent-light);
+  border-color: var(--border-focus);
 }
 
 .split-popover-btn {
