@@ -63,7 +63,7 @@ if (typeof electron === 'string') {
   return;
 }
 
-const { app, BrowserWindow, session } = electron;
+const { app, BrowserWindow, session, nativeTheme } = electron;
 process.noDeprecation = true;
 
 // Suppress internal Chromium DirectX/DirectComposition overlay notices and activate acceleration
@@ -126,6 +126,18 @@ app.whenReady().then(() => {
   try {
     session.defaultSession.setProxy({ mode: 'system' }).catch(() => {});
   } catch (e) {}
+  
+  // Synchronize OS native theme (Windows context menus, native select popups, titlebars)
+  try {
+    const storageManager = require('./electron/storage-manager');
+    const currentTheme = storageManager.getSettings()?.theme || 'dark';
+    if (nativeTheme) {
+      nativeTheme.themeSource = currentTheme === 'light' ? 'light' : (currentTheme === 'system' ? 'system' : 'dark');
+    }
+  } catch (e) {
+    if (nativeTheme) nativeTheme.themeSource = 'dark';
+  }
+
   registerIpcHandlers();
   menuManager.setupAppMenu(windowManager);
 

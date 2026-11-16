@@ -22,6 +22,7 @@ const ThemeManager = {
     }
 
     document.documentElement.setAttribute('data-theme', effectiveTheme);
+    document.documentElement.style.colorScheme = effectiveTheme === 'light' ? 'light' : 'dark';
   },
 
   setTheme(theme) {

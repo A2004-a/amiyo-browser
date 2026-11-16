@@ -350,75 +350,157 @@ const App = {
     });
   },
 
+  async toggleChromeMenu() {
+    const menuBtn = document.getElementById('chrome-menu-btn');
+    const menuEl = document.getElementById('chrome-app-menu');
+    if (!menuBtn || !menuEl) return;
+
+    const isHidden = menuEl.classList.contains('hidden');
+    if (!isHidden) {
+      this.closeChromeMenu();
+      return;
+    }
+
+    // Close any other open popovers (VPN, Shields, etc.)
+    if (typeof Omnibox !== 'undefined') {
+      if (typeof Omnibox.closeVpnPopover === 'function') Omnibox.closeVpnPopover();
+      if (typeof Omnibox.closeShieldsPopover === 'function') Omnibox.closeShieldsPopover();
+    }
+
+    // Freeze-frame snapshot backdrop to prevent WebContentsView clipping
+    const tab = State.getActiveTab();
+    const isWeb = tab && !tab.isInternal && tab.url && tab.url.startsWith('http');
+    if (isWeb) {
+      try {
+        const res = await IpcClient.captureViewport(tab.id);
+        if (res && res.dataUrl) {
+          const freeze = document.getElementById('freeze-backdrop');
+          if (freeze) {
+            freeze.style.backgroundImage = `url(${res.dataUrl})`;
+            freeze.classList.remove('hidden');
+          }
+        }
+      } catch (e) {}
+      if (IpcClient.setViewVisible) {
+        await IpcClient.setViewVisible(false);
+      }
+    }
+
+    const tabZoom = tab?.zoomFactor || 1;
+    const zoomValEl = document.getElementById('menu-zoom-val');
+    if (zoomValEl) {
+      zoomValEl.textContent = `${Math.round(tabZoom * 100)}%`;
+    }
+
+    menuEl.classList.remove('hidden');
+    menuBtn.classList.add('active');
+
+    if (!this._chromeMenuCloseListener) {
+      this._chromeMenuCloseListener = (e) => {
+        if (!menuEl.contains(e.target) && !menuBtn.contains(e.target)) {
+          this.closeChromeMenu();
+        }
+      };
+      setTimeout(() => {
+        document.addEventListener('click', this._chromeMenuCloseListener);
+      }, 0);
+    }
+
+    if (!this._chromeMenuEscListener) {
+      this._chromeMenuEscListener = (e) => {
+        if (e.key === 'Escape') {
+          this.closeChromeMenu();
+        }
+      };
+      document.addEventListener('keydown', this._chromeMenuEscListener);
+    }
+  },
+
+  closeChromeMenu() {
+    const menuEl = document.getElementById('chrome-app-menu');
+    const menuBtn = document.getElementById('chrome-menu-btn');
+    if (!menuEl || menuEl.classList.contains('hidden')) return;
+
+    menuEl.classList.add('hidden');
+    if (menuBtn) menuBtn.classList.remove('active');
+
+    if (this._chromeMenuCloseListener) {
+      document.removeEventListener('click', this._chromeMenuCloseListener);
+      this._chromeMenuCloseListener = null;
+    }
+    if (this._chromeMenuEscListener) {
+      document.removeEventListener('keydown', this._chromeMenuEscListener);
+      this._chromeMenuEscListener = null;
+    }
+
+    const freeze = document.getElementById('freeze-backdrop');
+    if (freeze) {
+      freeze.classList.add('hidden');
+      freeze.style.backgroundImage = '';
+    }
+    const tab = State.getActiveTab();
+    if (tab && !tab.isInternal && IpcClient.setViewVisible) {
+      IpcClient.setViewVisible(true);
+    }
+  },
+
   initChromeMenu() {
     const menuBtn = document.getElementById('chrome-menu-btn');
     const menuEl = document.getElementById('chrome-app-menu');
-    if (!menuBtn) return;
+    if (!menuBtn || !menuEl) return;
 
     menuBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      const rect = menuBtn.getBoundingClientRect();
-      if (IpcClient.showAppMenu) {
-        IpcClient.showAppMenu({
-          x: Math.round(rect.right),
-          y: Math.round(rect.bottom + 4)
-        });
-      }
-    });
-
-    document.addEventListener('click', (e) => {
-      if (!menuEl.contains(e.target) && e.target !== menuBtn) {
-        menuEl.classList.add('hidden');
-      }
+      this.toggleChromeMenu();
     });
 
     document.getElementById('menu-ai')?.addEventListener('click', () => {
-      menuEl.classList.add('hidden');
+      this.closeChromeMenu();
       if (typeof AiPanel !== 'undefined') AiPanel.toggle(true);
     });
 
     document.getElementById('menu-command-palette')?.addEventListener('click', () => {
-      menuEl.classList.add('hidden');
+      this.closeChromeMenu();
       if (typeof CommandPalette !== 'undefined') CommandPalette.toggle();
     });
 
     document.getElementById('menu-new-tab')?.addEventListener('click', () => {
-      menuEl.classList.add('hidden');
+      this.closeChromeMenu();
       IpcClient.createTab('aether://newtab');
     });
 
     document.getElementById('menu-new-window')?.addEventListener('click', () => {
-      menuEl.classList.add('hidden');
+      this.closeChromeMenu();
       IpcClient.newWindow(false);
     });
 
     document.getElementById('menu-new-incognito')?.addEventListener('click', () => {
-      menuEl.classList.add('hidden');
+      this.closeChromeMenu();
       IpcClient.newWindow(true);
     });
 
     document.getElementById('menu-bookmarks')?.addEventListener('click', () => {
-      menuEl.classList.add('hidden');
+      this.closeChromeMenu();
       IpcClient.createTab('aether://bookmarks');
     });
 
     document.getElementById('menu-history')?.addEventListener('click', () => {
-      menuEl.classList.add('hidden');
+      this.closeChromeMenu();
       IpcClient.createTab('aether://history');
     });
 
     document.getElementById('menu-downloads')?.addEventListener('click', () => {
-      menuEl.classList.add('hidden');
+      this.closeChromeMenu();
       IpcClient.createTab('aether://downloads');
     });
 
     document.getElementById('menu-find')?.addEventListener('click', () => {
-      menuEl.classList.add('hidden');
+      this.closeChromeMenu();
       this.toggleFindBar(true);
     });
 
     document.getElementById('menu-print')?.addEventListener('click', () => {
-      menuEl.classList.add('hidden');
+      this.closeChromeMenu();
       if (IpcClient.print) {
         IpcClient.print(State.activeTabId);
       } else if (IpcClient.api?.print) {
@@ -427,67 +509,67 @@ const App = {
     });
 
     document.getElementById('menu-capture')?.addEventListener('click', () => {
-      menuEl.classList.add('hidden');
+      this.closeChromeMenu();
       this.openWebCapture();
     });
 
     document.getElementById('menu-split')?.addEventListener('click', () => {
-      menuEl.classList.add('hidden');
+      this.closeChromeMenu();
       this.toggleSplitScreen();
     });
 
     document.getElementById('menu-reading-list')?.addEventListener('click', () => {
-      menuEl.classList.add('hidden');
+      this.closeChromeMenu();
       this.openReadingList();
     });
 
     document.getElementById('menu-passwords')?.addEventListener('click', () => {
-      menuEl.classList.add('hidden');
+      this.closeChromeMenu();
       this.openPasswordsVault();
     });
 
     document.getElementById('menu-task-manager')?.addEventListener('click', () => {
-      menuEl.classList.add('hidden');
+      this.closeChromeMenu();
       this.openTaskManager();
     });
 
     document.getElementById('menu-share')?.addEventListener('click', () => {
-      menuEl.classList.add('hidden');
+      this.closeChromeMenu();
       this.openShareSheet();
     });
 
     document.getElementById('menu-quick-notes')?.addEventListener('click', () => {
-      menuEl.classList.add('hidden');
+      this.closeChromeMenu();
       this.toggleQuickNotes();
     });
 
     document.getElementById('menu-eyedropper')?.addEventListener('click', () => {
-      menuEl.classList.add('hidden');
+      this.closeChromeMenu();
       this.openEyedropper();
     });
 
     document.getElementById('menu-diagnostics')?.addEventListener('click', () => {
-      menuEl.classList.add('hidden');
+      this.closeChromeMenu();
       this.openNetworkDiagnostics();
     });
 
     document.getElementById('menu-shortcuts')?.addEventListener('click', () => {
-      menuEl.classList.add('hidden');
+      this.closeChromeMenu();
       this.openKeyboardShortcuts();
     });
 
     document.getElementById('menu-clear-browsing-data')?.addEventListener('click', () => {
-      menuEl.classList.add('hidden');
+      this.closeChromeMenu();
       this.showClearBrowsingDataDialog();
     });
 
     document.getElementById('menu-settings')?.addEventListener('click', () => {
-      menuEl.classList.add('hidden');
+      this.closeChromeMenu();
       IpcClient.createTab('aether://settings');
     });
 
     document.getElementById('menu-exit')?.addEventListener('click', () => {
-      menuEl.classList.add('hidden');
+      this.closeChromeMenu();
       IpcClient.close();
     });
 
@@ -514,7 +596,7 @@ const App = {
     });
 
     document.getElementById('menu-zoom-full')?.addEventListener('click', () => {
-      menuEl.classList.add('hidden');
+      this.closeChromeMenu();
       IpcClient.toggleFullscreen();
     });
   },

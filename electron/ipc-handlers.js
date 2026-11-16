@@ -1,4 +1,4 @@
-const { ipcMain, dialog, BrowserWindow, app, session } = require('electron');
+const { ipcMain, dialog, BrowserWindow, app, session, nativeTheme } = require('electron');
 const windowManager = require('./window-manager');
 const storageManager = require('./storage-manager');
 const navigationController = require('./navigation-controller');
@@ -333,6 +333,9 @@ function registerIpcHandlers() {
   ipcMain.handle('settings:save', (event, updates) => {
     if (typeof updates !== 'object') return null;
     const newSettings = storageManager.saveSettings(updates);
+    if (updates.theme && nativeTheme) {
+      nativeTheme.themeSource = updates.theme === 'light' ? 'light' : (updates.theme === 'system' ? 'system' : 'dark');
+    }
     if (shieldsController && typeof shieldsController.updateSettings === 'function') {
       shieldsController.updateSettings(updates);
     }
