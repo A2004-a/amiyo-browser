@@ -212,6 +212,18 @@ const Omnibox = {
   closeVpnPopover() {
     if (!this.vpnPopoverEl) return;
     this.vpnPopoverEl.classList.add('hidden');
+    if (this.vpnLiveInterval) {
+      clearInterval(this.vpnLiveInterval);
+      this.vpnLiveInterval = null;
+    }
+    if (this._vpnCloseListener) {
+      document.removeEventListener('click', this._vpnCloseListener);
+      this._vpnCloseListener = null;
+    }
+    if (this._vpnEscListener) {
+      document.removeEventListener('keydown', this._vpnEscListener);
+      this._vpnEscListener = null;
+    }
     const freeze = document.getElementById('freeze-backdrop');
     if (freeze) {
       freeze.classList.add('hidden');
@@ -345,6 +357,10 @@ const Omnibox = {
       const multihopToggle = document.getElementById('vpn-multihop-toggle');
       const multihopDetails = document.getElementById('vpn-multihop-details');
       const exitSelect = document.getElementById('vpn-exit-select');
+      const entryTag = document.getElementById('vpn-entry-tag');
+      if (entryTag && status.location) {
+        entryTag.textContent = `${status.location.flag || '🌍'} ${status.location.name || 'Entry Node'}`;
+      }
       if (multihopToggle) multihopToggle.checked = !!status.multiHop?.enabled;
       if (multihopDetails) multihopDetails.classList.toggle('hidden', !status.multiHop?.enabled);
       if (exitSelect && status.multiHop?.exit) {
@@ -369,8 +385,14 @@ const Omnibox = {
 
       // Split Tunnel Mode
       const splitModeSelect = document.getElementById('vpn-split-mode-select');
+      const addInput = document.getElementById('vpn-new-bypass-input');
       if (splitModeSelect && status.splitTunnel?.mode) {
         splitModeSelect.value = status.splitTunnel.mode;
+        if (addInput) {
+          addInput.placeholder = (status.splitTunnel.mode === 'only_vpn')
+            ? 'e.g. streaming.com (VPN only)'
+            : 'e.g. bank.com (bypass VPN)';
+        }
       }
 
       if (killswitch) killswitch.checked = status.killSwitch !== false;
@@ -455,7 +477,16 @@ const Omnibox = {
     }
     if (rotateNowBtn) {
       rotateNowBtn.onclick = async () => {
-        await IpcClient.rotateVpnIpNow();
+        const ipVal = document.getElementById('vpn-ip-val');
+        if (ipVal) ipVal.textContent = 'Shuffling...';
+        rotateNowBtn.style.opacity = '0.6';
+        rotateNowBtn.disabled = true;
+        try {
+          await IpcClient.rotateVpnIpNow();
+        } finally {
+          rotateNowBtn.style.opacity = '1';
+          rotateNowBtn.disabled = false;
+        }
         await renderVpnUi();
       };
     }
@@ -495,20 +526,28 @@ const Omnibox = {
 
     // Quick Connect Hero Power Button
     const heroPowerBtn = document.getElementById('vpn-power-btn');
+    const triggerVpnToggle = async () => {
+      const powerLabel = document.getElementById('vpn-power-label');
+      const statusText = document.getElementById('vpn-status-text');
+      const isCurrentlyConnected = heroPowerBtn && heroPowerBtn.classList.contains('connected');
+      if (powerLabel) {
+        powerLabel.textContent = isCurrentlyConnected ? 'DISCONNECTING...' : 'CONNECTING...';
+      }
+      if (statusText) {
+        statusText.textContent = isCurrentlyConnected ? 'Closing tunnel...' : 'Securing tunnel...';
+        statusText.style.color = '#38BDF8';
+      }
+      const targetLoc = locSelect ? locSelect.value : null;
+      await IpcClient.toggleVpn(targetLoc);
+      await renderVpnUi();
+    };
+
     if (heroPowerBtn) {
-      heroPowerBtn.onclick = async () => {
-        const targetLoc = locSelect ? locSelect.value : null;
-        await IpcClient.toggleVpn(targetLoc);
-        await renderVpnUi();
-      };
+      heroPowerBtn.onclick = triggerVpnToggle;
     }
 
     if (masterToggle) {
-      masterToggle.onchange = async () => {
-        const targetLoc = locSelect ? locSelect.value : null;
-        await IpcClient.toggleVpn(targetLoc);
-        await renderVpnUi();
-      };
+      masterToggle.onchange = triggerVpnToggle;
     }
 
     if (locSelect) {
@@ -582,21 +621,47 @@ const Omnibox = {
 
     this.vpnPopoverEl.classList.remove('hidden');
 
+    // Live telemetry refresh interval while popover is open
+    if (this.vpnLiveInterval) clearInterval(this.vpnLiveInterval);
+    this.vpnLiveInterval = setInterval(async () => {
+      try {
+        if (!this.vpnPopoverEl || this.vpnPopoverEl.classList.contains('hidden')) {
+          if (this.vpnLiveInterval) {
+            clearInterval(this.vpnLiveInterval);
+            this.vpnLiveInterval = null;
+          }
+          return;
+        }
+        const st = await IpcClient.getVpnStatus();
+        if (!st) return;
+        const trafficVal = document.getElementById('vpn-traffic-val');
+        const latencyVal = document.getElementById('vpn-latency-val');
+        const ipVal = document.getElementById('vpn-ip-val');
+        if (trafficVal && st.stats?.bytesFormatted) {
+          trafficVal.textContent = st.stats.bytesFormatted;
+        }
+        if (latencyVal && st.connected) {
+          latencyVal.textContent = `${st.latency} ms`;
+        }
+        if (ipVal && st.connected) {
+          ipVal.textContent = st.virtualIp;
+        }
+      } catch (e) {}
+    }, 1500);
+
     // Close on click outside or Escape key
     const escListener = (e) => {
       if (e.key === 'Escape') {
         this.closeVpnPopover();
-        document.removeEventListener('keydown', escListener);
-        document.removeEventListener('click', closeListener);
       }
     };
     const closeListener = (e) => {
       if (!this.vpnPopoverEl.contains(e.target) && !this.vpnBtnEl.contains(e.target)) {
         this.closeVpnPopover();
-        document.removeEventListener('click', closeListener);
-        document.removeEventListener('keydown', escListener);
       }
     };
+    this._vpnEscListener = escListener;
+    this._vpnCloseListener = closeListener;
     setTimeout(() => {
       document.addEventListener('click', closeListener);
       document.addEventListener('keydown', escListener);

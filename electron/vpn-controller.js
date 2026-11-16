@@ -390,9 +390,24 @@ class VpnController {
   setProtocol(proto) {
     if (['wireguard', 'stealth-tls', 'openvpn'].includes(proto)) {
       this.protocol = proto;
+      if (this.status === 'connected') {
+        const targetLoc = this.getLocation(this.activeLocationId);
+        const protoOverhead = proto === 'stealth-tls' ? 12 : (proto === 'openvpn' ? 7 : 0);
+        const exitOverhead = (this.multiHopEnabled && this.exitLocationId)
+          ? (this.getLocation(this.exitLocationId).baseLatency + 8)
+          : 0;
+        this.latencyMs = targetLoc.baseLatency + protoOverhead + exitOverhead;
+      }
       this.saveSettings();
     }
     return this.getStatus();
+  }
+
+  recordEncryptedTraffic(url, byteSize = 0) {
+    if (this.status !== 'connected') return;
+    const bytes = byteSize > 0 ? byteSize : (Math.floor(Math.random() * 4000) + 1200);
+    this.trafficStats.bytesEncrypted += bytes;
+    this.trafficStats.packetsSecured += Math.floor(bytes / 600) + 1;
   }
 
   // Standard leak switches

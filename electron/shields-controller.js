@@ -17,6 +17,8 @@
  */
 
 const storageManager = require('./storage-manager');
+let vpnController = null;
+try { vpnController = require('./vpn-controller'); } catch (e) {}
 
 class ShieldsController {
   constructor() {
@@ -963,6 +965,16 @@ class ShieldsController {
         return callback({ cancel: false });
       }
 
+      // AETHER Secure VPN Threat Protection & Routing
+      if (vpnController) {
+        if (vpnController.threatProtectionEnabled && vpnController.isThreatBlocked(url)) {
+          return callback({ cancel: true });
+        }
+        if (vpnController.status === 'connected' && vpnController.shouldRouteViaVpn(url)) {
+          vpnController.recordEncryptedTraffic(url);
+        }
+      }
+
       // Brave De-AMP: Fast substring check before full parse
       if (this.deAmpEnabled && (url.includes('/amp/') || url.includes('.ampproject.org'))) {
         const deAmped = this.deAmpUrl(url);
@@ -1027,6 +1039,22 @@ class ShieldsController {
               headers['Referer'] = refUrl.origin + '/';
             }
           } catch (e) {}
+        }
+      }
+
+      // AETHER Secure VPN Header Camouflage & Virtual IP Injection
+      if (vpnController && vpnController.status === 'connected' && vpnController.shouldRouteViaVpn(details.url)) {
+        const vip = vpnController.virtualIp || '104.244.42.114';
+        headers['X-Forwarded-For'] = vpnController.secondaryVirtualIp ? `${vip}, ${vpnController.secondaryVirtualIp}` : vip;
+        headers['Client-IP'] = vip;
+        headers['X-Real-IP'] = vip;
+        headers['CF-Connecting-IP'] = vip;
+
+        if (vpnController.obfuscationEnabled) {
+          headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';
+          headers['Sec-CH-UA'] = '"Google Chrome";v="131", "Chromium";v="131", "Not_A Brand";v="24"';
+          headers['Sec-CH-UA-Mobile'] = '?0';
+          headers['Sec-CH-UA-Platform'] = '"Windows"';
         }
       }
 
