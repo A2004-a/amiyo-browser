@@ -89,7 +89,10 @@ class StorageManager {
       readingList: path.join(this.dataDir, 'reading-list.json'),
       passwords: path.join(this.dataDir, 'passwords.json'),
       customEngines: path.join(this.dataDir, 'custom-engines.json'),
-      hostZoom: path.join(this.dataDir, 'host-zoom.json')
+      hostZoom: path.join(this.dataDir, 'host-zoom.json'),
+      customShieldRules: path.join(this.dataDir, 'custom-rules.json'),
+      sessionBackup: path.join(this.dataDir, 'session-backup.json'),
+      shieldsStats: path.join(this.dataDir, 'shields-stats.json')
     };
   }
 
@@ -197,6 +200,16 @@ class StorageManager {
       { name: 'Reddit', keyword: 'r', searchUrl: 'https://www.reddit.com/search/?q=%s' }
     ]);
     this.cache.hostZoom = this.readJson(this.files.hostZoom, {});
+    this.cache.customShieldRules = this.readJson(this.files.customShieldRules, []);
+    this.cache.sessionBackup = this.readJson(this.files.sessionBackup, null);
+    this.cache.shieldsStats = this.readJson(this.files.shieldsStats, {
+      totalBlocked: 0,
+      adsBlocked: 0,
+      trackersBlocked: 0,
+      bandwidthSavedKB: 0,
+      timeSavedSec: 0,
+      co2SavedGrams: 0
+    });
 
     // Save defaults if files don't exist
     this.saveSettings(this.cache.settings);
@@ -586,6 +599,61 @@ class StorageManager {
       importedCount: count,
       count
     };
+  }
+
+  // --- Custom Shield Rules ---
+  getCustomShieldRules() {
+    return [...(this.cache.customShieldRules || [])];
+  }
+
+  saveCustomShieldRules(rules) {
+    this.cache.customShieldRules = Array.isArray(rules) ? rules : [];
+    this.writeJson(this.files.customShieldRules, this.cache.customShieldRules);
+    return this.cache.customShieldRules;
+  }
+
+  addCustomShieldRule(rule) {
+    if (!rule || !rule.pattern) return null;
+    const rules = this.cache.customShieldRules || [];
+    const item = {
+      id: rule.id || `rule_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+      pattern: rule.pattern.trim(),
+      action: rule.action || 'block',
+      enabled: rule.enabled !== false,
+      createdAt: Date.now()
+    };
+    rules.push(item);
+    this.saveCustomShieldRules(rules);
+    return item;
+  }
+
+  deleteCustomShieldRule(idOrPattern) {
+    const rules = this.cache.customShieldRules || [];
+    const filtered = rules.filter(r => r.id !== idOrPattern && r.pattern !== idOrPattern);
+    this.saveCustomShieldRules(filtered);
+    return true;
+  }
+
+  // --- Session Crash Backup ---
+  getSessionBackup() {
+    return this.cache.sessionBackup;
+  }
+
+  saveSessionBackup(data) {
+    this.cache.sessionBackup = data;
+    this.writeJson(this.files.sessionBackup, data);
+    return true;
+  }
+
+  // --- Shields Cumulative Statistics ---
+  getShieldsCumulativeStats() {
+    return { ...(this.cache.shieldsStats || {}) };
+  }
+
+  saveShieldsCumulativeStats(stats) {
+    this.cache.shieldsStats = { ...(this.cache.shieldsStats || {}), ...stats };
+    this.writeJson(this.files.shieldsStats, this.cache.shieldsStats);
+    return this.cache.shieldsStats;
   }
 }
 

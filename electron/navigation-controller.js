@@ -137,6 +137,16 @@ class NavigationController {
       return trimmed;
     }
 
+    // Brave-style IPFS & IPNS Decentralized Web Gateways
+    if (trimmed.startsWith('ipfs://')) {
+      const cid = trimmed.substring('ipfs://'.length).replace(/^\/+/, '');
+      return `https://dweb.link/ipfs/${cid}`;
+    }
+    if (trimmed.startsWith('ipns://')) {
+      const name = trimmed.substring('ipns://'.length).replace(/^\/+/, '');
+      return `https://dweb.link/ipns/${name}`;
+    }
+
     // Check for DuckDuckGo & Chrome Search Bangs
     const bangResolved = this.resolveBang(trimmed);
     if (bangResolved) {

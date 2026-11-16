@@ -266,6 +266,10 @@ const Omnibox = {
         if (timeEl) {
           timeEl.textContent = `${(count * 0.055).toFixed(1)} s`;
         }
+        const co2El = document.getElementById('shields-co2-saved');
+        if (co2El) {
+          co2El.textContent = `${(count * 0.025).toFixed(2)} g`;
+        }
         if (masterToggle) masterToggle.checked = status?.enabled !== false;
         
         const isWhitelisted = status?.whitelist?.includes(hostname);

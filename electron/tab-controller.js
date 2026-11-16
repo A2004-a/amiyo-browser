@@ -25,6 +25,31 @@ class TabController {
     this._memorySaverInterval = setInterval(() => {
       this.checkAndSuspendInactiveTabs();
     }, 60000);
+
+    // Auto-Save Session Crash Recovery Daemon
+    this._sessionBackupInterval = setInterval(() => {
+      this.backupSessionState();
+    }, 30000);
+  }
+
+  backupSessionState() {
+    if (this.isPrivate) return;
+    try {
+      const state = {
+        timestamp: Date.now(),
+        activeTabId: this.activeTabId,
+        tabs: this.tabs.map(t => ({
+          url: t.url,
+          title: t.title,
+          isPinned: t.isPinned,
+          groupId: t.groupId,
+          zoomFactor: t.zoomFactor
+        }))
+      };
+      if (storageManager.saveSessionBackup) {
+        storageManager.saveSessionBackup(state);
+      }
+    } catch (e) {}
   }
 
   checkAndSuspendInactiveTabs() {
@@ -121,6 +146,10 @@ class TabController {
       isSuspended: !!t.isSuspended,
       lastAccessed: t.lastAccessed || Date.now()
     }));
+  }
+
+  getAllTabs() {
+    return this.tabs || [];
   }
 
   getTab(id) {
@@ -874,6 +903,11 @@ class TabController {
       } catch (e) {}
     }
 
+    // High-Performance V8 Memory Reclaim Engine
+    if (typeof global.gc === 'function') {
+      try { global.gc(); } catch (e) {}
+    }
+
     // If no tabs left, open a new tab
     if (this.tabs.length === 0) {
       this.createTab('aether://newtab');
@@ -1069,6 +1103,10 @@ class TabController {
     const targetId = tabId || this.activeTabId;
     const toClose = this.tabs.filter(t => t.id !== targetId && !t.isPinned);
     toClose.forEach(t => this.closeTab(t.id));
+  }
+
+  closeOthers(tabId) {
+    return this.closeOtherTabs(tabId);
   }
 
   closeTabsToRight(tabId) {

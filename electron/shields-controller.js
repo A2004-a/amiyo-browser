@@ -26,15 +26,41 @@ class ShieldsController {
     this.antiFingerprinting = true;
     this.deAmpEnabled = true;
     this.blockCookieBanners = true;
+    this.blockSocialTrackers = true;
+    this.blockCryptoMiners = true;
+    this.blockCnameCloaking = true;
 
     this.stats = {
       totalBlocked: 0,
       adsBlocked: 0,
       trackersBlocked: 0,
+      socialBlocked: 0,
+      minersBlocked: 0,
       httpsUpgrades: 0,
       paramsStripped: 0,
       deAmpCount: 0
     };
+
+    // Social Tracking Networks
+    this.socialDomains = new Set([
+      'connect.facebook.net', 'facebook.com/tr', 'platform.twitter.com',
+      'syndication.twitter.com', 'analytics.twitter.com', 'platform.linkedin.com',
+      'snap.licdn.com', 'analytics.tiktok.com', 'assets.pinterest.com',
+      'ct.pinterest.com', 'accounts.google.com/gsi', 'apis.google.com/js/platform.js'
+    ]);
+
+    // Crypto Mining Networks
+    this.cryptoMinerDomains = new Set([
+      'coinhive.com', 'coin-hive.com', 'jsecoin.com', 'cryptoloot.pro',
+      'coinimp.com', 'webminepool.com', 'minr.pw', 'authedmine.com',
+      'monerominer.rocks', 'crypto-loot.com'
+    ]);
+
+    // CNAME Cloaking Tracking Subdomain Prefixes
+    this.cnameTrackingPrefixes = /^(telemetry|analytics|metrics|track|tr|px|stats|event|beacon|collector|log)[\.-]/i;
+
+    // Custom Rules
+    this.customRules = storageManager.getCustomShieldRules ? storageManager.getCustomShieldRules() : [];
 
     // Per-tab blocked request audit: tabId -> { ads: number, trackers: number, total: number, blockedUrls: [] }
     this.tabStats = new Map();
@@ -300,6 +326,47 @@ class ShieldsController {
   _computeUrlBlocked(url) {
     try {
       const parsed = new URL(url);
+
+      // Check Custom Shield Rules first (User overrides & ABP / EasyList patterns)
+      if (this.customRules && this.customRules.length > 0) {
+        for (const rule of this.customRules) {
+          if (!rule.enabled) continue;
+          const cleanPattern = (rule.pattern || '').replace(/^\|\|/, '').replace(/\^$/, '');
+          if (url.includes(rule.pattern) || url.includes(cleanPattern) || parsed.hostname.includes(cleanPattern)) {
+            if (rule.action === 'allow') return { blocked: false };
+            return { blocked: true, type: 'custom-rule' };
+          }
+        }
+      }
+
+      // Check Cryptomining
+      if (this.blockCryptoMiners) {
+        for (const miner of this.cryptoMinerDomains) {
+          if (parsed.hostname === miner || parsed.hostname.endsWith('.' + miner)) {
+            return { blocked: true, type: 'cryptominer' };
+          }
+        }
+      }
+
+      // Check Social Trackers
+      if (this.blockSocialTrackers) {
+        for (const social of this.socialDomains) {
+          if (parsed.hostname === social || parsed.hostname.endsWith('.' + social) || (parsed.hostname + parsed.pathname).includes(social)) {
+            return { blocked: true, type: 'social' };
+          }
+        }
+      }
+
+      // Check CNAME Cloaked Tracker heuristic
+      if (this.blockCnameCloaking) {
+        if (this.cnameTrackingPrefixes.test(parsed.hostname)) {
+          const p = parsed.pathname.toLowerCase();
+          if (p.includes('/v1/t') || p.includes('/track') || p.includes('/event') || p.includes('/pixel') || p.includes('/collect') || p.includes('/beacon') || p.endsWith('.js')) {
+            return { blocked: true, type: 'cname-cloaked' };
+          }
+        }
+      }
+
       const hostCheck = this.isDomainBlocked(parsed.hostname);
       if (hostCheck.blocked) return hostCheck;
 
@@ -348,6 +415,8 @@ class ShieldsController {
     if (result.blocked) {
       this.stats.totalBlocked++;
       if (result.type === 'ad') this.stats.adsBlocked++;
+      else if (result.type === 'social') this.stats.socialBlocked = (this.stats.socialBlocked || 0) + 1;
+      else if (result.type === 'cryptominer') this.stats.minersBlocked = (this.stats.minersBlocked || 0) + 1;
       else this.stats.trackersBlocked++;
 
       if (tabId) {
@@ -391,16 +460,55 @@ class ShieldsController {
   }
 
   getStats() {
+    const total = this.stats.totalBlocked || 0;
     return {
       enabled: this.enabled,
       mode: this.mode,
       stripTrackingParams: this.stripTrackingParams,
       blockCookieBanners: this.blockCookieBanners,
       deAmpEnabled: this.deAmpEnabled,
+      blockSocialTrackers: this.blockSocialTrackers,
+      blockCryptoMiners: this.blockCryptoMiners,
+      blockCnameCloaking: this.blockCnameCloaking,
+      bandwidthSavedMB: parseFloat(((total * 128) / 1024).toFixed(1)),
+      timeSavedSeconds: parseFloat((total * 0.055).toFixed(1)),
+      co2SavedGrams: parseFloat((total * 0.025).toFixed(2)),
+      customRulesCount: (this.customRules || []).length,
       ...this.stats,
       whitelistedCount: this.whitelist.size,
       whitelist: Array.from(this.whitelist)
     };
+  }
+
+  addCustomRule(pattern, action = 'block') {
+    if (!pattern) return null;
+    const rule = storageManager.addCustomShieldRule ? storageManager.addCustomShieldRule({ pattern, action }) : { id: 'r1', pattern, action };
+    this.customRules = storageManager.getCustomShieldRules ? storageManager.getCustomShieldRules() : [];
+    this.decisionCache.clear();
+    return rule;
+  }
+
+  removeCustomRule(id) {
+    const res = storageManager.deleteCustomShieldRule ? storageManager.deleteCustomShieldRule(id) : true;
+    this.customRules = storageManager.getCustomShieldRules ? storageManager.getCustomShieldRules() : [];
+    this.decisionCache.clear();
+    return res;
+  }
+
+  getCustomRules() {
+    return storageManager.getCustomShieldRules ? storageManager.getCustomShieldRules() : [];
+  }
+
+  toggleSocialTrackers(enable) {
+    this.blockSocialTrackers = typeof enable === 'boolean' ? enable : !this.blockSocialTrackers;
+    this.decisionCache.clear();
+    return this.blockSocialTrackers;
+  }
+
+  toggleCryptoMiners(enable) {
+    this.blockCryptoMiners = typeof enable === 'boolean' ? enable : !this.blockCryptoMiners;
+    this.decisionCache.clear();
+    return this.blockCryptoMiners;
   }
 
   toggle(enabled) {
@@ -412,9 +520,14 @@ class ShieldsController {
 
   setMode(mode) {
     this.mode = mode === 'aggressive' ? 'aggressive' : 'standard';
+    this.shieldLevel = this.mode;
     this.decisionCache.clear();
     storageManager.saveSettings({ shieldsMode: this.mode });
     return this.mode;
+  }
+
+  setShieldLevel(level) {
+    return this.setMode(level);
   }
 
   updateSettings(updates) {
@@ -783,6 +896,39 @@ class ShieldsController {
             Object.defineProperty(navigator, 'deviceMemory', { get: () => 8, configurable: true });
           } catch (e) {}
 
+          // 6e. Battery API Fingerprint Scrambler
+          if (navigator.getBattery) {
+            navigator.getBattery = function() {
+              return Promise.resolve({
+                charging: true,
+                chargingTime: 0,
+                dischargingTime: Infinity,
+                level: 1.0,
+                addEventListener: function() {},
+                removeEventListener: function() {}
+              });
+            };
+          }
+
+          // 6f. Canvas Font Measurement Farbling (Micro-jitter against font enumeration)
+          if (CanvasRenderingContext2D.prototype.measureText) {
+            const origMeasure = CanvasRenderingContext2D.prototype.measureText;
+            CanvasRenderingContext2D.prototype.measureText = function(...args) {
+              const metrics = origMeasure.apply(this, args);
+              if (metrics && typeof metrics.width === 'number') {
+                return new Proxy(metrics, {
+                  get(target, prop) {
+                    if (prop === 'width') {
+                      return target.width + (sessionNoise * 0.1);
+                    }
+                    return target[prop];
+                  }
+                });
+              }
+              return metrics;
+            };
+          }
+
         } catch (err) {}
       })();
     `;
@@ -790,8 +936,19 @@ class ShieldsController {
     return this._cachedScriptlet;
   }
 
+  getScriptlet() {
+    return this.getInPageScriptlet();
+  }
+
   attachToSession(sessionInstance) {
     if (!sessionInstance || !sessionInstance.webRequest) return;
+
+    // WebRTC Local IP Leak Protection
+    try {
+      if (typeof sessionInstance.setWebRTCIPHandlingPolicy === 'function') {
+        sessionInstance.setWebRTCIPHandlingPolicy('default_public_interface_only');
+      }
+    } catch (e) {}
 
     // 1. High-Performance onBeforeRequest: Block ad & tracking requests + HTTPS Upgrades + Brave De-AMP + Tracking Query Stripping
     sessionInstance.webRequest.onBeforeRequest({ urls: ['http://*/*', 'https://*/*'] }, (details, callback) => {
@@ -874,6 +1031,24 @@ class ShieldsController {
       }
 
       callback({ requestHeaders: headers });
+    });
+
+    // 3. Strict Cross-Origin Cookie Isolation & Third-Party Tracker Partitioning (Aggressive Mode)
+    sessionInstance.webRequest.onHeadersReceived((details, callback) => {
+      const responseHeaders = { ...details.responseHeaders };
+      if (this.enabled && this.mode === 'aggressive') {
+        if (details.referrer && details.url) {
+          try {
+            const refOrigin = new URL(details.referrer).origin;
+            const resOrigin = new URL(details.url).origin;
+            if (refOrigin !== resOrigin) {
+              delete responseHeaders['set-cookie'];
+              delete responseHeaders['Set-Cookie'];
+            }
+          } catch (e) {}
+        }
+      }
+      callback({ responseHeaders });
     });
   }
 }

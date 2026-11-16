@@ -27,6 +27,9 @@ const App = {
       if (typeof AiPanel !== 'undefined') {
         try { AiPanel.init(); } catch (e) { console.warn('AiPanel.init error:', e); }
       }
+      if (typeof CommandPalette !== 'undefined') {
+        try { CommandPalette.init(); } catch (e) { console.warn('CommandPalette.init error:', e); }
+      }
       try { KeyboardShortcuts.init(); } catch (e) { console.warn('KeyboardShortcuts.init error:', e); }
       try { this.initFindBar(); } catch (e) { console.warn('initFindBar error:', e); }
       try { this.initChromeMenu(); } catch (e) { console.warn('initChromeMenu error:', e); }
@@ -317,6 +320,11 @@ const App = {
     document.getElementById('menu-ai')?.addEventListener('click', () => {
       menuEl.classList.add('hidden');
       if (typeof AiPanel !== 'undefined') AiPanel.toggle(true);
+    });
+
+    document.getElementById('menu-command-palette')?.addEventListener('click', () => {
+      menuEl.classList.add('hidden');
+      if (typeof CommandPalette !== 'undefined') CommandPalette.toggle();
     });
 
     document.getElementById('menu-new-tab')?.addEventListener('click', () => {

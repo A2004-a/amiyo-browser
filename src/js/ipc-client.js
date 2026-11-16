@@ -104,6 +104,19 @@ const IpcClient = {
   setShieldsMode(mode) { return this.api.shields?.setMode ? this.api.shields.setMode(mode) : Promise.resolve(mode); },
   getShieldsTabStats(tabId) { return this.api.shields ? this.api.shields.getTabStats(tabId) : Promise.resolve({ total: 0 }); },
   toggleShieldsWhitelist(domain, allow) { return this.api.shields ? this.api.shields.toggleWhitelist(domain, allow) : Promise.resolve(false); },
+  getCustomShieldRules() { return this.api.shields?.getCustomRules ? this.api.shields.getCustomRules() : Promise.resolve([]); },
+  addCustomShieldRule(pattern, action) { return this.api.shields?.addCustomRule ? this.api.shields.addCustomRule(pattern, action) : Promise.resolve(null); },
+  deleteCustomShieldRule(id) { return this.api.shields?.deleteCustomRule ? this.api.shields.deleteCustomRule(id) : Promise.resolve(true); },
+  toggleSocialShield(enable) { return this.api.shields?.toggleSocial ? this.api.shields.toggleSocial(enable) : Promise.resolve(true); },
+  toggleMinerShield(enable) { return this.api.shields?.toggleMiners ? this.api.shields.toggleMiners(enable) : Promise.resolve(true); },
+
+  // Session Recovery
+  getSessionBackup() { return this.api.sessionRecovery?.getBackup ? this.api.sessionRecovery.getBackup() : Promise.resolve(null); },
+  restoreSessionBackup() { return this.api.sessionRecovery?.restoreBackup ? this.api.sessionRecovery.restoreBackup() : Promise.resolve(false); },
+
+  // Global Media Controls
+  getActiveMedia() { return this.api.media?.getActive ? this.api.media.getActive() : Promise.resolve([]); },
+  toggleAllAudio(mute) { return this.api.media?.toggleAllAudio ? this.api.media.toggleAllAudio(mute) : Promise.resolve(true); },
 
   // Tab Suspension & Memory Saver
   suspendTab(tabId) { return this.api.tabs ? this.api.tabs.suspend(tabId) : Promise.resolve(false); },

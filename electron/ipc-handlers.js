@@ -458,6 +458,26 @@ function registerIpcHandlers() {
     return shieldsController.setMode(mode);
   });
 
+  ipcMain.handle('shields:get-custom-rules', () => {
+    return shieldsController.getCustomRules();
+  });
+
+  ipcMain.handle('shields:add-custom-rule', (event, pattern, action) => {
+    return shieldsController.addCustomRule(pattern, action);
+  });
+
+  ipcMain.handle('shields:delete-custom-rule', (event, id) => {
+    return shieldsController.removeCustomRule(id);
+  });
+
+  ipcMain.handle('shields:toggle-social', (event, enable) => {
+    return shieldsController.toggleSocialTrackers(enable);
+  });
+
+  ipcMain.handle('shields:toggle-miners', (event, enable) => {
+    return shieldsController.toggleCryptoMiners(enable);
+  });
+
   // --- Tab Suspension / Memory Saver ---
   ipcMain.handle('tabs:suspend', (event, tabId) => {
     const tabCtrl = getTabControllerForSender(event);
@@ -729,6 +749,39 @@ function registerIpcHandlers() {
         resolve({ online: false, error: 'Timed out', latencyMs: -1 });
       });
     });
+  });
+  // --- Session Crash Recovery ---
+  ipcMain.handle('session:get-backup', () => {
+    return storageManager.getSessionBackup();
+  });
+
+  ipcMain.handle('session:restore-backup', (event) => {
+    const tabCtrl = getTabControllerForSender(event);
+    const backup = storageManager.getSessionBackup();
+    if (!tabCtrl || !backup || !Array.isArray(backup.tabs) || backup.tabs.length === 0) {
+      return false;
+    }
+    backup.tabs.forEach((t, i) => {
+      tabCtrl.createTab(t.url, { active: i === 0, isPinned: t.isPinned });
+    });
+    return true;
+  });
+
+  // --- Global Media Control ---
+  ipcMain.handle('media:get-active', (event) => {
+    const tabCtrl = getTabControllerForSender(event);
+    if (!tabCtrl) return [];
+    return tabCtrl.tabs
+      .filter(t => t.isPlayingAudio)
+      .map(t => ({ id: t.id, title: t.title, isMuted: t.isMuted }));
+  });
+
+  ipcMain.handle('media:toggle-all-audio', (event, mute) => {
+    const tabCtrl = getTabControllerForSender(event);
+    if (!tabCtrl) return false;
+    const playingTabs = tabCtrl.tabs.filter(t => t.isPlayingAudio);
+    playingTabs.forEach(t => tabCtrl.muteTab(t.id, mute));
+    return true;
   });
 }
 

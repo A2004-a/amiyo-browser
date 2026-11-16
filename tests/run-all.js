@@ -11,6 +11,7 @@ const readerTests = require('./reader-mode.test');
 const featureTests = require('./browser-features.test');
 const incognitoTests = require('./incognito.test');
 const superFeatureTests = require('./browser-super-features.test');
+const aetherShieldSuperTests = require('./aether-shield-and-super-features.test');
 
 console.log('========================================');
 console.log('       AETHER Browser Test Suite       ');
@@ -30,9 +31,10 @@ try {
   featureTests.run();
   incognitoTests.run();
   superFeatureTests.run();
+  aetherShieldSuperTests.run();
 
   console.log('\n========================================');
-  console.log('  ALL UNIT TEST SUITES PASSED (13/13)!  ');
+  console.log('  ALL UNIT TEST SUITES PASSED (14/14)!  ');
   console.log('========================================');
 } catch (err) {
   console.error('\n❌ Test failure:', err);

@@ -215,7 +215,24 @@ const api = {
     toggle: (enabled) => ipcRenderer.invoke('shields:toggle', enabled),
     getTabStats: (tabId) => ipcRenderer.invoke('shields:get-tab-stats', tabId),
     toggleWhitelist: (domain, allow) => ipcRenderer.invoke('shields:toggle-whitelist', domain, allow),
-    setMode: (mode) => ipcRenderer.invoke('shields:set-mode', mode)
+    setMode: (mode) => ipcRenderer.invoke('shields:set-mode', mode),
+    getCustomRules: () => ipcRenderer.invoke('shields:get-custom-rules'),
+    addCustomRule: (pattern, action) => ipcRenderer.invoke('shields:add-custom-rule', pattern, action),
+    deleteCustomRule: (id) => ipcRenderer.invoke('shields:delete-custom-rule', id),
+    toggleSocial: (enable) => ipcRenderer.invoke('shields:toggle-social', enable),
+    toggleMiners: (enable) => ipcRenderer.invoke('shields:toggle-miners', enable)
+  },
+
+  // --- Session Crash Recovery ---
+  sessionRecovery: {
+    getBackup: () => ipcRenderer.invoke('session:get-backup'),
+    restoreBackup: () => ipcRenderer.invoke('session:restore-backup')
+  },
+
+  // --- Global Media Control ---
+  media: {
+    getActive: () => ipcRenderer.invoke('media:get-active'),
+    toggleAllAudio: (mute) => ipcRenderer.invoke('media:toggle-all-audio', mute)
   },
 
   // --- Reader Mode ---
