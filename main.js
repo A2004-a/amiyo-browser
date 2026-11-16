@@ -60,8 +60,7 @@ if (typeof electron === 'string') {
   child.on('exit', (code) => {
     process.exit(code || 0);
   });
-  return;
-}
+} else {
 
 const { app, BrowserWindow, session, nativeTheme } = electron;
 process.noDeprecation = true;
@@ -186,3 +185,4 @@ app.on('window-all-closed', () => {
 process.on('unhandledRejection', (reason, promise) => {
   console.error('Unhandled Rejection at:', promise, 'reason:', reason);
 });
+}
