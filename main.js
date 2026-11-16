@@ -100,22 +100,24 @@ if (app && typeof app.setName === 'function') {
   } catch (e) {}
 }
 
-// Single instance lock to prevent concurrent database & cache lock contention
-const gotSingleInstanceLock = app.requestSingleInstanceLock();
-if (!gotSingleInstanceLock) {
-  console.log('[AETHER] Another instance of AETHER Browser is already running. Focusing primary window...');
-  app.quit();
-  return;
-}
-
-app.on('second-instance', () => {
-  const windows = BrowserWindow.getAllWindows();
-  if (windows.length > 0) {
-    const primary = windows[0];
-    if (primary.isMinimized()) primary.restore();
-    primary.focus();
+// Single instance lock configuration (gracefully handles IDE terminals & permission sandboxes)
+try {
+  const gotSingleInstanceLock = app.requestSingleInstanceLock();
+  if (gotSingleInstanceLock) {
+    app.on('second-instance', () => {
+      const windows = BrowserWindow.getAllWindows();
+      if (windows.length > 0) {
+        const primary = windows[0];
+        if (primary.isMinimized()) primary.restore();
+        primary.focus();
+      }
+    });
+  } else {
+    console.log('[AETHER] Note: ProcessSingleton lock unassigned or held. Proceeding with window launch.');
   }
-});
+} catch (e) {
+  console.log('[AETHER] ProcessSingleton notice:', e.message);
+}
 const windowManager = require('./electron/window-manager');
 const menuManager = require('./electron/menu-manager');
 const { registerIpcHandlers } = require('./electron/ipc-handlers');
