@@ -41,6 +41,14 @@ function registerIpcHandlers() {
     }
   });
 
+  ipcMain.handle('window:snap', (event, layout) => {
+    const win = BrowserWindow.fromWebContents(event.sender);
+    if (win) {
+      return windowManager.snapWindow(win, layout);
+    }
+    return null;
+  });
+
   ipcMain.handle('window:close', (event) => {
     const win = BrowserWindow.fromWebContents(event.sender);
     if (win) win.close();

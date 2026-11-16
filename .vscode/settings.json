@@ -1,5 +1,14 @@
 {
   "debug.javascript.autoAttachFilter": "disabled",
+  "java.jdt.ls.java.home": "C:\\tools\\jdk-21.0.13+9",
+  "gradle.java.home": "C:\\tools\\jdk-21.0.13+9",
+  "java.configuration.runtimes": [
+    {
+      "name": "JavaSE-21",
+      "path": "C:\\tools\\jdk-21.0.13+9",
+      "default": true
+    }
+  ],
   "java.configuration.updateBuildConfiguration": "disabled",
   "java.configuration.checkProjectSettingsExclusion": false,
   "java.errors.incompleteClasspath.severity": "ignore",

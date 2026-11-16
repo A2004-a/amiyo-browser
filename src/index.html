@@ -52,12 +52,46 @@
           <button class="window-btn" id="window-min-btn" title="Minimize">
             <svg class="icon" viewBox="0 0 24 24"><path d="M19 13H5v-2h14v2z"/></svg>
           </button>
-          <button class="window-btn" id="window-max-btn" title="Maximize">
+          <button class="window-btn" id="window-max-btn" title="Maximize / Snap Layouts">
             <svg class="icon" viewBox="0 0 24 24"><path d="M4 4h16v16H4V4zm2 2v12h12V6H6z"/></svg>
           </button>
           <button class="window-btn close-btn" id="window-close-btn" title="Close">
             <svg class="icon" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
           </button>
+        </div>
+
+        <!-- Windows 11 Snap Layouts Flyout Menu -->
+        <div id="snap-layouts-flyout" class="snap-layouts-flyout hidden">
+          <div class="snap-layout-card card-two-equal" title="Split Screen 50/50">
+            <div class="snap-zone snap-left-half" data-snap="left-half" title="Snap to Left Half"></div>
+            <div class="snap-zone snap-right-half" data-snap="right-half" title="Snap to Right Half"></div>
+          </div>
+          <div class="snap-layout-card card-two-unequal" title="Priority Split 70/30">
+            <div class="snap-zone snap-left-priority" data-snap="left-two-thirds" title="Snap to Left Two-Thirds"></div>
+            <div class="snap-zone snap-right-narrow" data-snap="right-one-third" title="Snap to Right One-Third"></div>
+          </div>
+          <div class="snap-layout-card card-three-pane" title="Three Pane Split">
+            <div class="snap-zone snap-pane-left" data-snap="left-half" title="Snap to Left Half"></div>
+            <div class="snap-zone-col">
+              <div class="snap-zone snap-pane-top-right" data-snap="right-top-quarter" title="Snap to Top Right Quarter"></div>
+              <div class="snap-zone snap-pane-bottom-right" data-snap="right-bottom-quarter" title="Snap to Bottom Right Quarter"></div>
+            </div>
+          </div>
+          <div class="snap-layout-card card-three-equal" title="Three Columns 33/33/33">
+            <div class="snap-zone snap-col-1" data-snap="left-third" title="Snap to Left Third"></div>
+            <div class="snap-zone snap-col-2" data-snap="center-third" title="Snap to Center Third"></div>
+            <div class="snap-zone snap-col-3" data-snap="right-third" title="Snap to Right Third"></div>
+          </div>
+          <div class="snap-layout-card card-two-horizontal" title="Horizontal Split 50/50">
+            <div class="snap-zone snap-top-half" data-snap="top-half" title="Snap to Top Half"></div>
+            <div class="snap-zone snap-bottom-half" data-snap="bottom-half" title="Snap to Bottom Half"></div>
+          </div>
+          <div class="snap-layout-card card-four-quadrants" title="Four Quadrants 25/25/25/25">
+            <div class="snap-zone snap-quad-tl" data-snap="top-left" title="Snap to Top-Left"></div>
+            <div class="snap-zone snap-quad-tr" data-snap="top-right" title="Snap to Top-Right"></div>
+            <div class="snap-zone snap-quad-bl" data-snap="bottom-left" title="Snap to Bottom-Left"></div>
+            <div class="snap-zone snap-quad-br" data-snap="bottom-right" title="Snap to Bottom-Right"></div>
+          </div>
         </div>
       </div>
 

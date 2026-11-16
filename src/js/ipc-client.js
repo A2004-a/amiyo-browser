@@ -4,6 +4,7 @@ const IpcClient = {
   // Window
   minimize() { return this.api.window.minimize(); },
   maximize() { return this.api.window.maximize(); },
+  snapWindow(layout) { return this.api.window.snap ? this.api.window.snap(layout) : Promise.resolve(null); },
   close() { return this.api.window.close(); },
   isMaximized() { return this.api.window.isMaximized(); },
   createNewWindow() { return this.api.window.createNew(); },

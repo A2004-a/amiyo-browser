@@ -209,6 +209,98 @@ class WindowManager {
         break;
     }
   }
+
+  snapWindow(win, layout, workAreaOverride = null) {
+    if (!win || (typeof win.isDestroyed === 'function' && win.isDestroyed())) return null;
+    let screenModule = null;
+    try {
+      screenModule = require('electron').screen;
+    } catch (e) {}
+
+    let workArea = workAreaOverride || { x: 0, y: 0, width: 1920, height: 1040 };
+    if (!workAreaOverride && screenModule && typeof screenModule.getDisplayMatching === 'function') {
+      try {
+        const currentBounds = win.getBounds ? win.getBounds() : { x: 0, y: 0, width: 1200, height: 800 };
+        const display = screenModule.getDisplayMatching(currentBounds);
+        if (display && display.workArea) {
+          workArea = display.workArea;
+        }
+      } catch (e) {}
+    }
+
+    if (win.isMaximized && win.isMaximized()) {
+      try { win.unmaximize(); } catch (e) {}
+    }
+
+    const { x, y, width, height } = workArea;
+    const halfW = Math.round(width / 2);
+    const halfH = Math.round(height / 2);
+    const thirdW = Math.round(width / 3);
+    const twoThirdsW = Math.round(width * 2 / 3);
+
+    let targetBounds = null;
+    switch (layout) {
+      case 'left-half':
+        targetBounds = { x, y, width: halfW, height };
+        break;
+      case 'right-half':
+        targetBounds = { x: x + halfW, y, width: width - halfW, height };
+        break;
+      case 'left-two-thirds':
+        targetBounds = { x, y, width: twoThirdsW, height };
+        break;
+      case 'right-one-third':
+        targetBounds = { x: x + twoThirdsW, y, width: width - twoThirdsW, height };
+        break;
+      case 'left-third':
+        targetBounds = { x, y, width: thirdW, height };
+        break;
+      case 'center-third':
+        targetBounds = { x: x + thirdW, y, width: thirdW, height };
+        break;
+      case 'right-third':
+        targetBounds = { x: x + 2 * thirdW, y, width: width - 2 * thirdW, height };
+        break;
+      case 'top-left':
+        targetBounds = { x, y, width: halfW, height: halfH };
+        break;
+      case 'top-right':
+        targetBounds = { x: x + halfW, y, width: width - halfW, height: halfH };
+        break;
+      case 'bottom-left':
+        targetBounds = { x, y: y + halfH, width: halfW, height: height - halfH };
+        break;
+      case 'bottom-right':
+        targetBounds = { x: x + halfW, y: y + halfH, width: width - halfW, height: height - halfH };
+        break;
+      case 'right-top-quarter':
+        targetBounds = { x: x + halfW, y, width: width - halfW, height: halfH };
+        break;
+      case 'right-bottom-quarter':
+        targetBounds = { x: x + halfW, y: y + halfH, width: width - halfW, height: height - halfH };
+        break;
+      case 'top-half':
+        targetBounds = { x, y, width, height: halfH };
+        break;
+      case 'bottom-half':
+        targetBounds = { x, y: y + halfH, width, height: height - halfH };
+        break;
+      case 'maximize':
+        if (typeof win.maximize === 'function') win.maximize();
+        return { layout, maximized: true };
+      default:
+        return null;
+    }
+
+    if (targetBounds && typeof win.setBounds === 'function') {
+      win.setBounds(targetBounds, true);
+      const info = this.getWindowInfo(win);
+      if (info && info.tabController) {
+        info.tabController.updateActiveViewBounds();
+      }
+    }
+    return { layout, bounds: targetBounds };
+  }
 }
 
 module.exports = new WindowManager();

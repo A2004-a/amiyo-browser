@@ -241,10 +241,65 @@ const App = {
     if (maxBtn) {
       maxBtn.innerHTML = Utils.icons.maximize;
       maxBtn.addEventListener('click', async () => {
+        const snapFlyout = document.getElementById('snap-layouts-flyout');
+        if (snapFlyout) snapFlyout.classList.add('hidden');
         await IpcClient.maximize();
         const isMax = await IpcClient.isMaximized();
         maxBtn.innerHTML = isMax ? Utils.icons.restore : Utils.icons.maximize;
       });
+
+      // Windows 11 Snap Layouts Flyout on Hover / Context Menu
+      const snapFlyout = document.getElementById('snap-layouts-flyout');
+      let snapHoverTimer = null;
+
+      if (snapFlyout) {
+        const showFlyout = () => {
+          clearTimeout(snapHoverTimer);
+          snapFlyout.classList.remove('hidden');
+        };
+
+        const hideFlyoutWithDelay = () => {
+          clearTimeout(snapHoverTimer);
+          snapHoverTimer = setTimeout(() => {
+            snapFlyout.classList.add('hidden');
+          }, 240);
+        };
+
+        maxBtn.addEventListener('mouseenter', () => {
+          clearTimeout(snapHoverTimer);
+          snapHoverTimer = setTimeout(showFlyout, 180);
+        });
+
+        maxBtn.addEventListener('mouseleave', hideFlyoutWithDelay);
+
+        snapFlyout.addEventListener('mouseenter', () => {
+          clearTimeout(snapHoverTimer);
+        });
+
+        snapFlyout.addEventListener('mouseleave', hideFlyoutWithDelay);
+
+        maxBtn.addEventListener('contextmenu', (e) => {
+          e.preventDefault();
+          snapFlyout.classList.toggle('hidden');
+        });
+
+        snapFlyout.querySelectorAll('.snap-zone').forEach((zone) => {
+          zone.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            const layout = zone.dataset.snap;
+            snapFlyout.classList.add('hidden');
+            if (layout && IpcClient.snapWindow) {
+              await IpcClient.snapWindow(layout);
+            }
+          });
+        });
+
+        document.addEventListener('click', (e) => {
+          if (!snapFlyout.contains(e.target) && e.target !== maxBtn && !maxBtn.contains(e.target)) {
+            snapFlyout.classList.add('hidden');
+          }
+        });
+      }
     }
 
     if (closeBtn) {

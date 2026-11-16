@@ -1252,6 +1252,48 @@
   color: var(--text-muted, #718096);
 }
 
+/* Themes for Universal Command Palette */
+[data-theme="dark"] .command-palette-modal {
+  background: #121B2B;
+  border-color: rgba(220, 227, 235, 0.15);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.7);
+}
+[data-theme="dark"] .command-palette-footer {
+  background: #0B0F14;
+}
+
+[data-theme="light"] .command-palette-modal {
+  background: #FFFFFF;
+  border-color: #CBD5E1;
+  box-shadow: 0 24px 64px rgba(15, 23, 42, 0.2);
+}
+[data-theme="light"] .command-palette-input {
+  color: #0F172A;
+}
+[data-theme="light"] .cp-item-title {
+  color: #0F172A;
+}
+[data-theme="light"] .command-palette-footer {
+  background: #F8FAFC;
+  border-top-color: #E2E8F0;
+}
+
+[data-theme="cyan"] .command-palette-modal {
+  background: #0A1424;
+  border-color: rgba(53, 216, 242, 0.4);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.85), 0 0 30px rgba(53, 216, 242, 0.25);
+}
+[data-theme="cyan"] .command-palette-input {
+  color: #E0F2FE;
+}
+[data-theme="cyan"] .cp-item-title {
+  color: #E0F2FE;
+}
+[data-theme="cyan"] .command-palette-footer {
+  background: #050B14;
+  border-top-color: rgba(53, 216, 242, 0.2);
+}
+
 
 
 

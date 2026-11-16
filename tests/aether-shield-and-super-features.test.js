@@ -310,7 +310,62 @@ function run() {
   assert.notStrictEqual(clonedTab.id, baseTab.id, 'Cloned tab must receive a new distinct ID');
   console.log('    ✔ Single-action tab cloning preserving navigation context verified');
 
-  console.log('\n✔ All 22 AETHER Shield v3.0 & Advanced Browser Features Tested & Verified Successfully!');
+  // ==========================================
+  // [23/24] Windows 11 Snap Layouts Snapping Engine
+  // ==========================================
+  console.log('  [23/24] Testing Windows 11 Snap Layouts Snapping Engine...');
+  const mockWorkArea = { x: 0, y: 0, width: 1920, height: 1040 };
+  const mockBounds = { x: 100, y: 100, width: 800, height: 600 };
+  let appliedBounds = null;
+  let isUnmaximized = false;
+  const mockWindow = {
+    isMaximized: () => false,
+    unmaximize: () => { isUnmaximized = true; },
+    getBounds: () => mockBounds,
+    setBounds: (b) => { appliedBounds = b; }
+  };
+  const windowManager = require('../electron/window-manager');
+  const snapResultLeft = windowManager.snapWindow(mockWindow, 'left-half', mockWorkArea);
+  assert.ok(snapResultLeft && snapResultLeft.bounds, 'Snap window should return result object');
+  assert.strictEqual(appliedBounds.width, 960, 'Left half should be 960px wide');
+  assert.strictEqual(appliedBounds.x, 0, 'Left half should start at x=0');
+
+  windowManager.snapWindow(mockWindow, 'right-half', mockWorkArea);
+  assert.strictEqual(appliedBounds.x, 960, 'Right half should start at x=960');
+  assert.strictEqual(appliedBounds.width, 960, 'Right half should be 960px wide');
+
+  windowManager.snapWindow(mockWindow, 'left-two-thirds', mockWorkArea);
+  assert.strictEqual(appliedBounds.width, Math.round(1920 * (2 / 3)), 'Left two-thirds should be 2/3 width (1280px)');
+
+  windowManager.snapWindow(mockWindow, 'top-right', mockWorkArea);
+  assert.strictEqual(appliedBounds.x, 960, 'Top-right starts at x=960');
+  assert.strictEqual(appliedBounds.y, 0, 'Top-right starts at y=0');
+  assert.strictEqual(appliedBounds.height, 520, 'Top-right height is 520px');
+  console.log('    ✔ Windows 11 Snap Layouts bounds calculation validated across multi-pane layouts');
+
+  // ==========================================
+  // [24/24] Theme System Consistency
+  // ==========================================
+  console.log('  [24/24] Testing Theme System Consistency (Dark, Light, Cyan)...');
+  const fs = require('fs');
+  const path = require('path');
+  const toolbarCss = fs.readFileSync(path.join(__dirname, '../src/styles/toolbar.css'), 'utf-8');
+  const tabsCss = fs.readFileSync(path.join(__dirname, '../src/styles/tabs.css'), 'utf-8');
+  const browserCss = fs.readFileSync(path.join(__dirname, '../src/styles/browser.css'), 'utf-8');
+
+  assert.ok(toolbarCss.includes('[data-theme="dark"] .chrome-menu-dropdown'), 'Dark theme for menu must be defined');
+  assert.ok(toolbarCss.includes('[data-theme="light"] .chrome-menu-dropdown'), 'Light theme for menu must be defined');
+  assert.ok(toolbarCss.includes('[data-theme="cyan"] .chrome-menu-dropdown'), 'Cyan theme for menu must be defined');
+
+  assert.ok(tabsCss.includes('[data-theme="dark"] .snap-layouts-flyout'), 'Dark theme for snap flyout must be defined');
+  assert.ok(tabsCss.includes('[data-theme="light"] .snap-layouts-flyout'), 'Light theme for snap flyout must be defined');
+  assert.ok(tabsCss.includes('[data-theme="cyan"] .snap-layouts-flyout'), 'Cyan theme for snap flyout must be defined');
+
+  assert.ok(browserCss.includes('[data-theme="dark"] .command-palette-modal'), 'Dark theme for command palette must be defined');
+  assert.ok(browserCss.includes('[data-theme="cyan"] .command-palette-modal'), 'Cyan theme for command palette must be defined');
+  console.log('    ✔ Unified theme scoping strictly enforced across all popup menus, flyouts, and modals');
+
+  console.log('\n✔ All 24 AETHER Shield v3.0 & Advanced Browser Features Tested & Verified Successfully!');
 }
 
 module.exports = { run };

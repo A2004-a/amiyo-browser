@@ -20,6 +20,7 @@ const api = {
   window: {
     minimize: () => ipcRenderer.invoke('window:minimize'),
     maximize: () => ipcRenderer.invoke('window:maximize'),
+    snap: (layout) => ipcRenderer.invoke('window:snap', layout),
     close: () => ipcRenderer.invoke('window:close'),
     isMaximized: () => ipcRenderer.invoke('window:is-maximized'),
     createNew: () => ipcRenderer.invoke('window:create-new'),

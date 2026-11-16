@@ -188,6 +188,14 @@
             android:layout_height="match_parent" />
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
+    <!-- Fullscreen Video Container (YouTube / HTML5 Video) -->
+    <FrameLayout
+        android:id="@+id/customViewContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#000000"
+        android:visibility="gone" />
+
     <!-- Bottom Navigation Bar (Back, Forward, Home, Share, Bookmarks) -->
     <LinearLayout
         android:id="@+id/bottomBar"

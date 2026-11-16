@@ -34,6 +34,7 @@ import java.util.Locale;
 import java.util.Set;
 import android.os.Build;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.ProgressBar;
@@ -66,6 +67,12 @@ public class MainActivity extends AppCompatActivity {
     // Desktop Site & Tab state
     private boolean isDesktopSite = false;
     private String defaultUserAgent = null;
+
+    // Fullscreen video & Zoom support
+    private FrameLayout customViewContainer;
+    private View customView = null;
+    private WebChromeClient.CustomViewCallback customViewCallback = null;
+    private int currentTextZoom = 100;
 
     public static class TabItem {
         public String id;
@@ -166,6 +173,7 @@ public class MainActivity extends AppCompatActivity {
         btnFindPrev = findViewById(R.id.btnFindPrev);
         btnFindNext = findViewById(R.id.btnFindNext);
         btnFindClose = findViewById(R.id.btnFindClose);
+        customViewContainer = findViewById(R.id.customViewContainer);
 
         swipeRefresh.setColorSchemeResources(R.color.accent, R.color.primary);
     }
@@ -237,6 +245,16 @@ public class MainActivity extends AppCompatActivity {
                 }
                 return true;
             }
+
+            @Override
+            public void onShowCustomView(View view, CustomViewCallback callback) {
+                showCustomView(view, callback);
+            }
+
+            @Override
+            public void onHideCustomView() {
+                hideCustomView();
+            }
         });
 
         webView.setWebViewClient(new WebViewClient() {
@@ -247,6 +265,7 @@ public class MainActivity extends AppCompatActivity {
                 if (activeTabIndex >= 0 && activeTabIndex < tabs.size()) {
                     tabs.get(activeTabIndex).url = url;
                 }
+                injectZoomUnlocker(view);
             }
 
             @Override
@@ -262,6 +281,8 @@ public class MainActivity extends AppCompatActivity {
                     String pageTitle = view.getTitle();
                     cur.title = (pageTitle != null && !pageTitle.isEmpty()) ? pageTitle : "AETHER";
                 }
+
+                injectZoomUnlocker(view);
 
                 // Inject YouTube Video Ad Fast-Forward & Skipper for mobile
                 String script = "(function() {" +
@@ -538,6 +559,10 @@ public class MainActivity extends AppCompatActivity {
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
+                if (customView != null) {
+                    hideCustomView();
+                    return;
+                }
                 if (findInPageBar.getVisibility() == View.VISIBLE) {
                     webView.clearMatches();
                     findInPageBar.setVisibility(View.GONE);
@@ -662,7 +687,10 @@ public class MainActivity extends AppCompatActivity {
         popup.getMenu().add(0, 6, 5, "Share...");
         popup.getMenu().add(0, 7, 6, "Find in page");
         popup.getMenu().add(0, 8, 7, isDesktopSite ? "Mobile site" : "Desktop site");
-        popup.getMenu().add(0, 9, 8, "Settings");
+        popup.getMenu().add(0, 10, 8, "Zoom in (+)");
+        popup.getMenu().add(0, 11, 9, "Zoom out (-)");
+        popup.getMenu().add(0, 12, 10, "Reset zoom (" + currentTextZoom + "%)");
+        popup.getMenu().add(0, 9, 11, "Settings");
 
         popup.setOnMenuItemClickListener(item -> {
             switch (item.getItemId()) {
@@ -697,6 +725,15 @@ public class MainActivity extends AppCompatActivity {
                 case 8:
                     toggleDesktopSite();
                     return true;
+                case 10:
+                    zoomIn();
+                    return true;
+                case 11:
+                    zoomOut();
+                    return true;
+                case 12:
+                    resetZoom();
+                    return true;
                 case 9:
                     openInternalPage("settings");
                     return true;
@@ -730,11 +767,94 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "Desktop site enabled", Toast.LENGTH_SHORT).show();
         } else {
             settings.setUserAgentString(defaultUserAgent != null ? defaultUserAgent + " AETHERBrowser/0.0.1" : null);
-            settings.setUseWideViewPort(false);
-            settings.setLoadWithOverviewMode(false);
+            settings.setUseWideViewPort(true);
+            settings.setLoadWithOverviewMode(true);
             Toast.makeText(this, "Mobile site enabled", Toast.LENGTH_SHORT).show();
         }
         webView.reload();
+    }
+
+    private void injectZoomUnlocker(WebView view) {
+        if (view == null) return;
+        String zoomScript = "(function() {" +
+            "  function unlockZoom() {" +
+            "    try {" +
+            "      const metas = document.querySelectorAll('meta[name=\"viewport\"]');" +
+            "      metas.forEach(m => {" +
+            "        let c = m.getAttribute('content') || '';" +
+            "        if (/user-scalable\\s*=\\s*(no|0)/i.test(c) || /maximum-scale\\s*=\\s*1(\\.0)?/i.test(c)) {" +
+            "          c = c.replace(/user-scalable\\s*=\\s*(no|0)/gi, 'user-scalable=yes');" +
+            "          c = c.replace(/maximum-scale\\s*=\\s*[0-9\\.]+/gi, 'maximum-scale=10.0');" +
+            "          m.setAttribute('content', c + ', user-scalable=yes, maximum-scale=10.0');" +
+            "        }" +
+            "      });" +
+            "      if (document.documentElement) document.documentElement.style.touchAction = 'manipulation';" +
+            "      if (document.body) document.body.style.touchAction = 'manipulation';" +
+            "    } catch(e) {}" +
+            "  }" +
+            "  unlockZoom();" +
+            "  document.addEventListener('DOMContentLoaded', unlockZoom);" +
+            "  window.addEventListener('load', unlockZoom);" +
+            "})();";
+        view.evaluateJavascript(zoomScript, null);
+    }
+
+    private void showCustomView(View view, WebChromeClient.CustomViewCallback callback) {
+        if (customView != null) {
+            callback.onCustomViewHidden();
+            return;
+        }
+        customView = view;
+        customViewCallback = callback;
+        if (findViewById(R.id.topBar) != null) findViewById(R.id.topBar).setVisibility(View.GONE);
+        if (findViewById(R.id.bottomBar) != null) findViewById(R.id.bottomBar).setVisibility(View.GONE);
+        if (swipeRefresh != null) swipeRefresh.setVisibility(View.GONE);
+        if (customViewContainer != null) {
+            customViewContainer.addView(view);
+            customViewContainer.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void hideCustomView() {
+        if (customView == null) return;
+        if (customViewContainer != null) {
+            customViewContainer.removeView(customView);
+            customViewContainer.setVisibility(View.GONE);
+        }
+        if (findViewById(R.id.topBar) != null) findViewById(R.id.topBar).setVisibility(View.VISIBLE);
+        if (findViewById(R.id.bottomBar) != null) findViewById(R.id.bottomBar).setVisibility(View.VISIBLE);
+        if (swipeRefresh != null) swipeRefresh.setVisibility(View.VISIBLE);
+        if (customViewCallback != null) {
+            customViewCallback.onCustomViewHidden();
+            customViewCallback = null;
+        }
+        customView = null;
+    }
+
+    private void zoomIn() {
+        currentTextZoom = Math.min(300, currentTextZoom + 20);
+        if (webView != null) {
+            webView.getSettings().setTextZoom(currentTextZoom);
+            webView.zoomIn();
+        }
+        Toast.makeText(this, "Zoom: " + currentTextZoom + "%", Toast.LENGTH_SHORT).show();
+    }
+
+    private void zoomOut() {
+        currentTextZoom = Math.max(50, currentTextZoom - 20);
+        if (webView != null) {
+            webView.getSettings().setTextZoom(currentTextZoom);
+            webView.zoomOut();
+        }
+        Toast.makeText(this, "Zoom: " + currentTextZoom + "%", Toast.LENGTH_SHORT).show();
+    }
+
+    private void resetZoom() {
+        currentTextZoom = 100;
+        if (webView != null) {
+            webView.getSettings().setTextZoom(100);
+        }
+        Toast.makeText(this, "Zoom: 100%", Toast.LENGTH_SHORT).show();
     }
 
     private void hideKeyboard() {
