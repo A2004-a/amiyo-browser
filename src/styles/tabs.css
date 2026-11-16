@@ -102,6 +102,17 @@
   z-index: 2;
 }
 
+.browser-tab.multi-selected {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+  background: rgba(6, 182, 212, 0.15) !important;
+}
+
+.browser-tab.suspended {
+  opacity: 0.55;
+  filter: grayscale(0.2);
+}
+
 /* Pinned Tab */
 .browser-tab.pinned {
   max-width: 44px;

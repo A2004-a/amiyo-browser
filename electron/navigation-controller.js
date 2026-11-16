@@ -46,6 +46,65 @@ class NavigationController {
     return false;
   }
 
+  resolveBang(input) {
+    if (!input || typeof input !== 'string') return null;
+    const trimmed = input.trim();
+    const bangMatch = trimmed.match(/^!([a-zA-Z0-9]+)\s+(.+)$/);
+    if (!bangMatch) return null;
+
+    const bang = bangMatch[1].toLowerCase();
+    const q = bangMatch[2].trim();
+    const encQ = encodeURIComponent(q);
+
+    const bangMap = {
+      g: () => this.buildSearchUrl(q, 'google'),
+      d: () => this.buildSearchUrl(q, 'duckduckgo'),
+      ddg: () => this.buildSearchUrl(q, 'duckduckgo'),
+      b: () => this.buildSearchUrl(q, 'bing'),
+      e: () => this.buildSearchUrl(q, 'ecosia'),
+      y: () => `https://www.youtube.com/results?search_query=${encQ}`,
+      yt: () => `https://www.youtube.com/results?search_query=${encQ}`,
+      w: () => `https://en.wikipedia.org/wiki/Special:Search?search=${encQ}`,
+      wiki: () => `https://en.wikipedia.org/wiki/Special:Search?search=${encQ}`,
+      gh: () => `https://github.com/search?q=${encQ}`,
+      r: () => `https://www.reddit.com/search/?q=${encQ}`,
+      so: () => `https://stackoverflow.com/search?q=${encQ}`,
+      a: () => `https://www.amazon.com/s?k=${encQ}`,
+      m: () => `https://www.google.com/maps/search/${encQ}`,
+      maps: () => `https://www.google.com/maps/search/${encQ}`,
+      t: () => `https://twitter.com/search?q=${encQ}`,
+      npm: () => `https://www.npmjs.com/search?q=${encQ}`,
+      mdn: () => `https://developer.mozilla.org/en-US/search?q=${encQ}`
+    };
+
+    if (bangMap[bang]) {
+      return bangMap[bang]();
+    }
+    return null;
+  }
+
+  resolveCustomEngine(input, customEnginesList = null) {
+    if (!input || typeof input !== 'string') return null;
+    const trimmed = input.trim();
+    try {
+      const customEngines = customEnginesList || (storageManager.getCustomSearchEngines ? storageManager.getCustomSearchEngines() : []);
+      const spaceIdx = trimmed.indexOf(' ');
+      if (spaceIdx > 0) {
+        const potentialKw = trimmed.substring(0, spaceIdx).toLowerCase();
+        const customQ = trimmed.substring(spaceIdx + 1).trim();
+        const matched = customEngines.find(e => e.keyword.toLowerCase() === potentialKw);
+        if (matched && matched.searchUrl) {
+          return matched.searchUrl.split('%s').join(encodeURIComponent(customQ));
+        }
+      }
+    } catch (e) {}
+    return null;
+  }
+
+  formatUrl(input, customSearchEngine) {
+    return this.resolveUrl(input, customSearchEngine);
+  }
+
   resolveUrl(input, customSearchEngine) {
     if (!input || typeof input !== 'string') {
       return 'aether://newtab';
@@ -67,18 +126,28 @@ class NavigationController {
       } catch (e) { }
     }
 
+    // Check for view-source: prefix (Chrome standard)
+    if (trimmed.toLowerCase().startsWith('view-source:')) {
+      const targetUrl = trimmed.substring('view-source:'.length).trim();
+      return `aether://source?url=${encodeURIComponent(targetUrl)}`;
+    }
+
     // Check for internal protocols
     if (trimmed.startsWith('amiyo://') || trimmed.startsWith('aether://')) {
       return trimmed;
     }
 
-    // Check for bang shortcuts
-    if (trimmed.startsWith('!g ')) return this.buildSearchUrl(trimmed.slice(3).trim(), 'google');
-    if (trimmed.startsWith('!d ') || trimmed.startsWith('!ddg ')) return this.buildSearchUrl(trimmed.replace(/^!(d|ddg)\s+/, '').trim(), 'duckduckgo');
-    if (trimmed.startsWith('!b ')) return this.buildSearchUrl(trimmed.slice(3).trim(), 'bing');
-    if (trimmed.startsWith('!y ')) return `https://www.youtube.com/results?search_query=${encodeURIComponent(trimmed.slice(3).trim())}`;
-    if (trimmed.startsWith('!w ')) return `https://en.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(trimmed.slice(3).trim())}`;
-    if (trimmed.startsWith('!e ')) return this.buildSearchUrl(trimmed.slice(3).trim(), 'ecosia');
+    // Check for DuckDuckGo & Chrome Search Bangs
+    const bangResolved = this.resolveBang(trimmed);
+    if (bangResolved) {
+      return bangResolved;
+    }
+
+    // Check for user-defined Custom Search Engines (keyword + space + query)
+    const customResolved = this.resolveCustomEngine(trimmed);
+    if (customResolved) {
+      return customResolved;
+    }
 
     // Check for standard protocols
     if (/^[a-zA-Z]+:\/\//.test(trimmed)) {
@@ -118,6 +187,23 @@ class NavigationController {
     }
 
     return template.split('%s').join(encodeURIComponent(query));
+  }
+
+  getCleanUrl(rawUrl) {
+    if (!rawUrl || typeof rawUrl !== 'string') return rawUrl;
+    try {
+      const u = new URL(rawUrl);
+      const trackers = [
+        'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'utm_id',
+        'fbclid', 'gclid', 'gclsrc', 'dclid', 'msclkid', 'twclid', 'yclid', 'zanpid',
+        'mc_eid', 'igshid', '_hsenc', '_hsmi', 'wickedid', 'rb_clickid', 's_kwcid',
+        '_ga', '_gl', 'ref_src', 'ref_url', 'mkt_tok', 'trk', 'tracking_id', 'gdfms', 'gdftrk', 'gdffi'
+      ];
+      trackers.forEach(param => u.searchParams.delete(param));
+      return u.toString();
+    } catch (e) {
+      return rawUrl;
+    }
   }
 
   getSecurityStatus(url) {

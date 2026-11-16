@@ -344,6 +344,35 @@ class MenuManager {
         browserWindow.webContents.send('trigger-web-capture');
       }
     }));
+    menu.append(new MenuItem({
+      label: '📺 Picture-in-Picture (PiP)',
+      click: () => {
+        const activeTab = tabController.getActiveTab();
+        if (activeTab) {
+          const pipCtrl = require('./pip-controller');
+          pipCtrl.togglePip(tabController, activeTab.id);
+        }
+      }
+    }));
+    menu.append(new MenuItem({
+      label: '🖨️ Save as PDF...',
+      click: () => {
+        const activeTab = tabController.getActiveTab();
+        if (activeTab) {
+          tabController.printToPdf(activeTab.id);
+        }
+      }
+    }));
+    menu.append(new MenuItem({
+      label: '📄 View Page Source',
+      accelerator: 'CmdOrCtrl+U',
+      click: () => {
+        const activeTab = tabController.getActiveTab();
+        if (activeTab && activeTab.url) {
+          tabController.createTab(`view-source:${activeTab.url}`, { active: true });
+        }
+      }
+    }));
     menu.append(new MenuItem({ type: 'separator' }));
 
     // Navigation items

@@ -85,7 +85,11 @@ class StorageManager {
       history: path.join(this.dataDir, 'history.json'),
       downloads: path.join(this.dataDir, 'downloads.json'),
       permissions: path.join(this.dataDir, 'permissions.json'),
-      session: path.join(this.dataDir, 'session.json')
+      session: path.join(this.dataDir, 'session.json'),
+      readingList: path.join(this.dataDir, 'reading-list.json'),
+      passwords: path.join(this.dataDir, 'passwords.json'),
+      customEngines: path.join(this.dataDir, 'custom-engines.json'),
+      hostZoom: path.join(this.dataDir, 'host-zoom.json')
     };
   }
 
@@ -183,6 +187,16 @@ class StorageManager {
     this.cache.history = this.readJson(this.files.history, []);
     this.cache.downloads = this.readJson(this.files.downloads, []);
     this.cache.permissions = this.readJson(this.files.permissions, {});
+    this.cache.readingList = this.readJson(this.files.readingList, []);
+    this.cache.passwords = this.readJson(this.files.passwords, []);
+    this.cache.customEngines = this.readJson(this.files.customEngines, [
+      { name: 'DuckDuckGo', keyword: 'ddg', searchUrl: 'https://duckduckgo.com/?q=%s' },
+      { name: 'YouTube', keyword: 'yt', searchUrl: 'https://www.youtube.com/results?search_query=%s' },
+      { name: 'GitHub', keyword: 'gh', searchUrl: 'https://github.com/search?q=%s' },
+      { name: 'Wikipedia', keyword: 'wiki', searchUrl: 'https://en.wikipedia.org/wiki/Special:Search?search=%s' },
+      { name: 'Reddit', keyword: 'r', searchUrl: 'https://www.reddit.com/search/?q=%s' }
+    ]);
+    this.cache.hostZoom = this.readJson(this.files.hostZoom, {});
 
     // Save defaults if files don't exist
     this.saveSettings(this.cache.settings);
@@ -393,6 +407,185 @@ class StorageManager {
 
   getSession() {
     return this.readJson(this.files.session, []);
+  }
+
+  // --- Reading List (Read Later Queue) ---
+  getReadingList() {
+    return [...(this.cache.readingList || [])];
+  }
+
+  addReadingListItem(item) {
+    if (!item || !item.url) return null;
+    const existing = (this.cache.readingList || []).find(r => r.url === item.url);
+    if (existing) {
+      existing.isRead = false;
+      existing.timestamp = Date.now();
+      this.writeJson(this.files.readingList, this.cache.readingList);
+      return existing;
+    }
+    const entry = {
+      id: `rl_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+      title: item.title || item.url,
+      url: item.url,
+      favicon: item.favicon || '',
+      isRead: false,
+      timestamp: Date.now()
+    };
+    if (!this.cache.readingList) this.cache.readingList = [];
+    this.cache.readingList.unshift(entry);
+    this.writeJson(this.files.readingList, this.cache.readingList);
+    return entry;
+  }
+
+  toggleReadingListItem(id) {
+    const list = this.cache.readingList || [];
+    const item = list.find(r => r.id === id);
+    if (item) {
+      item.isRead = !item.isRead;
+      this.writeJson(this.files.readingList, list);
+      return item;
+    }
+    return null;
+  }
+
+  removeReadingListItem(id) {
+    const list = this.cache.readingList || [];
+    this.cache.readingList = list.filter(r => r.id !== id);
+    this.writeJson(this.files.readingList, this.cache.readingList);
+    return true;
+  }
+
+  // --- Host Zoom Memory ---
+  getHostZoom(host) {
+    if (!host) return 100;
+    const cleanHost = host.toLowerCase().replace(/:\d+$/, '');
+    return (this.cache.hostZoom && typeof this.cache.hostZoom[cleanHost] === 'number')
+      ? this.cache.hostZoom[cleanHost]
+      : 100;
+  }
+
+  setHostZoom(host, zoomPercent) {
+    if (!host) return;
+    const cleanHost = host.toLowerCase().replace(/:\d+$/, '');
+    if (!this.cache.hostZoom) this.cache.hostZoom = {};
+    if (zoomPercent === 100) {
+      delete this.cache.hostZoom[cleanHost];
+    } else {
+      this.cache.hostZoom[cleanHost] = Math.round(zoomPercent);
+    }
+    this.writeJson(this.files.hostZoom, this.cache.hostZoom);
+    return this.cache.hostZoom;
+  }
+
+  // --- Passwords / Credentials Vault ---
+  getPasswords() {
+    return [...(this.cache.passwords || [])];
+  }
+
+  savePassword(entry) {
+    const site = entry?.site || entry?.url;
+    if (!entry || !site || !entry.username) return null;
+    const passwords = this.cache.passwords || [];
+    const existingIdx = passwords.findIndex(p => (p.site === site || p.url === site) && p.username === entry.username);
+    const item = {
+      id: entry.id || `pwd_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+      site: site,
+      url: site,
+      username: entry.username,
+      password: entry.password || '',
+      updatedAt: Date.now()
+    };
+    if (existingIdx !== -1) {
+      passwords[existingIdx] = item;
+    } else {
+      passwords.unshift(item);
+    }
+    this.cache.passwords = passwords;
+    this.writeJson(this.files.passwords, passwords);
+    return item;
+  }
+
+  deletePassword(id) {
+    const passwords = this.cache.passwords || [];
+    this.cache.passwords = passwords.filter(p => p.id !== id);
+    this.writeJson(this.files.passwords, this.cache.passwords);
+    return true;
+  }
+
+  // --- Custom Search Engines ---
+  getCustomSearchEngines() {
+    return [...(this.cache.customEngines || [])];
+  }
+
+  addCustomSearchEngine(engine) {
+    if (!engine || !engine.name || !engine.keyword || !engine.searchUrl) return null;
+    const engines = this.cache.customEngines || [];
+    const idx = engines.findIndex(e => e.keyword.toLowerCase() === engine.keyword.toLowerCase());
+    const item = {
+      name: engine.name,
+      keyword: engine.keyword.toLowerCase(),
+      searchUrl: engine.searchUrl
+    };
+    if (idx !== -1) {
+      engines[idx] = item;
+    } else {
+      engines.push(item);
+    }
+    this.cache.customEngines = engines;
+    this.writeJson(this.files.customEngines, engines);
+    return item;
+  }
+
+  deleteCustomSearchEngine(keyword) {
+    const engines = this.cache.customEngines || [];
+    this.cache.customEngines = engines.filter(e => e.keyword.toLowerCase() !== keyword.toLowerCase());
+    this.writeJson(this.files.customEngines, this.cache.customEngines);
+    return true;
+  }
+
+  // --- Netscape HTML Bookmarks Export / Import ---
+  exportBookmarksToNetscapeHtml(customBookmarks = null) {
+    const bookmarks = customBookmarks || this.getBookmarks();
+    let html = `<!DOCTYPE NETSCAPE-Bookmark-file-1>
+<!-- This is an automatically generated file.
+     It will be read and overwritten.
+     DO NOT EDIT! -->
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
+<TITLE>Bookmarks</TITLE>
+<H1>Bookmarks</H1>
+<DL><p>
+    <DT><H3 ADD_DATE="${Math.floor(Date.now() / 1000)}" LAST_MODIFIED="${Math.floor(Date.now() / 1000)}" PERSONAL_TOOLBAR_FOLDER="true">Bookmarks Bar</H3>
+    <DL><p>
+`;
+    for (const b of bookmarks) {
+      const title = (b.title || b.url || 'Bookmark').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      const icon = b.favicon ? ` ICON="${b.favicon}"` : '';
+      const addDate = Math.floor((b.dateAdded || Date.now()) / 1000);
+      html += `        <DT><A HREF="${b.url}" ADD_DATE="${addDate}"${icon}>${title}</A>\n`;
+    }
+    html += `    </DL><p>\n</DL><p>\n`;
+    return html;
+  }
+
+  importBookmarksFromNetscapeHtml(htmlString) {
+    if (!htmlString || typeof htmlString !== 'string') return 0;
+    const regex = /<A\s+[^>]*HREF=["']([^"']+)["'][^>]*>(.*?)<\/A>/gi;
+    let match;
+    let count = 0;
+    while ((match = regex.exec(htmlString)) !== null) {
+      const url = match[1];
+      const rawTitle = match[2];
+      const title = rawTitle ? rawTitle.replace(/<[^>]+>/g, '').trim() : url;
+      if (url && (url.startsWith('http://') || url.startsWith('https://'))) {
+        this.addBookmark({ title, url });
+        count++;
+      }
+    }
+    return {
+      success: true,
+      importedCount: count,
+      count
+    };
   }
 }
 

@@ -277,6 +277,24 @@ const KeyboardShortcuts = {
         return;
       }
 
+      // Ctrl + / or ? : Keyboard Shortcuts Cheatsheet
+      if ((isCtrlOrCmd && e.key === '/') || (!isCtrlOrCmd && !e.altKey && e.key === '?' && !['input', 'textarea'].includes(e.target.tagName.toLowerCase()))) {
+        e.preventDefault();
+        if (typeof App !== 'undefined' && App.openKeyboardShortcuts) {
+          App.openKeyboardShortcuts();
+        }
+        return;
+      }
+
+      // Ctrl + Shift + P: Print to PDF
+      if (isCtrlOrCmd && e.shiftKey && e.key.toLowerCase() === 'p') {
+        e.preventDefault();
+        if (State.activeTabId && IpcClient.printToPdf) {
+          IpcClient.printToPdf(State.activeTabId);
+        }
+        return;
+      }
+
       // F11: Fullscreen
       if (e.key === 'F11') {
         e.preventDefault();

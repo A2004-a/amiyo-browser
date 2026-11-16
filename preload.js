@@ -29,6 +29,7 @@ const api = {
     setTopOffset: (offset) => ipcRenderer.invoke('window:set-top-offset', offset),
     setLeftOffset: (offset) => ipcRenderer.invoke('window:set-left-offset', offset),
     print: (tabId) => ipcRenderer.invoke('window:print', tabId),
+    printToPdf: (tabId) => ipcRenderer.invoke('window:print-to-pdf', tabId),
     onMaximizedChanged: (callback) => {
       const listener = (event, val) => callback(val);
       ipcRenderer.on('window-maximized-changed', listener);
@@ -59,6 +60,10 @@ const api = {
     setSplit: (tabId) => ipcRenderer.invoke('tabs:set-split', tabId),
     closeSplit: () => ipcRenderer.invoke('tabs:close-split'),
     getSplit: () => ipcRenderer.invoke('tabs:get-split'),
+    closeOther: (tabId) => ipcRenderer.invoke('tabs:close-other', tabId),
+    closeRight: (tabId) => ipcRenderer.invoke('tabs:close-right', tabId),
+    closeMultiple: (tabIds) => ipcRenderer.invoke('tabs:close-multiple', tabIds),
+    muteMultiple: (tabIds, isMuted) => ipcRenderer.invoke('tabs:mute-multiple', tabIds, isMuted),
     setViewVisible: (visible) => ipcRenderer.invoke('tabs:set-view-visible', visible),
     onGroupsUpdated: (callback) => {
       const listener = (event, data) => callback(data);
@@ -94,7 +99,8 @@ const api = {
     reload: (tabId, ignoreCache) => ipcRenderer.invoke('nav:reload', tabId, ignoreCache),
     stop: (tabId) => ipcRenderer.invoke('nav:stop', tabId),
     getSuggestions: (query) => ipcRenderer.invoke('nav:suggestions', query),
-    getSecurityStatus: (url) => ipcRenderer.invoke('nav:security-status', url)
+    getSecurityStatus: (url) => ipcRenderer.invoke('nav:security-status', url),
+    getCleanUrl: (rawUrl) => ipcRenderer.invoke('nav:get-clean-url', rawUrl)
   },
 
   // --- Bookmarks ---
@@ -104,7 +110,9 @@ const api = {
     remove: (id) => ipcRenderer.invoke('bookmarks:remove', id),
     update: (id, updates) => ipcRenderer.invoke('bookmarks:update', id, updates),
     export: () => ipcRenderer.invoke('bookmarks:export'),
-    import: (jsonString) => ipcRenderer.invoke('bookmarks:import', jsonString)
+    import: (jsonString) => ipcRenderer.invoke('bookmarks:import', jsonString),
+    exportHtml: () => ipcRenderer.invoke('bookmarks:export-html'),
+    importHtml: (htmlString) => ipcRenderer.invoke('bookmarks:import-html', htmlString)
   },
 
   // --- History ---
@@ -172,7 +180,9 @@ const api = {
 
   // --- Zoom ---
   zoom: {
-    set: (tabId, factor) => ipcRenderer.invoke('zoom:set', tabId, factor)
+    set: (tabId, factor) => ipcRenderer.invoke('zoom:set', tabId, factor),
+    getHost: (host) => ipcRenderer.invoke('zoom:get-host', host),
+    setHost: (host, pct) => ipcRenderer.invoke('zoom:set-host', host, pct)
   },
 
   // --- Context Menu & App Menu ---
@@ -224,6 +234,39 @@ const api = {
   system: {
     getTasks: () => ipcRenderer.invoke('system:get-tasks'),
     killProcess: (pid, tabId) => ipcRenderer.invoke('system:kill-process', pid, tabId)
+  },
+
+  // --- Picture-in-Picture (PiP) ---
+  pip: {
+    toggle: (tabId) => ipcRenderer.invoke('pip:toggle', tabId),
+    action: (action) => ipcRenderer.send('pip:action', action)
+  },
+
+  // --- Reading List (Read Later Queue) ---
+  readingList: {
+    get: () => ipcRenderer.invoke('reading-list:get'),
+    add: (item) => ipcRenderer.invoke('reading-list:add', item),
+    toggleRead: (id) => ipcRenderer.invoke('reading-list:toggle-read', id),
+    remove: (id) => ipcRenderer.invoke('reading-list:remove', id)
+  },
+
+  // --- Passwords Vault ---
+  passwords: {
+    get: () => ipcRenderer.invoke('passwords:get'),
+    save: (entry) => ipcRenderer.invoke('passwords:save', entry),
+    delete: (id) => ipcRenderer.invoke('passwords:delete', id)
+  },
+
+  // --- Custom Search Engines ---
+  customEngines: {
+    get: () => ipcRenderer.invoke('custom-engines:get'),
+    add: (engine) => ipcRenderer.invoke('custom-engines:add', engine),
+    delete: (keyword) => ipcRenderer.invoke('custom-engines:delete', keyword)
+  },
+
+  // --- Network Diagnostics ---
+  diagnostics: {
+    ping: () => ipcRenderer.invoke('diagnostics:ping')
   },
 
   // --- Triggers ---

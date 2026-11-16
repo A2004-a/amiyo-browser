@@ -3,6 +3,7 @@ const TabManager = {
   draggedIndex: null,
   hoverTimer: null,
   hoveredTabId: null,
+  selectedTabIds: new Set(),
 
   hideHoverCard() {
     if (this.hoverTimer) {
@@ -224,9 +225,16 @@ const TabManager = {
       // Event handlers
       tabEl.addEventListener('click', (e) => {
         this.hideHoverCard();
-        if (!e.target.closest('.tab-close-btn') && !e.target.closest('.tab-audio-btn')) {
-          IpcClient.switchTab(tab.id);
+        if (e.target.closest('.tab-close-btn') || e.target.closest('.tab-audio-btn')) return;
+
+        if (e.ctrlKey || e.metaKey) {
+          e.preventDefault();
+          this.toggleTabSelection(tab.id);
+          return;
         }
+
+        this.clearTabSelection();
+        IpcClient.switchTab(tab.id);
       });
 
       // Middle click to close
@@ -363,6 +371,32 @@ const TabManager = {
     if (tab.id === State.activeTabId && !tab.isInternal) {
       document.title = `${tab.title || 'AETHER Browser'} - AETHER Browser`;
     }
+  },
+
+  toggleTabSelection(tabId) {
+    if (this.selectedTabIds.has(tabId)) {
+      this.selectedTabIds.delete(tabId);
+    } else {
+      this.selectedTabIds.add(tabId);
+    }
+    this.updateMultiSelectionClasses();
+  },
+
+  clearTabSelection() {
+    this.selectedTabIds.clear();
+    this.updateMultiSelectionClasses();
+  },
+
+  getSelectedTabIds() {
+    return this.selectedTabIds.size > 0 ? Array.from(this.selectedTabIds) : [State.activeTabId];
+  },
+
+  updateMultiSelectionClasses() {
+    if (!this.stripEl) return;
+    this.stripEl.querySelectorAll('.browser-tab').forEach(el => {
+      const tid = el.dataset.tabId;
+      el.classList.toggle('multi-selected', this.selectedTabIds.has(tid));
+    });
   }
 };
 

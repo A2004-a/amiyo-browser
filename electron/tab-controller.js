@@ -266,6 +266,20 @@ class TabController {
       tab.canGoBack = this.canGoBack(wc);
       tab.canGoForward = this.canGoForward(wc);
       tab.lastAccessed = Date.now();
+
+      // Restore saved host zoom
+      if (!tab.isInternal && navigatedUrl.startsWith('http')) {
+        try {
+          const u = new URL(navigatedUrl);
+          const savedZoom = storageManager.getHostZoom(u.hostname);
+          if (savedZoom && savedZoom !== 100) {
+            tab.zoomFactor = savedZoom / 100;
+            wc.setZoomFactor(tab.zoomFactor);
+          } else if (!tab.zoomFactor) {
+            tab.zoomFactor = 1.0;
+          }
+        } catch (e) {}
+      }
       if (!tab.isInternal && this.activeTabId === tab.id && tab.view) {
         this.isViewVisible = true;
         try {
@@ -1007,9 +1021,73 @@ class TabController {
     const tab = this.getTab(tabId || this.activeTabId);
     if (tab && tab.view && !tab.isInternal) {
       tab.zoomFactor = Math.max(0.25, Math.min(3.0, zoomFactor));
-      tab.view.webContents.setZoomFactor(tab.zoomFactor);
+      try {
+        tab.view.webContents.setZoomFactor(tab.zoomFactor);
+      } catch (e) {}
+
+      // Persist per-host zoom
+      try {
+        if (tab.url && tab.url.startsWith('http')) {
+          const u = new URL(tab.url);
+          storageManager.setHostZoom(u.hostname, Math.round(tab.zoomFactor * 100));
+        }
+      } catch (e) {}
+
       this.notifyTabUpdated(tab);
     }
+  }
+
+  async printToPdf(tabId, customPath) {
+    const tab = this.getTab(tabId || this.activeTabId);
+    if (!tab || !tab.view || tab.isInternal) return { success: false, error: 'No printable tab' };
+    try {
+      const data = await tab.view.webContents.printToPDF({
+        printBackground: true,
+        margins: { top: 0.4, bottom: 0.4, left: 0.4, right: 0.4 }
+      });
+      let targetPath = customPath;
+      if (!targetPath) {
+        const { dialog } = require('electron');
+        const defaultName = `${(tab.title || 'webpage').replace(/[/\\?%*:|"<>]/g, '_')}.pdf`;
+        const res = await dialog.showSaveDialog(this.browserWindow, {
+          title: 'Save Webpage as PDF',
+          defaultPath: defaultName,
+          filters: [{ name: 'PDF Document', extensions: ['pdf'] }]
+        });
+        if (res.canceled || !res.filePath) return { success: false, canceled: true };
+        targetPath = res.filePath;
+      }
+      const fs = require('fs');
+      fs.writeFileSync(targetPath, data);
+      return { success: true, filePath: targetPath };
+    } catch (e) {
+      return { success: false, error: e.message };
+    }
+  }
+
+  closeOtherTabs(tabId) {
+    const targetId = tabId || this.activeTabId;
+    const toClose = this.tabs.filter(t => t.id !== targetId && !t.isPinned);
+    toClose.forEach(t => this.closeTab(t.id));
+  }
+
+  closeTabsToRight(tabId) {
+    const targetId = tabId || this.activeTabId;
+    const idx = this.tabs.findIndex(t => t.id === targetId);
+    if (idx !== -1) {
+      const toClose = this.tabs.slice(idx + 1).filter(t => !t.isPinned);
+      toClose.forEach(t => this.closeTab(t.id));
+    }
+  }
+
+  closeMultipleTabs(tabIds) {
+    if (!Array.isArray(tabIds)) return;
+    tabIds.forEach(id => this.closeTab(id));
+  }
+
+  muteMultipleTabs(tabIds, isMuted = true) {
+    if (!Array.isArray(tabIds)) return;
+    tabIds.forEach(id => this.muteTab(id, isMuted));
   }
 
   findInPage(tabId, text, options = {}) {

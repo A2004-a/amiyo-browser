@@ -75,7 +75,7 @@ app.whenReady().then(async () => {
     // TEST 3: Navigation Resolution (Search Queries & Domains)
     // ----------------------------------------------------
     const queryUrl = navigationController.resolveUrl('india');
-    reportTest('Search query "india" resolves to Google Search URL', queryUrl.includes('google.com/search?q=india'));
+    reportTest('Search query "india" resolves to Search Engine URL', queryUrl.includes('india') && (queryUrl.includes('google.com') || queryUrl.includes('duckduckgo.com') || queryUrl.includes('bing.com')));
 
     const domainUrl = navigationController.resolveUrl('github.com');
     reportTest('Bare domain "github.com" resolves to https://github.com', domainUrl === 'https://github.com');

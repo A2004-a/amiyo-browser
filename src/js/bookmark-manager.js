@@ -90,10 +90,11 @@ const BookmarkManager = {
               ${Utils.icons.search}
               <input type="text" id="bm-search" placeholder="Search bookmarks..." />
             </div>
-            <button class="btn-secondary" id="bm-import-btn">Import</button>
-            <button class="btn-secondary" id="bm-export-btn">Export</button>
+            <button class="btn-secondary" id="bm-import-btn">Import (HTML/JSON)</button>
+            <button class="btn-secondary" id="bm-export-btn">Export JSON</button>
+            <button class="btn-secondary" id="bm-export-html-btn">Export HTML</button>
             <button class="btn-primary" id="bm-add-btn">Add Bookmark</button>
-            <input type="file" id="bm-file-input" accept=".json" style="display:none;" />
+            <input type="file" id="bm-file-input" accept=".json,.html,.htm" style="display:none;" />
           </div>
         </div>
         <div class="bookmarks-grid" id="bm-list"></div>
@@ -171,7 +172,12 @@ const BookmarkManager = {
         const reader = new FileReader();
         reader.onload = async (event) => {
           try {
-            await IpcClient.importBookmarks(event.target.result);
+            const content = event.target.result;
+            if (file.name.endsWith('.html') || file.name.endsWith('.htm') || content.includes('NETSCAPE-Bookmark-file-1')) {
+              await IpcClient.importBookmarksHtml(content);
+            } else {
+              await IpcClient.importBookmarks(content);
+            }
             State.bookmarks = await IpcClient.getBookmarks();
             BookmarksBar.render();
             renderList(searchInput.value);
@@ -189,6 +195,15 @@ const BookmarkManager = {
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
       a.download = `aether-bookmarks-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+    });
+
+    container.querySelector('#bm-export-html-btn')?.addEventListener('click', async () => {
+      const html = await IpcClient.exportBookmarksHtml();
+      const blob = new Blob([html], { type: 'text/html' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `bookmarks_${new Date().toISOString().slice(0, 10)}.html`;
       a.click();
     });
   },

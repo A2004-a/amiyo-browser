@@ -9,6 +9,7 @@ const aiController = require('./ai-controller');
 const shieldsController = require('./shields-controller');
 const readerController = require('./reader-controller');
 const captureController = require('./capture-controller');
+const pipController = require('./pip-controller');
 
 function getTabControllerForSender(event) {
   const win = BrowserWindow.fromWebContents(event.sender);
@@ -598,6 +599,136 @@ function registerIpcHandlers() {
       }
     }
     return false;
+  });
+
+  // --- Picture-in-Picture (PiP) ---
+  ipcMain.handle('pip:toggle', (event, tabId) => {
+    const tabCtrl = getTabControllerForSender(event);
+    if (!tabCtrl) return { active: false };
+    return pipController.togglePip(tabCtrl, tabId);
+  });
+
+  ipcMain.on('pip:action', (event, action) => {
+    const win = BrowserWindow.fromWebContents(event.sender);
+    const winInfo = windowManager.getWindowInfo(win);
+    pipController.handlePipAction(action, winInfo ? winInfo.tabController : null);
+  });
+
+  // --- Print to PDF ---
+  ipcMain.handle('window:print-to-pdf', async (event, tabId) => {
+    const tabCtrl = getTabControllerForSender(event);
+    if (!tabCtrl) return { success: false, error: 'Tab controller not available' };
+    return await tabCtrl.printToPdf(tabId);
+  });
+
+  // --- Reading List (Read Later Queue) ---
+  ipcMain.handle('reading-list:get', () => {
+    return storageManager.getReadingList();
+  });
+
+  ipcMain.handle('reading-list:add', (event, item) => {
+    return storageManager.addReadingListItem(item);
+  });
+
+  ipcMain.handle('reading-list:toggle-read', (event, id) => {
+    return storageManager.toggleReadingListItem(id);
+  });
+
+  ipcMain.handle('reading-list:remove', (event, id) => {
+    return storageManager.removeReadingListItem(id);
+  });
+
+  // --- Passwords Vault ---
+  ipcMain.handle('passwords:get', () => {
+    return storageManager.getPasswords();
+  });
+
+  ipcMain.handle('passwords:save', (event, entry) => {
+    return storageManager.savePassword(entry);
+  });
+
+  ipcMain.handle('passwords:delete', (event, id) => {
+    return storageManager.deletePassword(id);
+  });
+
+  // --- Custom Search Engines ---
+  ipcMain.handle('custom-engines:get', () => {
+    return storageManager.getCustomSearchEngines();
+  });
+
+  ipcMain.handle('custom-engines:add', (event, engine) => {
+    return storageManager.addCustomSearchEngine(engine);
+  });
+
+  ipcMain.handle('custom-engines:delete', (event, keyword) => {
+    return storageManager.deleteCustomSearchEngine(keyword);
+  });
+
+  // --- Netscape HTML Bookmarks ---
+  ipcMain.handle('bookmarks:export-html', () => {
+    return storageManager.exportBookmarksToNetscapeHtml();
+  });
+
+  ipcMain.handle('bookmarks:import-html', (event, htmlString) => {
+    return storageManager.importBookmarksFromNetscapeHtml(htmlString);
+  });
+
+  // --- Multi-Tab Bulk Actions ---
+  ipcMain.handle('tabs:close-other', (event, tabId) => {
+    const tabCtrl = getTabControllerForSender(event);
+    if (tabCtrl) tabCtrl.closeOtherTabs(tabId);
+    return true;
+  });
+
+  ipcMain.handle('tabs:close-right', (event, tabId) => {
+    const tabCtrl = getTabControllerForSender(event);
+    if (tabCtrl) tabCtrl.closeTabsToRight(tabId);
+    return true;
+  });
+
+  ipcMain.handle('tabs:close-multiple', (event, tabIds) => {
+    const tabCtrl = getTabControllerForSender(event);
+    if (tabCtrl) tabCtrl.closeMultipleTabs(tabIds);
+    return true;
+  });
+
+  ipcMain.handle('tabs:mute-multiple', (event, tabIds, isMuted) => {
+    const tabCtrl = getTabControllerForSender(event);
+    if (tabCtrl) tabCtrl.muteMultipleTabs(tabIds, isMuted);
+    return true;
+  });
+
+  // --- Zoom Host Info ---
+  ipcMain.handle('zoom:get-host', (event, host) => {
+    return storageManager.getHostZoom(host);
+  });
+
+  ipcMain.handle('zoom:set-host', (event, host, zoomPercent) => {
+    return storageManager.setHostZoom(host, zoomPercent);
+  });
+
+  // --- Clean URL Stripper ---
+  ipcMain.handle('nav:get-clean-url', (event, rawUrl) => {
+    return navigationController.getCleanUrl(rawUrl);
+  });
+
+  // --- Network Diagnostics / Latency Ping ---
+  ipcMain.handle('diagnostics:ping', async () => {
+    const https = require('https');
+    const start = Date.now();
+    return new Promise((resolve) => {
+      const req = https.get('https://1.1.1.1/cdn-cgi/trace', { timeout: 4000 }, (res) => {
+        const latency = Date.now() - start;
+        resolve({ online: true, latencyMs: latency, status: res.statusCode });
+      });
+      req.on('error', (err) => {
+        resolve({ online: false, error: err.message, latencyMs: -1 });
+      });
+      req.on('timeout', () => {
+        req.destroy();
+        resolve({ online: false, error: 'Timed out', latencyMs: -1 });
+      });
+    });
   });
 }
 

@@ -132,6 +132,49 @@ const IpcClient = {
 
   // Task Manager
   getSystemTasks() { return this.api.system ? this.api.system.getTasks() : Promise.resolve([]); },
-  killSystemProcess(pid, tabId) { return this.api.system ? this.api.system.killProcess(pid, tabId) : Promise.resolve(false); }
+  killSystemProcess(pid, tabId) { return this.api.system ? this.api.system.killProcess(pid, tabId) : Promise.resolve(false); },
+
+  // Print to PDF
+  printToPdf(tabId) { return this.api.window?.printToPdf ? this.api.window.printToPdf(tabId) : Promise.resolve({ success: false }); },
+
+  // Bulk Tab Actions
+  closeOtherTabs(tabId) { return this.api.tabs?.closeOther ? this.api.tabs.closeOther(tabId) : Promise.resolve(true); },
+  closeTabsToRight(tabId) { return this.api.tabs?.closeRight ? this.api.tabs.closeRight(tabId) : Promise.resolve(true); },
+  closeMultipleTabs(tabIds) { return this.api.tabs?.closeMultiple ? this.api.tabs.closeMultiple(tabIds) : Promise.resolve(true); },
+  muteMultipleTabs(tabIds, isMuted) { return this.api.tabs?.muteMultiple ? this.api.tabs.muteMultiple(tabIds, isMuted) : Promise.resolve(true); },
+
+  // Clean URL
+  getCleanUrl(rawUrl) { return this.api.navigation?.getCleanUrl ? this.api.navigation.getCleanUrl(rawUrl) : Promise.resolve(rawUrl); },
+
+  // Bookmarks Netscape HTML Export/Import
+  exportBookmarksHtml() { return this.api.bookmarks?.exportHtml ? this.api.bookmarks.exportHtml() : Promise.resolve(''); },
+  importBookmarksHtml(html) { return this.api.bookmarks?.importHtml ? this.api.bookmarks.importHtml(html) : Promise.resolve({ success: false }); },
+
+  // Host Zoom Memory
+  getHostZoom(host) { return this.api.zoom?.getHost ? this.api.zoom.getHost(host) : Promise.resolve(100); },
+  setHostZoom(host, pct) { return this.api.zoom?.setHost ? this.api.zoom.setHost(host, pct) : Promise.resolve(); },
+
+  // Picture-in-Picture
+  togglePip(tabId) { return this.api.pip?.toggle ? this.api.pip.toggle(tabId) : Promise.resolve({ active: false }); },
+  sendPipAction(action) { if (this.api.pip?.action) this.api.pip.action(action); },
+
+  // Reading List
+  getReadingList() { return this.api.readingList?.get ? this.api.readingList.get() : Promise.resolve([]); },
+  addReadingListItem(item) { return this.api.readingList?.add ? this.api.readingList.add(item) : Promise.resolve(null); },
+  toggleReadingListItem(id) { return this.api.readingList?.toggleRead ? this.api.readingList.toggleRead(id) : Promise.resolve(null); },
+  removeReadingListItem(id) { return this.api.readingList?.remove ? this.api.readingList.remove(id) : Promise.resolve(true); },
+
+  // Passwords Vault
+  getPasswords() { return this.api.passwords?.get ? this.api.passwords.get() : Promise.resolve([]); },
+  savePassword(entry) { return this.api.passwords?.save ? this.api.passwords.save(entry) : Promise.resolve(null); },
+  deletePassword(id) { return this.api.passwords?.delete ? this.api.passwords.delete(id) : Promise.resolve(true); },
+
+  // Custom Search Engines
+  getCustomEngines() { return this.api.customEngines?.get ? this.api.customEngines.get() : Promise.resolve([]); },
+  addCustomEngine(engine) { return this.api.customEngines?.add ? this.api.customEngines.add(engine) : Promise.resolve(null); },
+  deleteCustomEngine(kw) { return this.api.customEngines?.delete ? this.api.customEngines.delete(kw) : Promise.resolve(true); },
+
+  // Network Diagnostics
+  pingDiagnostics() { return this.api.diagnostics?.ping ? this.api.diagnostics.ping() : Promise.resolve({ online: navigator.onLine }); }
 };
 

@@ -10,6 +10,7 @@ const memoryTests = require('./memory-saver.test');
 const readerTests = require('./reader-mode.test');
 const featureTests = require('./browser-features.test');
 const incognitoTests = require('./incognito.test');
+const superFeatureTests = require('./browser-super-features.test');
 
 console.log('========================================');
 console.log('       AETHER Browser Test Suite       ');
@@ -28,9 +29,10 @@ try {
   readerTests.run();
   featureTests.run();
   incognitoTests.run();
+  superFeatureTests.run();
 
   console.log('\n========================================');
-  console.log('  ALL UNIT TEST SUITES PASSED (12/12)!  ');
+  console.log('  ALL UNIT TEST SUITES PASSED (13/13)!  ');
   console.log('========================================');
 } catch (err) {
   console.error('\n❌ Test failure:', err);

@@ -218,6 +218,8 @@ const App = {
       DownloadManager.render(container);
     } else if (targetUrl === 'aether://settings' || targetUrl === 'amiyo://settings') {
       SettingsManager.render(container);
+    } else if (targetUrl.startsWith('aether://source') || targetUrl.startsWith('amiyo://source')) {
+      this.renderPageSource(container, targetUrl);
     } else {
       Homepage.render(container);
     }
@@ -371,6 +373,16 @@ const App = {
       this.toggleSplitScreen();
     });
 
+    document.getElementById('menu-reading-list')?.addEventListener('click', () => {
+      menuEl.classList.add('hidden');
+      this.openReadingList();
+    });
+
+    document.getElementById('menu-passwords')?.addEventListener('click', () => {
+      menuEl.classList.add('hidden');
+      this.openPasswordsVault();
+    });
+
     document.getElementById('menu-task-manager')?.addEventListener('click', () => {
       menuEl.classList.add('hidden');
       this.openTaskManager();
@@ -384,6 +396,21 @@ const App = {
     document.getElementById('menu-quick-notes')?.addEventListener('click', () => {
       menuEl.classList.add('hidden');
       this.toggleQuickNotes();
+    });
+
+    document.getElementById('menu-eyedropper')?.addEventListener('click', () => {
+      menuEl.classList.add('hidden');
+      this.openEyedropper();
+    });
+
+    document.getElementById('menu-diagnostics')?.addEventListener('click', () => {
+      menuEl.classList.add('hidden');
+      this.openNetworkDiagnostics();
+    });
+
+    document.getElementById('menu-shortcuts')?.addEventListener('click', () => {
+      menuEl.classList.add('hidden');
+      this.openKeyboardShortcuts();
     });
 
     document.getElementById('menu-clear-browsing-data')?.addEventListener('click', () => {
@@ -857,7 +884,7 @@ const App = {
               </div>
             </td>
             <td><code>${task.pid}</code></td>
-            <td><strong>${task.cpu.toFixed(1)}%</strong></td>
+            <td><strong>${(parseFloat(task.cpu) || 0).toFixed(1)}%</strong></td>
             <td>${task.memoryMB} MB</td>
             <td>
               ${task.type !== 'browser' ? `
@@ -1354,6 +1381,422 @@ const App = {
         }
       }
     ]);
+  },
+
+  async renderPageSource(container, sourceUrl) {
+    let target = '';
+    try {
+      const parsed = new URL(sourceUrl);
+      target = parsed.searchParams.get('url') || '';
+    } catch (e) {
+      target = sourceUrl.replace(/^(aether|amiyo):\/\/source\?url=/, '');
+    }
+    
+    container.innerHTML = `
+      <div class="view-source-container">
+        <div class="view-source-header">
+          <div class="view-source-title">
+            <span class="view-source-tag">SOURCE</span>
+            <span class="view-source-url">${Utils.escapeHtml(target || 'Current Document')}</span>
+          </div>
+          <button class="btn-secondary" id="vs-copy-btn">📋 Copy Source</button>
+        </div>
+        <div class="view-source-code-wrap">
+          <pre id="view-source-pre"><code>Loading document source...</code></pre>
+        </div>
+      </div>
+    `;
+
+    try {
+      let html = '';
+      if (target) {
+        const resp = await fetch(target).catch(() => null);
+        if (resp && resp.ok) {
+          html = await resp.text();
+        }
+      }
+      if (!html) {
+        const activeTab = State.getActiveTab();
+        const pageContent = await IpcClient.aiGetPageContent(activeTab?.id);
+        html = pageContent?.text ? `<!-- Extracted DOM content -->\n${pageContent.text}` : '<!DOCTYPE html>\n<html>\n<head><title>Source</title></head>\n<body>No source available</body>\n</html>';
+      }
+
+      const pre = container.querySelector('#view-source-pre code');
+      if (pre) {
+        pre.textContent = html;
+      }
+      container.querySelector('#vs-copy-btn')?.addEventListener('click', () => {
+        navigator.clipboard.writeText(html);
+        const b = container.querySelector('#vs-copy-btn');
+        if (b) b.textContent = '✔ Copied!';
+      });
+    } catch (err) {
+      const pre = container.querySelector('#view-source-pre code');
+      if (pre) pre.textContent = `Error loading source: ${err.message}`;
+    }
+  },
+
+  async openReadingList() {
+    let items = await IpcClient.getReadingList();
+    const renderList = () => {
+      const listEl = document.getElementById('reading-list-items');
+      if (!listEl) return;
+      if (!items || items.length === 0) {
+        listEl.innerHTML = `
+          <div style="text-align:center;padding:40px 20px;color:var(--text-muted);">
+            <div style="font-size:32px;margin-bottom:12px;">📖</div>
+            <div style="font-weight:600;font-size:14px;color:var(--text-secondary);">Your reading list is empty</div>
+            <div style="font-size:12px;margin-top:4px;">Use the Share icon (↗️) in the address bar to save pages for later.</div>
+          </div>
+        `;
+        return;
+      }
+
+      listEl.innerHTML = items.map(item => `
+        <div class="reading-list-card ${item.isRead ? 'read' : ''}" data-id="${item.id}">
+          <div class="rl-info">
+            <div class="rl-title">${Utils.escapeHtml(item.title || 'Untitled')}</div>
+            <div class="rl-url">${Utils.escapeHtml(item.url)}</div>
+            <div class="rl-meta">Saved ${new Date(item.addedAt).toLocaleDateString()}</div>
+          </div>
+          <div class="rl-actions">
+            <button class="rl-btn-toggle" data-id="${item.id}" title="${item.isRead ? 'Mark as unread' : 'Mark as read'}">
+              ${item.isRead ? '✓ Read' : '○ Unread'}
+            </button>
+            <button class="rl-btn-del" data-id="${item.id}" title="Remove from reading list">✕</button>
+          </div>
+        </div>
+      `).join('');
+
+      listEl.querySelectorAll('.rl-info').forEach(info => {
+        info.addEventListener('click', () => {
+          const card = info.closest('.reading-list-card');
+          const id = card?.dataset.id;
+          const found = items.find(it => it.id === id);
+          if (found) {
+            IpcClient.createTab(found.url, { active: true });
+            this.closeModal();
+          }
+        });
+      });
+
+      listEl.querySelectorAll('.rl-btn-toggle').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          const id = btn.dataset.id;
+          items = await IpcClient.toggleReadingListItem(id);
+          renderList();
+        });
+      });
+
+      listEl.querySelectorAll('.rl-btn-del').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          const id = btn.dataset.id;
+          items = await IpcClient.removeReadingListItem(id);
+          renderList();
+        });
+      });
+    };
+
+    const bodyHtml = `
+      <div style="display:flex;flex-direction:column;gap:12px;max-height:450px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border-subtle);padding-bottom:10px;">
+          <span style="font-size:12px;color:var(--text-muted);">${items.length} saved article${items.length === 1 ? '' : 's'}</span>
+          <button class="btn-secondary" id="rl-add-current-btn">+ Add Current Page</button>
+        </div>
+        <div id="reading-list-items" style="overflow-y:auto;max-height:380px;display:flex;flex-direction:column;gap:8px;"></div>
+      </div>
+    `;
+
+    this.showModal('Reading List (Read Later)', bodyHtml, [
+      { label: 'Close', class: 'btn-secondary', click: () => this.closeModal() }
+    ]);
+
+    renderList();
+
+    document.getElementById('rl-add-current-btn')?.addEventListener('click', async () => {
+      const activeTab = State.getActiveTab();
+      if (activeTab && activeTab.url && !activeTab.isInternal) {
+        items = await IpcClient.addReadingListItem({
+          title: activeTab.title || 'Saved Page',
+          url: activeTab.url
+        });
+        renderList();
+      }
+    });
+  },
+
+  async openPasswordsVault() {
+    let passwords = await IpcClient.getPasswords();
+    const renderTable = (filter = '') => {
+      const tbody = document.getElementById('pw-tbody');
+      if (!tbody) return;
+      const q = filter.toLowerCase().trim();
+      const filtered = (passwords || []).filter(p => 
+        (p.url && p.url.toLowerCase().includes(q)) || 
+        (p.username && p.username.toLowerCase().includes(q))
+      );
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text-muted);">No passwords saved.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(p => `
+        <tr>
+          <td><strong style="color:var(--text-primary);">${Utils.escapeHtml(p.url)}</strong></td>
+          <td>${Utils.escapeHtml(p.username)}</td>
+          <td>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <input type="password" readonly value="${Utils.escapeHtml(p.password)}" class="pw-input-mask" style="background:transparent;border:none;color:var(--text-primary);font-family:monospace;width:110px;" />
+              <button class="btn-icon pw-reveal-btn" title="Toggle password visibility">👁️</button>
+              <button class="btn-icon pw-copy-btn" data-pw="${Utils.escapeHtml(p.password)}" title="Copy password">📋</button>
+            </div>
+          </td>
+          <td>
+            <button class="task-btn-kill pw-del-btn" data-id="${p.id}">Delete</button>
+          </td>
+        </tr>
+      `).join('');
+
+      tbody.querySelectorAll('.pw-reveal-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const inp = btn.parentElement.querySelector('input');
+          if (inp) {
+            inp.type = inp.type === 'password' ? 'text' : 'password';
+          }
+        });
+      });
+
+      tbody.querySelectorAll('.pw-copy-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          navigator.clipboard.writeText(btn.dataset.pw || '');
+          btn.textContent = '✔';
+          setTimeout(() => { btn.textContent = '📋'; }, 1500);
+        });
+      });
+
+      tbody.querySelectorAll('.pw-del-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const id = btn.dataset.id;
+          await IpcClient.deletePassword(id);
+          passwords = await IpcClient.getPasswords();
+          renderTable(filter);
+        });
+      });
+    };
+
+    const generatePassword = (len = 16) => {
+      const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+~`|}{[]:;?><,./-=';
+      const arr = new Uint32Array(len);
+      window.crypto.getRandomValues(arr);
+      return Array.from(arr, val => chars[val % chars.length]).join('');
+    };
+
+    const bodyHtml = `
+      <div style="display:flex;flex-direction:column;gap:14px;max-height:480px;">
+        <div style="display:flex;gap:10px;justify-content:space-between;align-items:center;">
+          <input type="text" id="pw-search" placeholder="Search saved passwords..." class="settings-input" style="flex:1;" />
+          <button class="btn-primary" id="pw-gen-btn">⚡ Generate Password</button>
+        </div>
+
+        <div id="pw-gen-box" class="hidden" style="background:var(--bg-tertiary);padding:10px 14px;border-radius:8px;border:1px solid var(--border-subtle);display:flex;align-items:center;justify-content:space-between;">
+          <div style="font-family:monospace;font-size:14px;font-weight:700;color:var(--accent);" id="pw-gen-val"></div>
+          <button class="btn-secondary" id="pw-gen-copy">Copy</button>
+        </div>
+
+        <div style="overflow-y:auto;max-height:300px;">
+          <table class="task-manager-table">
+            <thead>
+              <tr>
+                <th>Website / Domain</th>
+                <th>Username / Email</th>
+                <th>Password</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="pw-tbody">
+              <tr><td colspan="4" style="text-align:center;padding:12px;color:var(--text-muted);">Loading passwords...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+
+    this.showModal('Passwords Vault & Generator', bodyHtml, [
+      { label: 'Done', class: 'btn-secondary', click: () => this.closeModal() }
+    ]);
+
+    renderTable();
+
+    document.getElementById('pw-search')?.addEventListener('input', (e) => {
+      renderTable(e.target.value);
+    });
+
+    document.getElementById('pw-gen-btn')?.addEventListener('click', () => {
+      const box = document.getElementById('pw-gen-box');
+      const valEl = document.getElementById('pw-gen-val');
+      if (box && valEl) {
+        const pw = generatePassword(16);
+        valEl.textContent = pw;
+        box.classList.remove('hidden');
+      }
+    });
+
+    document.getElementById('pw-gen-copy')?.addEventListener('click', () => {
+      const val = document.getElementById('pw-gen-val')?.textContent;
+      if (val) {
+        navigator.clipboard.writeText(val);
+        const b = document.getElementById('pw-gen-copy');
+        if (b) b.textContent = '✔ Copied!';
+        setTimeout(() => { if (b) b.textContent = 'Copy'; }, 1500);
+      }
+    });
+  },
+
+  async openEyedropper() {
+    if (!window.EyeDropper) {
+      alert('The EyeDropper API is available on Chromium desktop browsers.');
+      return;
+    }
+    try {
+      const eyeDropper = new window.EyeDropper();
+      const result = await eyeDropper.open();
+      if (result && result.sRGBHex) {
+        await navigator.clipboard.writeText(result.sRGBHex);
+        this.showModal('Eyedropper Color Picker', `
+          <div style="display:flex;align-items:center;gap:16px;padding:16px;">
+            <div style="width:48px;height:48px;border-radius:8px;background:${result.sRGBHex};border:2px solid var(--border-subtle);box-shadow:var(--shadow-md);"></div>
+            <div>
+              <div style="font-size:18px;font-weight:700;font-family:monospace;color:var(--text-primary);">${result.sRGBHex}</div>
+              <div style="font-size:12px;color:var(--success);margin-top:4px;">✓ Copied color code to clipboard!</div>
+            </div>
+          </div>
+        `, [
+          { label: 'Done', class: 'btn-secondary', click: () => this.closeModal() }
+        ]);
+      }
+    } catch (e) {
+      console.log('Eyedropper cancelled or dismissed');
+    }
+  },
+
+  async openNetworkDiagnostics() {
+    const bodyHtml = `
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <div style="display:flex;align-items:center;gap:12px;padding:14px;background:var(--bg-tertiary);border-radius:8px;border:1px solid var(--border-subtle);">
+          <div id="diag-status-icon" style="font-size:24px;">🔄</div>
+          <div>
+            <div id="diag-status-title" style="font-weight:700;color:var(--text-primary);">Pinging network endpoints...</div>
+            <div id="diag-status-sub" style="font-size:12px;color:var(--text-muted);">Testing DNS resolution and round-trip latency to Cloudflare 1.1.1.1</div>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div style="background:var(--bg-secondary);padding:12px;border-radius:8px;border:1px solid var(--border-subtle);">
+            <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;">Round-Trip Latency</div>
+            <div id="diag-latency" style="font-size:20px;font-weight:700;color:var(--accent);margin-top:4px;">-- ms</div>
+          </div>
+          <div style="background:var(--bg-secondary);padding:12px;border-radius:8px;border:1px solid var(--border-subtle);">
+            <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;">Network Adapter State</div>
+            <div id="diag-adapter" style="font-size:20px;font-weight:700;color:var(--text-primary);margin-top:4px;">${navigator.onLine ? 'Connected' : 'Offline'}</div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    this.showModal('Network Latency & Connectivity Diagnostics', bodyHtml, [
+      { label: 'Re-test', class: 'btn-secondary', click: () => this.openNetworkDiagnostics() },
+      { label: 'Close', class: 'btn-primary', click: () => this.closeModal() }
+    ]);
+
+    try {
+      const res = await IpcClient.pingDiagnostics();
+      const icon = document.getElementById('diag-status-icon');
+      const title = document.getElementById('diag-status-title');
+      const sub = document.getElementById('diag-status-sub');
+      const lat = document.getElementById('diag-latency');
+
+      if (res && res.online) {
+        if (icon) icon.textContent = '🟢';
+        if (title) title.textContent = 'Internet Connection Operational';
+        if (sub) sub.textContent = `HTTP ${res.status || 200} OK via DNS over HTTPS`;
+        if (lat) lat.textContent = `${res.latencyMs} ms`;
+      } else {
+        if (icon) icon.textContent = '🔴';
+        if (title) title.textContent = 'Network Offline or Unreachable';
+        if (sub) sub.textContent = res.error || 'Connection timed out';
+        if (lat) lat.textContent = 'Timeout';
+      }
+    } catch (err) {
+      console.warn('Diagnostics ping failed:', err);
+    }
+  },
+
+  openKeyboardShortcuts() {
+    const shortcuts = [
+      { cat: 'Tab Navigation', key: 'Ctrl + T', desc: 'Open new tab' },
+      { cat: 'Tab Navigation', key: 'Ctrl + W', desc: 'Close active tab' },
+      { cat: 'Tab Navigation', key: 'Ctrl + Shift + T', desc: 'Restore closed tab' },
+      { cat: 'Tab Navigation', key: 'Ctrl + Tab', desc: 'Cycle to next tab' },
+      { cat: 'Tab Navigation', key: 'Ctrl + Shift + Tab', desc: 'Cycle to previous tab' },
+      { cat: 'Tab Navigation', key: 'Ctrl + 1-8', desc: 'Switch directly to tab 1 through 8' },
+      { cat: 'Tab Navigation', key: 'Ctrl + 9', desc: 'Switch to rightmost tab' },
+      { cat: 'Page Navigation', key: 'Ctrl + L', desc: 'Focus address bar (Omnibox)' },
+      { cat: 'Page Navigation', key: 'Ctrl + R', desc: 'Reload active page' },
+      { cat: 'Page Navigation', key: 'Ctrl + Shift + R', desc: 'Force hard reload (bypass cache)' },
+      { cat: 'Page Navigation', key: 'Alt + Left / Right', desc: 'Navigate backward / forward in history' },
+      { cat: 'Page Tools', key: 'Ctrl + F', desc: 'Find in page' },
+      { cat: 'Page Tools', key: 'Ctrl + P', desc: 'Print active page' },
+      { cat: 'Page Tools', key: 'Ctrl + Shift + P', desc: 'Save page directly to PDF' },
+      { cat: 'Page Tools', key: 'Ctrl + Shift + S', desc: 'AETHER Prism Web Capture / Screenshot' },
+      { cat: 'Page Tools', key: 'Ctrl + Alt + R', desc: 'Toggle Distraction-Free Reader Mode' },
+      { cat: 'Page Tools', key: 'Ctrl + Shift + U', desc: 'Microsoft Edge Read Aloud Speech Synthesizer' },
+      { cat: 'System & Power', key: 'Shift + Esc', desc: 'AETHER Pulse Task Manager (CPU & RAM per tab)' },
+      { cat: 'System & Power', key: 'Ctrl + Shift + A', desc: 'Tab Search across all open tabs' },
+      { cat: 'System & Power', key: 'Ctrl + Alt + N', desc: 'Edge Quick Notes / Scratchpad' },
+      { cat: 'System & Power', key: 'Ctrl + Shift + Del', desc: 'Clear browsing data (cache, cookies, history)' },
+      { cat: 'System & Power', key: 'F11', desc: 'Toggle Fullscreen view' }
+    ];
+
+    const bodyHtml = `
+      <div style="display:flex;flex-direction:column;gap:12px;max-height:480px;">
+        <input type="text" id="ks-filter" placeholder="Search shortcuts..." class="settings-input" />
+        <div style="overflow-y:auto;max-height:400px;">
+          <table class="task-manager-table">
+            <thead>
+              <tr>
+                <th>Category</th>
+                <th>Shortcut</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="ks-tbody">
+              ${shortcuts.map(s => `
+                <tr class="ks-row" data-text="${s.cat.toLowerCase()} ${s.key.toLowerCase()} ${s.desc.toLowerCase()}">
+                  <td><span class="badge" style="background:var(--bg-tertiary);color:var(--text-secondary);padding:3px 6px;border-radius:4px;font-size:11px;">${s.cat}</span></td>
+                  <td><kbd style="background:var(--bg-secondary);padding:3px 8px;border-radius:4px;border:1px solid var(--border-subtle);font-family:monospace;font-size:12px;font-weight:600;color:var(--accent);">${s.key}</kbd></td>
+                  <td style="color:var(--text-primary);">${s.desc}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+
+    this.showModal('Keyboard Shortcuts Cheatsheet', bodyHtml, [
+      { label: 'Close', class: 'btn-secondary', click: () => this.closeModal() }
+    ]);
+
+    document.getElementById('ks-filter')?.addEventListener('input', (e) => {
+      const q = e.target.value.toLowerCase().trim();
+      document.querySelectorAll('.ks-row').forEach(row => {
+        const text = row.dataset.text || '';
+        row.style.display = text.includes(q) ? '' : 'none';
+      });
+    });
   }
 };
 
