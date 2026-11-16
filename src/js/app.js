@@ -432,8 +432,25 @@ const App = {
       zoomValEl.textContent = `${Math.round(tabZoom * 100)}%`;
     }
 
+    // Dynamically calculate exact available height within window to strictly avoid screen/taskbar overlap
+    const updateMenuMaxHeight = () => {
+      const btnRect = menuBtn.getBoundingClientRect();
+      const availableHeight = window.innerHeight - btnRect.bottom - 16;
+      menuEl.style.maxHeight = `${Math.max(200, Math.floor(availableHeight))}px`;
+    };
+    updateMenuMaxHeight();
+
     menuEl.classList.remove('hidden');
     menuBtn.classList.add('active');
+
+    if (!this._chromeMenuResizeListener) {
+      this._chromeMenuResizeListener = () => {
+        if (!menuEl.classList.contains('hidden')) {
+          updateMenuMaxHeight();
+        }
+      };
+      window.addEventListener('resize', this._chromeMenuResizeListener);
+    }
 
     if (!this._chromeMenuCloseListener) {
       this._chromeMenuCloseListener = (e) => {
@@ -462,7 +479,13 @@ const App = {
     if (!menuEl || menuEl.classList.contains('hidden')) return;
 
     menuEl.classList.add('hidden');
+    menuEl.style.maxHeight = '';
     if (menuBtn) menuBtn.classList.remove('active');
+
+    if (this._chromeMenuResizeListener) {
+      window.removeEventListener('resize', this._chromeMenuResizeListener);
+      this._chromeMenuResizeListener = null;
+    }
 
     if (this._chromeMenuCloseListener) {
       document.removeEventListener('click', this._chromeMenuCloseListener);

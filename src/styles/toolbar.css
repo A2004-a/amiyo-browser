@@ -298,9 +298,10 @@
   top: 42px;
   right: 8px;
   width: 320px;
-  max-height: calc(100vh - 56px);
+  max-height: calc(100vh - 100px);
   overflow-y: auto;
   overflow-x: hidden;
+  overscroll-behavior: contain;
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
   border-radius: 12px;
@@ -312,20 +313,21 @@
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.45) transparent;
 }
 
 .chrome-menu-dropdown::-webkit-scrollbar {
-  width: 5px;
+  width: 6px;
 }
 .chrome-menu-dropdown::-webkit-scrollbar-track {
   background: transparent;
 }
 .chrome-menu-dropdown::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.25);
+  background: rgba(148, 163, 184, 0.35);
   border-radius: 4px;
 }
 .chrome-menu-dropdown::-webkit-scrollbar-thumb:hover {
-  background: rgba(148, 163, 184, 0.45);
+  background: rgba(148, 163, 184, 0.6);
 }
 
 .chrome-menu-item {
