@@ -21,6 +21,8 @@ class TabController {
     this.splitTabId = null; // Split view dual display
     this.splitRatio = 0.5; // Split view ratio (left pane proportion, default 50/50)
     this.groups = new Map(); // groupId -> { id, title, color, isCollapsed }
+    this._isSessionDirty = true;
+    this._updateBoundsTimer = null;
 
     // Automatic Memory Saver / Inactive Tab Suspension sweep
     this._memorySaverInterval = setInterval(() => {
@@ -33,8 +35,25 @@ class TabController {
     }, 30000);
   }
 
+  requestUpdateActiveViewBounds(immediate = false) {
+    if (immediate) {
+      if (this._updateBoundsTimer) {
+        clearTimeout(this._updateBoundsTimer);
+        this._updateBoundsTimer = null;
+      }
+      this.updateActiveViewBounds();
+      return;
+    }
+    if (this._updateBoundsTimer) return;
+    this._updateBoundsTimer = setTimeout(() => {
+      this._updateBoundsTimer = null;
+      this.updateActiveViewBounds();
+    }, 16); // 60fps frame rate throttle (16ms)
+  }
+
   backupSessionState() {
-    if (this.isPrivate) return;
+    if (this.isPrivate || !this._isSessionDirty) return;
+    this._isSessionDirty = false;
     try {
       const state = {
         timestamp: Date.now(),
@@ -82,12 +101,12 @@ class TabController {
 
   setTopOffset(offset) {
     this.topOffset = offset;
-    this.updateActiveViewBounds();
+    this.requestUpdateActiveViewBounds(false);
   }
 
   setLeftOffset(offset) {
     this.leftOffset = typeof offset === 'number' && offset >= 0 ? offset : 0;
-    this.updateActiveViewBounds();
+    this.requestUpdateActiveViewBounds(false);
   }
 
   setActiveViewVisible(visible) {
@@ -210,6 +229,7 @@ class TabController {
     }
 
     // Insert tab in list
+    this._isSessionDirty = true;
     if (options.index !== undefined && options.index >= 0) {
       this.tabs.splice(options.index, 0, tab);
     } else {
@@ -1186,7 +1206,7 @@ class TabController {
 
   setSideOffset(offset) {
     this.sideOffset = typeof offset === 'number' && offset >= 0 ? offset : 0;
-    this.updateActiveViewBounds();
+    this.requestUpdateActiveViewBounds(false);
   }
 
   async getActiveTabContent(tabId) {

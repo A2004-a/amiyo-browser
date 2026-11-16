@@ -722,7 +722,7 @@ class VpnController {
   async clearProxyRules() {
     try {
       if (session && session.defaultSession) {
-        await session.defaultSession.setProxy({ mode: 'system' });
+        await session.defaultSession.setProxy({ mode: 'direct' });
       }
     } catch (e) {}
   }

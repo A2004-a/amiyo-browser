@@ -33,44 +33,68 @@ const App = {
       try { KeyboardShortcuts.init(); } catch (e) { console.warn('KeyboardShortcuts.init error:', e); }
       try { this.initFindBar(); } catch (e) { console.warn('initFindBar error:', e); }
       try { this.initChromeMenu(); } catch (e) { console.warn('initChromeMenu error:', e); }
-      try { this.initModals(); } catch (e) { console.warn('initModals error:', e); }
-      try { this.initReaderOverlay(); } catch (e) { console.warn('initReaderOverlay error:', e); }
       try { this.initIpcTriggers(); } catch (e) { console.warn('initIpcTriggers error:', e); }
-      try { this.initShareSheet(); } catch (e) { console.warn('initShareSheet error:', e); }
-      try { this.initQuickNotes(); } catch (e) { console.warn('initQuickNotes error:', e); }
+      try { this.initSplitScreenControls(); } catch (e) { console.warn('initSplitScreenControls error:', e); }
       try { this.updateTopOffset(); } catch (e) {}
 
-      try { this.initSplitScreenControls(); } catch (e) { console.warn('initSplitScreenControls error:', e); }
-
-      window.addEventListener('resize', () => {
-        this.updateTopOffset();
+      // Defer secondary non-critical overlays to idle cycle to maximize initial launch speed
+      const scheduleIdle = window.requestIdleCallback || ((cb) => setTimeout(cb, 40));
+      scheduleIdle(() => {
+        try { this.initModals(); } catch (e) {}
+        try { this.initReaderOverlay(); } catch (e) {}
+        try { this.initShareSheet(); } catch (e) {}
+        try { this.initQuickNotes(); } catch (e) {}
       });
 
-      console.log('[App] Loading state from IPC...');
-      // 2. Fetch state in parallel with allSettled so one failure never blocks the entire browser
-      const [settingsRes, bookmarksRes, historyRes, downloadsRes, permissionsRes, initialTabsRes] = await Promise.allSettled([
+      let resizeRaf = null;
+      window.addEventListener('resize', () => {
+        if (resizeRaf) return;
+        resizeRaf = requestAnimationFrame(() => {
+          resizeRaf = null;
+          this.updateTopOffset();
+        });
+      });
+
+      console.log('[App] Loading critical state from IPC...');
+      // High-speed critical path: Fetch settings and initial tabs first to mount UI instantly
+      const [settingsRes, initialTabsRes] = await Promise.allSettled([
         IpcClient.getSettings(),
-        IpcClient.getBookmarks(),
-        IpcClient.getHistory(),
-        IpcClient.getDownloads(),
-        IpcClient.getPermissions(),
         IpcClient.getTabs()
       ]);
 
       const settings = settingsRes.status === 'fulfilled' && settingsRes.value ? settingsRes.value : {};
-      const bookmarks = bookmarksRes.status === 'fulfilled' && bookmarksRes.value ? bookmarksRes.value : [];
-      const history = historyRes.status === 'fulfilled' && historyRes.value ? historyRes.value : [];
-      const downloads = downloadsRes.status === 'fulfilled' && downloadsRes.value ? downloadsRes.value : [];
-      const permissions = permissionsRes.status === 'fulfilled' && permissionsRes.value ? permissionsRes.value : {};
       const initialTabs = initialTabsRes.status === 'fulfilled' && initialTabsRes.value ? initialTabsRes.value : [];
 
-      console.log('[App] State loaded. Initial tabs count:', initialTabs.length);
+      console.log('[App] Critical state loaded. Initial tabs count:', initialTabs.length);
 
       State.settings = settings;
-      State.bookmarks = bookmarks;
-      State.history = history;
-      State.downloads = downloads;
-      State.permissions = permissions;
+      State.bookmarks = [];
+      State.history = [];
+      State.downloads = [];
+      State.permissions = {};
+
+      // Background non-blocking fetch of heavy auxiliary stores (history, bookmarks, downloads, permissions)
+      Promise.allSettled([
+        IpcClient.getBookmarks(),
+        IpcClient.getHistory(),
+        IpcClient.getDownloads(),
+        IpcClient.getPermissions()
+      ]).then(([bookmarksRes, historyRes, downloadsRes, permissionsRes]) => {
+        if (bookmarksRes.status === 'fulfilled') {
+          State.bookmarks = bookmarksRes.value || [];
+          if (typeof BookmarksBar !== 'undefined' && BookmarksBar.render) BookmarksBar.render();
+        }
+        if (historyRes.status === 'fulfilled') {
+          State.history = historyRes.value || [];
+        }
+        if (downloadsRes.status === 'fulfilled') {
+          State.downloads = downloadsRes.value || [];
+          if (typeof DownloadManager !== 'undefined' && DownloadManager.updateBadge) DownloadManager.updateBadge();
+        }
+        if (permissionsRes.status === 'fulfilled') {
+          State.permissions = permissionsRes.value || {};
+        }
+      });
 
       if (typeof Omnibox !== 'undefined' && Omnibox.updateSearchEngine) {
         Omnibox.updateSearchEngine(State.settings.searchEngine);

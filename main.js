@@ -83,10 +83,18 @@ if (app && app.commandLine) {
     app.commandLine.appendSwitch('disable-gpu-program-cache');
   }
   app.commandLine.appendSwitch('enable-fast-unload');
+  app.commandLine.appendSwitch('enable-tcp-fastopen');
+  app.commandLine.appendSwitch('enable-quic');
+  app.commandLine.appendSwitch('enable-async-dns');
+  app.commandLine.appendSwitch('enable-dns-result-order');
+  app.commandLine.appendSwitch('v8-cache-options', 'code');
+  app.commandLine.appendSwitch('enable-aggressive-domstorage-flushing');
+  app.commandLine.appendSwitch('prerender-from-omnibox', 'enabled');
+  app.commandLine.appendSwitch('disk-cache-size', '1048576000'); // 1GB high-speed disk cache
   app.commandLine.appendSwitch('enable-features', isGpuDisabled
-    ? 'OverlayScrollbar,SmoothScrolling,ParallelDownloading,AsyncDns,BackForwardCache'
-    : 'VaapiVideoDecoder,OverlayScrollbar,CanvasOopRasterization,SmoothScrolling,ParallelDownloading,AsyncDns,BackForwardCache');
-  app.commandLine.appendSwitch('disable-features', 'CalculateNativeWinOcclusion');
+    ? 'OverlayScrollbar,SmoothScrolling,ParallelDownloading,AsyncDns,BackForwardCache,TcpFastOpen,EarlyHintsPreloadForNavigation'
+    : 'VaapiVideoDecoder,OverlayScrollbar,CanvasOopRasterization,SmoothScrolling,ParallelDownloading,AsyncDns,BackForwardCache,ZeroCopy,TcpFastOpen,EarlyHintsPreloadForNavigation');
+  app.commandLine.appendSwitch('disable-features', 'CalculateNativeWinOcclusion,InterestCohort,Translate');
   app.commandLine.appendSwitch('js-flags', '--max-old-space-size=2048');
 }
 
@@ -124,7 +132,7 @@ const { registerIpcHandlers } = require('./electron/ipc-handlers');
 
 app.whenReady().then(() => {
   try {
-    session.defaultSession.setProxy({ mode: 'system' }).catch(() => {});
+    session.defaultSession.setProxy({ mode: 'direct' }).catch(() => {});
   } catch (e) {}
   
   // Synchronize OS native theme (Windows context menus, native select popups, titlebars)

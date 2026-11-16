@@ -79,16 +79,28 @@ class WindowManager {
     });
 
     win.on('resize', () => {
-      tabController.updateActiveViewBounds();
+      if (tabController.requestUpdateActiveViewBounds) {
+        tabController.requestUpdateActiveViewBounds(false);
+      } else {
+        tabController.updateActiveViewBounds();
+      }
     });
 
     win.on('maximize', () => {
-      tabController.updateActiveViewBounds();
+      if (tabController.requestUpdateActiveViewBounds) {
+        tabController.requestUpdateActiveViewBounds(true);
+      } else {
+        tabController.updateActiveViewBounds();
+      }
       win.webContents.send('window-maximized-changed', true);
     });
 
     win.on('unmaximize', () => {
-      tabController.updateActiveViewBounds();
+      if (tabController.requestUpdateActiveViewBounds) {
+        tabController.requestUpdateActiveViewBounds(true);
+      } else {
+        tabController.updateActiveViewBounds();
+      }
       win.webContents.send('window-maximized-changed', false);
     });
 

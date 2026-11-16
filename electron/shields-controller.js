@@ -960,8 +960,11 @@ class ShieldsController {
 
       const url = details.url;
 
-      // Fast-path: Skip internal or data URLs
-      if (url.charCodeAt(0) === 100 /* 'd' (data:) */ || url.charCodeAt(0) === 97 /* 'a' (aether://) */) {
+      // Fast-path: Skip internal, data, blob, file, or chrome URLs
+      const firstChar = url.charCodeAt(0);
+      if (firstChar === 100 /* 'd' (data:) */ || firstChar === 97 /* 'a' (aether:) */ ||
+          firstChar === 98 /* 'b' (blob:) */ || firstChar === 102 /* 'f' (file:) */ ||
+          firstChar === 99 /* 'c' (chrome:) */) {
         return callback({ cancel: false });
       }
 

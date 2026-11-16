@@ -648,7 +648,10 @@ class StorageManager {
 
   saveSessionBackup(data) {
     this.cache.sessionBackup = data;
-    this.writeJson(this.files.sessionBackup, data);
+    try {
+      this.ensureDataDir();
+      fs.promises.writeFile(this.files.sessionBackup, JSON.stringify(data, null, 2), 'utf-8').catch(() => {});
+    } catch (e) {}
     return true;
   }
 
@@ -659,7 +662,10 @@ class StorageManager {
 
   saveShieldsCumulativeStats(stats) {
     this.cache.shieldsStats = { ...(this.cache.shieldsStats || {}), ...stats };
-    this.writeJson(this.files.shieldsStats, this.cache.shieldsStats);
+    try {
+      this.ensureDataDir();
+      fs.promises.writeFile(this.files.shieldsStats, JSON.stringify(this.cache.shieldsStats, null, 2), 'utf-8').catch(() => {});
+    } catch (e) {}
     return this.cache.shieldsStats;
   }
 }

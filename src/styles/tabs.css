@@ -59,6 +59,7 @@
   gap: 4px;
   padding-right: 4px;
   -webkit-app-region: no-drag;
+  contain: layout style;
 }
 
 #tabs-strip::-webkit-scrollbar {
@@ -78,6 +79,8 @@
   border-radius: 8px 8px 0 0;
   background: transparent;
   color: var(--text-secondary);
+  will-change: transform;
+  transform: translateZ(0);
   font-size: 12px;
   position: relative;
   cursor: pointer;
