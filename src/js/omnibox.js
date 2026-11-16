@@ -289,6 +289,22 @@ const Omnibox = {
       if (masterToggle) masterToggle.checked = !!status.connected;
       if (emblem) emblem.classList.toggle('active', !!status.connected);
 
+      // Quick Connect Power Button
+      const powerBtn = document.getElementById('vpn-power-btn');
+      const powerLabel = document.getElementById('vpn-power-label');
+      if (powerBtn) {
+        powerBtn.classList.toggle('connected', !!status.connected);
+      }
+      if (powerLabel) {
+        if (status.connected) {
+          powerLabel.textContent = 'DISCONNECT';
+        } else if (status.connecting) {
+          powerLabel.textContent = 'CONNECTING...';
+        } else {
+          powerLabel.textContent = 'QUICK CONNECT';
+        }
+      }
+
       if (statusText) {
         if (status.connected) {
           statusText.textContent = `Connected (${status.location?.name || 'Secure'})`;
@@ -461,6 +477,32 @@ const Omnibox = {
       };
     }
 
+    // Category Navigation Tabs
+    const catTabs = this.vpnPopoverEl.querySelectorAll('.vpn-cat-tab');
+    const panels = this.vpnPopoverEl.querySelectorAll('.vpn-panel');
+    catTabs.forEach(tab => {
+      tab.onclick = () => {
+        catTabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        const targetId = `vpn-panel-${tab.getAttribute('data-vpn-tab')}`;
+        panels.forEach(p => {
+          const match = p.id === targetId;
+          p.classList.toggle('hidden', !match);
+          p.classList.toggle('active', match);
+        });
+      };
+    });
+
+    // Quick Connect Hero Power Button
+    const heroPowerBtn = document.getElementById('vpn-power-btn');
+    if (heroPowerBtn) {
+      heroPowerBtn.onclick = async () => {
+        const targetLoc = locSelect ? locSelect.value : null;
+        await IpcClient.toggleVpn(targetLoc);
+        await renderVpnUi();
+      };
+    }
+
     if (masterToggle) {
       masterToggle.onchange = async () => {
         const targetLoc = locSelect ? locSelect.value : null;
@@ -510,56 +552,6 @@ const Omnibox = {
           } else {
             await IpcClient.addVpnBypassDomain(val);
           }
-          addInput.value = '';
-          await renderVpnUi();
-        }
-      };
-    }
-
-    if (masterToggle) {
-      masterToggle.onchange = async () => {
-        const targetLoc = locSelect ? locSelect.value : null;
-        await IpcClient.toggleVpn(targetLoc);
-        await renderVpnUi();
-      };
-    }
-
-    if (locSelect) {
-      locSelect.onchange = async () => {
-        await IpcClient.setVpnLocation(locSelect.value);
-        await renderVpnUi();
-      };
-    }
-
-    if (killswitch) {
-      killswitch.onchange = async () => {
-        await IpcClient.setVpnKillSwitch(killswitch.checked);
-      };
-    }
-
-    if (dnsleak) {
-      dnsleak.onchange = async () => {
-        await IpcClient.setVpnDnsLeakProtection(dnsleak.checked);
-      };
-    }
-
-    if (webrtc) {
-      webrtc.onchange = async () => {
-        await IpcClient.setVpnWebRtcProtection(webrtc.checked);
-      };
-    }
-
-    if (autoconnect) {
-      autoconnect.onchange = async () => {
-        await IpcClient.setVpnAutoConnect(autoconnect.checked);
-      };
-    }
-
-    if (addBtn && addInput) {
-      addBtn.onclick = async () => {
-        const val = addInput.value.trim();
-        if (val) {
-          await IpcClient.addVpnBypassDomain(val);
           addInput.value = '';
           await renderVpnUi();
         }

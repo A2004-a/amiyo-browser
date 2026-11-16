@@ -236,6 +236,10 @@ async function run() {
   // ==========================================
   console.log('  [23/24] Testing UI Elements Integration (HTML)...');
   const html = fs.readFileSync(path.join(__dirname, '../src/index.html'), 'utf-8');
+  assert.ok(html.includes('id="vpn-power-btn"'), 'Quick Connect power button exists');
+  assert.ok(html.includes('id="vpn-cat-tunnel-btn"'), 'Tunnel category tab exists');
+  assert.ok(html.includes('id="vpn-cat-shields-btn"'), 'Shields category tab exists');
+  assert.ok(html.includes('id="vpn-cat-split-btn"'), 'Split Tunnel category tab exists');
   assert.ok(html.includes('id="vpn-proto-wireguard"'), 'WireGuard protocol button exists');
   assert.ok(html.includes('id="vpn-proto-stealth"'), 'Stealth TLS button exists');
   assert.ok(html.includes('id="vpn-multihop-toggle"'), 'Multi-hop toggle exists');
@@ -245,20 +249,23 @@ async function run() {
   assert.ok(html.includes('id="vpn-stealth-toggle"'), 'Stealth toggle exists');
   assert.ok(html.includes('id="vpn-tor-toggle"'), 'Tor over VPN toggle exists');
   assert.ok(html.includes('id="vpn-split-mode-select"'), 'Split tunnel mode selector exists');
-  console.log('    ✔ All 9 UI control components confirmed in index.html');
+  console.log('    ✔ All 13 UI control and tab components confirmed in index.html');
 
   // ==========================================
   // [24/24] Theme System Styling Consistency
   // ==========================================
   console.log('  [24/24] Testing Theme System Consistency (Dark, Light, Cyan)...');
   const toolbarCss = fs.readFileSync(path.join(__dirname, '../src/styles/toolbar.css'), 'utf-8');
+  assert.ok(toolbarCss.includes('.vpn-power-btn'), 'Power button CSS exists');
+  assert.ok(toolbarCss.includes('.vpn-cat-tabs'), 'Category tabs CSS exists');
+  assert.ok(toolbarCss.includes('.vpn-panel'), 'Panel CSS exists');
   assert.ok(toolbarCss.includes('.vpn-protocol-tabs'), 'Protocol tabs CSS exists');
   assert.ok(toolbarCss.includes('.vpn-multihop-card'), 'Multi-hop card CSS exists');
   assert.ok(toolbarCss.includes('.vpn-shuffle-btn'), 'Shuffle button CSS exists');
   assert.ok(toolbarCss.includes('[data-theme="dark"] .vpn-popover'), 'Dark theme popover styling exists');
   assert.ok(toolbarCss.includes('[data-theme="light"] .vpn-popover'), 'Light theme popover styling exists');
   assert.ok(toolbarCss.includes('[data-theme="cyan"] .vpn-popover'), 'Cyan theme popover styling exists');
-  console.log('    ✔ Strict theme scoping verified across Obsidian Dark, Modern Light, and AETHER Cyan');
+  console.log('    ✔ Strict theme scoping and responsive tabs verified across Obsidian Dark, Modern Light, and AETHER Cyan');
 
   console.log('\n✔ All 24 AETHER Secure VPN Enterprise Features Tested & Verified Successfully!');
 }

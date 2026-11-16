@@ -282,187 +282,211 @@
               </label>
             </div>
 
-            <!-- Protocol Mode Selector -->
-            <div class="vpn-protocol-tabs">
-              <button class="vpn-proto-btn active" id="vpn-proto-wireguard" data-proto="wireguard">⚡ WireGuard</button>
-              <button class="vpn-proto-btn" id="vpn-proto-stealth" data-proto="stealth-tls">🛡️ Stealth TLS</button>
-              <button class="vpn-proto-btn" id="vpn-proto-openvpn" data-proto="openvpn">🔒 OpenVPN</button>
+            <!-- Category Navigation Tabs -->
+            <div class="vpn-cat-tabs">
+              <button class="vpn-cat-tab active" id="vpn-cat-tunnel-btn" data-vpn-tab="tunnel">⚡ Tunnel</button>
+              <button class="vpn-cat-tab" id="vpn-cat-shields-btn" data-vpn-tab="shields">🛡️ Security (7)</button>
+              <button class="vpn-cat-tab" id="vpn-cat-split-btn" data-vpn-tab="split">🔀 Split Tunnel</button>
             </div>
 
-            <!-- Server Location Selector -->
-            <div class="vpn-location-card">
-              <div class="vpn-card-label">Virtual Location</div>
-              <select id="vpn-location-select" class="vpn-select">
-                <option value="optimal">🌍 Optimal Location (Lowest Load &amp; Ping)</option>
-                <option value="us-east">🇺🇸 United States (New York)</option>
-                <option value="us-west">🇺🇸 United States (Los Angeles)</option>
-                <option value="de-fra">🇩🇪 Germany (Frankfurt)</option>
-                <option value="nl-ams">🇳🇱 Netherlands (Amsterdam)</option>
-                <option value="uk-lon">🇬🇧 United Kingdom (London)</option>
-                <option value="sg-sin">🇸🇬 Singapore</option>
-                <option value="jp-tyo">🇯🇵 Japan (Tokyo)</option>
-                <option value="ca-tor">🇨🇦 Canada (Toronto)</option>
-                <option value="ch-zrh">🇨🇭 Switzerland (Privacy Haven)</option>
-                <option value="se-sto">🇸🇪 Sweden (Stockholm)</option>
-                <option value="is-rey">🇮🇸 Iceland (Ultra-Private)</option>
-              </select>
-            </div>
+            <!-- Panel 1: Tunnel & Connection -->
+            <div id="vpn-panel-tunnel" class="vpn-panel active">
+              <!-- Quick Connect Action Card -->
+              <div class="vpn-power-hero">
+                <button id="vpn-power-btn" class="vpn-power-btn">
+                  <span class="vpn-power-icon">
+                    <svg viewBox="0 0 24 24"><path d="M13 3h-2v10h2V3zm4.83 2.17l-1.42 1.42A7.92 7.92 0 0 1 20 12c0 4.41-3.59 8-8 8s-8-3.59-8-8c0-2.38 1.05-4.52 2.73-5.99L5.31 4.59C3.27 6.4 2 9.05 2 12c0 5.52 4.48 10 10 10s10-4.48 10-10c0-2.95-1.27-5.6-3.17-7.83z"/></svg>
+                  </span>
+                  <span id="vpn-power-label">QUICK CONNECT</span>
+                </button>
+              </div>
 
-            <!-- Multi-Hop (Double VPN) Card -->
-            <div class="vpn-multihop-card">
-              <div class="vpn-toggle-row">
-                <div>
-                  <div class="vpn-row-title">Double VPN / Multi-Hop</div>
-                  <div class="vpn-row-desc">Route through 2 independent countries</div>
-                </div>
-                <label class="toggle-switch small">
-                  <input type="checkbox" id="vpn-multihop-toggle" />
-                  <span class="toggle-slider"></span>
-                </label>
+              <!-- Protocol Mode Selector -->
+              <div class="vpn-protocol-tabs">
+                <button class="vpn-proto-btn active" id="vpn-proto-wireguard" data-proto="wireguard">⚡ WireGuard</button>
+                <button class="vpn-proto-btn" id="vpn-proto-stealth" data-proto="stealth-tls">🛡️ Stealth TLS</button>
+                <button class="vpn-proto-btn" id="vpn-proto-openvpn" data-proto="openvpn">🔒 OpenVPN</button>
               </div>
-              <div id="vpn-multihop-details" class="vpn-multihop-details hidden">
-                <div class="vpn-hop-chain">
-                  <span class="vpn-hop-tag" id="vpn-entry-tag">🇨🇭 Switzerland</span>
-                  <span class="vpn-hop-arrow">➔</span>
-                  <select id="vpn-exit-select" class="vpn-mini-select">
-                    <option value="nl-ams">🇳🇱 Netherlands</option>
-                    <option value="de-fra">🇩🇪 Germany</option>
-                    <option value="is-rey">🇮🇸 Iceland</option>
-                    <option value="se-sto">🇸🇪 Sweden</option>
-                  </select>
-                </div>
-              </div>
-            </div>
 
-            <!-- Real-time Stats Grid -->
-            <div class="vpn-stat-grid">
-              <div class="vpn-stat-card">
-                <div class="vpn-stat-label">Virtual IP</div>
-                <div class="vpn-stat-val" id="vpn-ip-val">Protected</div>
-              </div>
-              <div class="vpn-stat-card">
-                <div class="vpn-stat-label">Ping / Latency</div>
-                <div class="vpn-stat-val" id="vpn-latency-val">-- ms</div>
-              </div>
-              <div class="vpn-stat-card">
-                <div class="vpn-stat-label">Tunnel Protocol</div>
-                <div class="vpn-stat-val" id="vpn-active-proto-val">WireGuard</div>
-              </div>
-              <div class="vpn-stat-card">
-                <div class="vpn-stat-label">Data Encrypted</div>
-                <div class="vpn-stat-val" id="vpn-traffic-val">0 KB</div>
-              </div>
-            </div>
-
-            <!-- Rotating IP Engine Card -->
-            <div class="vpn-rotating-card">
-              <div class="vpn-toggle-row">
-                <div>
-                  <div class="vpn-row-title">Rotating IP Engine</div>
-                  <div class="vpn-row-desc">Automatically shuffles IP address periodically</div>
-                </div>
-                <label class="toggle-switch small">
-                  <input type="checkbox" id="vpn-rotating-toggle" />
-                  <span class="toggle-slider"></span>
-                </label>
-              </div>
-              <div class="vpn-rotate-btn-row">
-                <button id="vpn-rotate-now-btn" class="vpn-shuffle-btn">🔀 Shuffle IP Now</button>
-                <span id="vpn-rotation-status" class="vpn-rotation-badge">Static</span>
-              </div>
-            </div>
-
-            <!-- Advanced Protection Toggles -->
-            <div class="vpn-toggle-list">
-              <div class="vpn-toggle-row">
-                <div>
-                  <div class="vpn-row-title">Threat Protection (CleanWeb)</div>
-                  <div class="vpn-row-desc">Block malware, phishing &amp; cryptominers at DNS layer</div>
-                </div>
-                <label class="toggle-switch small">
-                  <input type="checkbox" id="vpn-threat-toggle" checked />
-                  <span class="toggle-slider"></span>
-                </label>
-              </div>
-              <div class="vpn-toggle-row">
-                <div>
-                  <div class="vpn-row-title">Camouflage / Stealth Mode</div>
-                  <div class="vpn-row-desc">Disguise VPN traffic as standard HTTPS to bypass DPI</div>
-                </div>
-                <label class="toggle-switch small">
-                  <input type="checkbox" id="vpn-stealth-toggle" />
-                  <span class="toggle-slider"></span>
-                </label>
-              </div>
-              <div class="vpn-toggle-row">
-                <div>
-                  <div class="vpn-row-title">Tor over VPN (Onion Gateway)</div>
-                  <div class="vpn-row-desc">Route encrypted traffic into the Tor network</div>
-                </div>
-                <label class="toggle-switch small">
-                  <input type="checkbox" id="vpn-tor-toggle" />
-                  <span class="toggle-slider"></span>
-                </label>
-              </div>
-              <div class="vpn-toggle-row">
-                <div>
-                  <div class="vpn-row-title">Emergency Kill Switch</div>
-                  <div class="vpn-row-desc">Drop all traffic if secure tunnel disconnects</div>
-                </div>
-                <label class="toggle-switch small">
-                  <input type="checkbox" id="vpn-killswitch-toggle" checked />
-                  <span class="toggle-slider"></span>
-                </label>
-              </div>
-              <div class="vpn-toggle-row">
-                <div>
-                  <div class="vpn-row-title">DNS Leak Shield</div>
-                  <div class="vpn-row-desc">Force Encrypted DNS-over-HTTPS (Cloudflare / Quad9)</div>
-                </div>
-                <label class="toggle-switch small">
-                  <input type="checkbox" id="vpn-dnsleak-toggle" checked />
-                  <span class="toggle-slider"></span>
-                </label>
-              </div>
-              <div class="vpn-toggle-row">
-                <div>
-                  <div class="vpn-row-title">WebRTC IP Shield</div>
-                  <div class="vpn-row-desc">Prevent browser from exposing real physical IP via WebRTC</div>
-                </div>
-                <label class="toggle-switch small">
-                  <input type="checkbox" id="vpn-webrtc-toggle" checked />
-                  <span class="toggle-slider"></span>
-                </label>
-              </div>
-              <div class="vpn-toggle-row">
-                <div>
-                  <div class="vpn-row-title">Auto-Connect on Public Wi-Fi</div>
-                  <div class="vpn-row-desc">Automatically protect your connection on untrusted networks</div>
-                </div>
-                <label class="toggle-switch small">
-                  <input type="checkbox" id="vpn-autoconnect-toggle" />
-                  <span class="toggle-slider"></span>
-                </label>
-              </div>
-            </div>
-
-            <!-- Split Tunneling (Bypass List & Reverse Mode) -->
-            <div class="vpn-bypass-card">
-              <div class="vpn-split-header">
-                <div class="vpn-card-label">Split Tunneling</div>
-                <select id="vpn-split-mode-select" class="vpn-mini-select">
-                  <option value="bypass">Bypass Selected Domains</option>
-                  <option value="only_vpn">Tunnel Only Selected (Reverse)</option>
+              <!-- Server Location Selector -->
+              <div class="vpn-location-card">
+                <div class="vpn-card-label">Virtual Location</div>
+                <select id="vpn-location-select" class="vpn-select">
+                  <option value="optimal">🌍 Optimal Location (Lowest Load &amp; Ping)</option>
+                  <option value="us-east">🇺🇸 United States (New York) [28ms]</option>
+                  <option value="us-west">🇺🇸 United States (Los Angeles) [45ms]</option>
+                  <option value="de-fra">🇩🇪 Germany (Frankfurt) [32ms]</option>
+                  <option value="nl-ams">🇳🇱 Netherlands (Amsterdam) [29ms]</option>
+                  <option value="uk-lon">🇬🇧 United Kingdom (London) [35ms]</option>
+                  <option value="sg-sin">🇸🇬 Singapore [58ms]</option>
+                  <option value="jp-tyo">🇯🇵 Japan (Tokyo) [64ms]</option>
+                  <option value="ca-tor">🇨🇦 Canada (Toronto) [38ms]</option>
+                  <option value="ch-zrh">🇨🇭 Switzerland (Zurich - Privacy Haven) [34ms]</option>
+                  <option value="se-sto">🇸🇪 Sweden (Stockholm) [37ms]</option>
+                  <option value="is-rey">🇮🇸 Iceland (Reykjavik - Ultra-Private) [49ms]</option>
                 </select>
               </div>
-              <div class="vpn-bypass-chips" id="vpn-bypass-chips">
-                <span class="vpn-chip">localhost</span>
-                <span class="vpn-chip">127.0.0.1</span>
-                <span class="vpn-chip">*.local</span>
+
+              <!-- Real-time Stats Grid -->
+              <div class="vpn-stat-grid">
+                <div class="vpn-stat-card">
+                  <div class="vpn-stat-label">Virtual IP</div>
+                  <div class="vpn-stat-val" id="vpn-ip-val">Protected</div>
+                </div>
+                <div class="vpn-stat-card">
+                  <div class="vpn-stat-label">Ping / Latency</div>
+                  <div class="vpn-stat-val" id="vpn-latency-val">-- ms</div>
+                </div>
+                <div class="vpn-stat-card">
+                  <div class="vpn-stat-label">Tunnel Protocol</div>
+                  <div class="vpn-stat-val" id="vpn-active-proto-val">WireGuard</div>
+                </div>
+                <div class="vpn-stat-card">
+                  <div class="vpn-stat-label">Data Encrypted</div>
+                  <div class="vpn-stat-val" id="vpn-traffic-val">0 KB</div>
+                </div>
               </div>
-              <div class="vpn-add-bypass-row">
-                <input type="text" id="vpn-new-bypass-input" placeholder="e.g. streaming.com or *.corp" class="vpn-input" />
-                <button id="vpn-add-bypass-btn" class="vpn-add-btn">Add</button>
+
+              <!-- Multi-Hop (Double VPN) Card -->
+              <div class="vpn-multihop-card">
+                <div class="vpn-toggle-row">
+                  <div>
+                    <div class="vpn-row-title">Double VPN / Multi-Hop</div>
+                    <div class="vpn-row-desc">Route through 2 independent countries</div>
+                  </div>
+                  <label class="toggle-switch small">
+                    <input type="checkbox" id="vpn-multihop-toggle" />
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+                <div id="vpn-multihop-details" class="vpn-multihop-details hidden">
+                  <div class="vpn-hop-chain">
+                    <span class="vpn-hop-tag" id="vpn-entry-tag">🇨🇭 Switzerland</span>
+                    <span class="vpn-hop-arrow">➔</span>
+                    <select id="vpn-exit-select" class="vpn-mini-select">
+                      <option value="nl-ams">🇳🇱 Netherlands</option>
+                      <option value="de-fra">🇩🇪 Germany</option>
+                      <option value="is-rey">🇮🇸 Iceland</option>
+                      <option value="se-sto">🇸🇪 Sweden</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Rotating IP Engine Card -->
+              <div class="vpn-rotating-card">
+                <div class="vpn-toggle-row">
+                  <div>
+                    <div class="vpn-row-title">Rotating IP Engine</div>
+                    <div class="vpn-row-desc">Automatically shuffles IP address periodically</div>
+                  </div>
+                  <label class="toggle-switch small">
+                    <input type="checkbox" id="vpn-rotating-toggle" />
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+                <div class="vpn-rotate-btn-row">
+                  <button id="vpn-rotate-now-btn" class="vpn-shuffle-btn">🔀 Shuffle IP Now</button>
+                  <span id="vpn-rotation-status" class="vpn-rotation-badge">Static</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Panel 2: Security & Protection -->
+            <div id="vpn-panel-shields" class="vpn-panel hidden">
+              <div class="vpn-toggle-list">
+                <div class="vpn-toggle-row">
+                  <div>
+                    <div class="vpn-row-title">Threat Protection (CleanWeb)</div>
+                    <div class="vpn-row-desc">Block malware, phishing &amp; cryptominers at DNS layer</div>
+                  </div>
+                  <label class="toggle-switch small">
+                    <input type="checkbox" id="vpn-threat-toggle" checked />
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+                <div class="vpn-toggle-row">
+                  <div>
+                    <div class="vpn-row-title">Camouflage / Stealth Mode</div>
+                    <div class="vpn-row-desc">Disguise VPN traffic as standard HTTPS to bypass DPI</div>
+                  </div>
+                  <label class="toggle-switch small">
+                    <input type="checkbox" id="vpn-stealth-toggle" />
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+                <div class="vpn-toggle-row">
+                  <div>
+                    <div class="vpn-row-title">Tor over VPN (Onion Gateway)</div>
+                    <div class="vpn-row-desc">Route encrypted traffic into the Tor network</div>
+                  </div>
+                  <label class="toggle-switch small">
+                    <input type="checkbox" id="vpn-tor-toggle" />
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+                <div class="vpn-toggle-row">
+                  <div>
+                    <div class="vpn-row-title">Emergency Kill Switch</div>
+                    <div class="vpn-row-desc">Drop all traffic if secure tunnel disconnects</div>
+                  </div>
+                  <label class="toggle-switch small">
+                    <input type="checkbox" id="vpn-killswitch-toggle" checked />
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+                <div class="vpn-toggle-row">
+                  <div>
+                    <div class="vpn-row-title">DNS Leak Shield</div>
+                    <div class="vpn-row-desc">Force Encrypted DNS-over-HTTPS (Cloudflare / Quad9)</div>
+                  </div>
+                  <label class="toggle-switch small">
+                    <input type="checkbox" id="vpn-dnsleak-toggle" checked />
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+                <div class="vpn-toggle-row">
+                  <div>
+                    <div class="vpn-row-title">WebRTC IP Shield</div>
+                    <div class="vpn-row-desc">Prevent browser from exposing real physical IP via WebRTC</div>
+                  </div>
+                  <label class="toggle-switch small">
+                    <input type="checkbox" id="vpn-webrtc-toggle" checked />
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+                <div class="vpn-toggle-row">
+                  <div>
+                    <div class="vpn-row-title">Auto-Connect on Public Wi-Fi</div>
+                    <div class="vpn-row-desc">Automatically protect your connection on untrusted networks</div>
+                  </div>
+                  <label class="toggle-switch small">
+                    <input type="checkbox" id="vpn-autoconnect-toggle" />
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Panel 3: Split Tunneling -->
+            <div id="vpn-panel-split" class="vpn-panel hidden">
+              <div class="vpn-bypass-card">
+                <div class="vpn-split-header">
+                  <div class="vpn-card-label">Split Tunneling</div>
+                  <select id="vpn-split-mode-select" class="vpn-mini-select">
+                    <option value="bypass">Bypass Selected Domains</option>
+                    <option value="only_vpn">Tunnel Only Selected (Reverse)</option>
+                  </select>
+                </div>
+                <div class="vpn-bypass-chips" id="vpn-bypass-chips">
+                  <span class="vpn-chip">localhost</span>
+                  <span class="vpn-chip">127.0.0.1</span>
+                  <span class="vpn-chip">*.local</span>
+                </div>
+                <div class="vpn-add-bypass-row">
+                  <input type="text" id="vpn-new-bypass-input" placeholder="e.g. streaming.com or *.corp" class="vpn-input" />
+                  <button id="vpn-add-bypass-btn" class="vpn-add-btn">Add</button>
+                </div>
               </div>
             </div>
           </div>
