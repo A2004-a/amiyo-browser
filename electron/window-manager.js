@@ -126,10 +126,16 @@ class WindowManager {
       query: isPrivate ? { private: '1' } : {}
     });
 
-    win.once('ready-to-show', () => {
-      win.show();
-      tabController.updateActiveViewBounds();
-    });
+    const showWindow = () => {
+      if (!win.isDestroyed() && !win.isVisible()) {
+        win.show();
+        tabController.updateActiveViewBounds();
+      }
+    };
+
+    win.once('ready-to-show', showWindow);
+    // Instant fallback guarantee: never leave window hidden
+    setTimeout(showWindow, 300);
 
     return win;
   }
