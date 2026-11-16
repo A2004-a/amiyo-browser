@@ -814,8 +814,8 @@ function registerIpcHandlers() {
     return await vpnController.setLocation(locationId);
   });
 
-  ipcMain.handle('vpn:get-locations', () => {
-    return vpnController.getLocations();
+  ipcMain.handle('vpn:get-locations', (event, specialty) => {
+    return vpnController.getLocations(specialty);
   });
 
   ipcMain.handle('vpn:set-killswitch', (event, enabled) => {
@@ -885,6 +885,35 @@ function registerIpcHandlers() {
 
   ipcMain.handle('vpn:set-protocol', (event, proto) => {
     return vpnController.setProtocol(proto);
+  });
+
+  // Industry Leader Superpowers (NordVPN, ExpressVPN, Proton VPN, Surfshark)
+  ipcMain.handle('vpn:set-turbo-accelerator', (event, enabled) => {
+    return vpnController.setTurboAccelerator(enabled);
+  });
+
+  ipcMain.handle('vpn:run-speed-test', async () => {
+    return await vpnController.runSpeedTest();
+  });
+
+  ipcMain.handle('vpn:check-ip-reputation', () => {
+    return vpnController.checkIpReputation();
+  });
+
+  ipcMain.handle('vpn:set-post-quantum', (event, enabled) => {
+    return vpnController.setPostQuantum(enabled);
+  });
+
+  ipcMain.handle('vpn:pause', async (event, minutes) => {
+    return await vpnController.pauseVpn(minutes);
+  });
+
+  ipcMain.handle('vpn:resume', async () => {
+    return await vpnController.resumeVpn();
+  });
+
+  ipcMain.handle('vpn:set-threat-level', (event, level) => {
+    return vpnController.setThreatProtectionLevel(level);
   });
 }
 

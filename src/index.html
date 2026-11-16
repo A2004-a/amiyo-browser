@@ -306,6 +306,25 @@
                 </button>
               </div>
 
+              <!-- Pause / Snooze VPN Bar -->
+              <div class="vpn-pause-bar" id="vpn-pause-bar">
+                <span class="vpn-pause-label">Pause:</span>
+                <button class="vpn-snooze-btn" data-pause="5">5m</button>
+                <button class="vpn-snooze-btn" data-pause="15">15m</button>
+                <button class="vpn-snooze-btn" data-pause="60">1h</button>
+                <button class="vpn-resume-btn hidden" id="vpn-resume-btn">▶️ Resume</button>
+                <span class="vpn-pause-countdown hidden" id="vpn-pause-countdown">05:00</span>
+              </div>
+
+              <!-- Specialty Location Filter Pills -->
+              <div class="vpn-specialty-pills" id="vpn-specialty-pills">
+                <button class="vpn-pill active" data-specialty="all">All</button>
+                <button class="vpn-pill" data-specialty="streaming">🎬 Streaming</button>
+                <button class="vpn-pill" data-specialty="p2p">⚡ P2P</button>
+                <button class="vpn-pill" data-specialty="secure-core">🛡️ Secure Core</button>
+                <button class="vpn-pill" data-specialty="tor">🧅 Onion</button>
+              </div>
+
               <!-- Server Location Selector -->
               <div class="vpn-location-card">
                 <div class="vpn-card-label">Virtual Location</div>
@@ -343,18 +362,75 @@
                   <div class="vpn-stat-val" id="vpn-latency-val">-- ms</div>
                 </div>
                 <div class="vpn-stat-card">
-                  <div class="vpn-stat-label">Tunnel Protocol</div>
-                  <div class="vpn-stat-val" id="vpn-active-proto-val">WireGuard</div>
+                  <div class="vpn-stat-label">Session Duration</div>
+                  <div class="vpn-stat-val" id="vpn-session-time-val">00:00</div>
                 </div>
                 <div class="vpn-stat-card">
                   <div class="vpn-stat-label">Data Encrypted</div>
                   <div class="vpn-stat-val" id="vpn-traffic-val">0 KB</div>
                 </div>
+                <div class="vpn-stat-card">
+                  <div class="vpn-stat-label">Tunnel Protocol</div>
+                  <div class="vpn-stat-val" id="vpn-active-proto-val">WireGuard</div>
+                </div>
+                <div class="vpn-stat-card">
+                  <div class="vpn-stat-label">Download / Upload</div>
+                  <div class="vpn-stat-val" id="vpn-down-up-val">0 / 0 KB</div>
+                </div>
+              </div>
+
+              <!-- AETHER Turbo Accelerator Card -->
+              <div class="vpn-turbo-card">
+                <div class="vpn-toggle-row">
+                  <div>
+                    <div class="vpn-row-title">⚡ AETHER Turbo Accelerator</div>
+                    <div class="vpn-row-desc">Multi-stream BBR socket pacing (+320% throughput boost)</div>
+                  </div>
+                  <label class="toggle-switch small">
+                    <input type="checkbox" id="vpn-turbo-toggle" checked />
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Real-Time Speed Test Card -->
+              <div class="vpn-speedtest-card">
+                <div class="vpn-speedtest-header">
+                  <div>
+                    <div class="vpn-row-title">🚀 Real-Time Speed Test</div>
+                    <div class="vpn-row-desc">Measure live tunnel bandwidth &amp; ping</div>
+                  </div>
+                  <button id="vpn-speedtest-btn" class="vpn-speedtest-run-btn">Run Test</button>
+                </div>
+                <div id="vpn-speedtest-results" class="vpn-speedtest-results hidden">
+                  <div class="vpn-speed-item">
+                    <span class="vpn-speed-metric-lbl">Download</span>
+                    <span class="vpn-speed-metric-val" id="vpn-speed-down">-- Mbps</span>
+                  </div>
+                  <div class="vpn-speed-item">
+                    <span class="vpn-speed-metric-lbl">Upload</span>
+                    <span class="vpn-speed-metric-val" id="vpn-speed-up">-- Mbps</span>
+                  </div>
+                  <div class="vpn-speed-item">
+                    <span class="vpn-speed-metric-lbl">Ping / Jitter</span>
+                    <span class="vpn-speed-metric-val" id="vpn-speed-ping">-- ms</span>
+                  </div>
+                </div>
+                <div class="vpn-speed-quality hidden" id="vpn-speed-quality"></div>
               </div>
             </div>
 
             <!-- Panel 2: Security & Protection -->
             <div id="vpn-panel-shields" class="vpn-panel hidden">
+              <!-- IP Reputation & Dark Web Shield Card -->
+              <div class="vpn-reputation-card" id="vpn-reputation-card">
+                <div class="vpn-reputation-header">
+                  <span class="vpn-reputation-title">🛡️ IP Reputation &amp; Dark Web Shield</span>
+                  <span class="vpn-reputation-badge" id="vpn-ip-trust-badge">100% Clean</span>
+                </div>
+                <div class="vpn-reputation-sub" id="vpn-ip-reputation-detail">0/92 Blacklists • Spamhaus Clean • Zero Dark Web Breaches</div>
+              </div>
+
               <!-- Multi-Hop (Double VPN) Card -->
               <div class="vpn-multihop-card">
                 <div class="vpn-toggle-row">
@@ -407,6 +483,26 @@
                   </div>
                   <label class="toggle-switch small">
                     <input type="checkbox" id="vpn-threat-toggle" checked />
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+                <div class="vpn-toggle-row">
+                  <div>
+                    <div class="vpn-row-title">Threat Filtering Sensitivity</div>
+                    <div class="vpn-row-desc">Standard (Malware) or Strict (+Miners &amp; Tracking)</div>
+                  </div>
+                  <select id="vpn-threat-level-select" class="vpn-mini-select">
+                    <option value="strict">Strict (Maximum Defense)</option>
+                    <option value="standard">Standard (Basic Filter)</option>
+                  </select>
+                </div>
+                <div class="vpn-toggle-row">
+                  <div>
+                    <div class="vpn-row-title">Post-Quantum Cryptography (Kyber-1024)</div>
+                    <div class="vpn-row-desc">Quantum-resistant ML-KEM exchange to defeat future decryption</div>
+                  </div>
+                  <label class="toggle-switch small">
+                    <input type="checkbox" id="vpn-quantum-toggle" checked />
                     <span class="toggle-slider"></span>
                   </label>
                 </div>

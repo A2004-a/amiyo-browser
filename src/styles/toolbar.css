@@ -1334,6 +1334,212 @@
   fill: currentColor;
 }
 
+/* Pause / Snooze VPN Bar */
+.vpn-pause-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  background: var(--bg-secondary);
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border-subtle);
+}
+
+.vpn-pause-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.vpn-snooze-btn {
+  padding: 3px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.vpn-snooze-btn:hover {
+  background: var(--bg-hover);
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.vpn-resume-btn {
+  padding: 3px 8px;
+  border-radius: 4px;
+  border: 1px solid #10B981;
+  background: rgba(16, 185, 129, 0.2);
+  color: #10B981;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.vpn-pause-countdown {
+  font-size: 11px;
+  font-weight: 700;
+  color: #F59E0B;
+}
+
+/* Specialty Location Filter Pills */
+.vpn-specialty-pills {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.vpn-specialty-pills::-webkit-scrollbar {
+  height: 3px;
+}
+
+.vpn-pill {
+  padding: 3px 7px;
+  border-radius: 12px;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-secondary);
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.vpn-pill:hover {
+  color: var(--text-primary);
+  border-color: var(--border-focus);
+}
+
+.vpn-pill.active {
+  background: var(--accent);
+  color: #FFFFFF;
+  border-color: var(--accent);
+}
+
+/* Turbo Accelerator Card */
+.vpn-turbo-card {
+  background: var(--bg-secondary);
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border-subtle);
+}
+
+/* Real-Time Speed Test Card */
+.vpn-speedtest-card {
+  background: var(--bg-secondary);
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.vpn-speedtest-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.vpn-speedtest-run-btn {
+  padding: 5px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--accent);
+  background: linear-gradient(135deg, rgba(53, 216, 242, 0.2), rgba(2, 132, 199, 0.3));
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.vpn-speedtest-run-btn:hover {
+  background: var(--accent);
+  color: #FFFFFF;
+  box-shadow: 0 2px 8px rgba(53, 216, 242, 0.4);
+}
+
+.vpn-speedtest-results {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 6px;
+  background: var(--bg-surface);
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border-subtle);
+}
+
+.vpn-speed-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: center;
+}
+
+.vpn-speed-metric-lbl {
+  font-size: 9px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.vpn-speed-metric-val {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.vpn-speed-quality {
+  font-size: 10px;
+  font-weight: 600;
+  color: #10B981;
+  text-align: center;
+}
+
+/* IP Reputation & Dark Web Shield */
+.vpn-reputation-card {
+  background: var(--bg-secondary);
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.vpn-reputation-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.vpn-reputation-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.vpn-reputation-badge {
+  font-size: 10px;
+  font-weight: 700;
+  color: #10B981;
+  background: rgba(16, 185, 129, 0.15);
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.vpn-reputation-sub {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
 
 
 

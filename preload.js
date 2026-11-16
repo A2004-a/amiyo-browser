@@ -311,7 +311,14 @@ const api = {
     setSplitTunnelMode: (mode) => ipcRenderer.invoke('vpn:set-split-tunnel-mode', mode),
     addOnlyVpnDomain: (dom) => ipcRenderer.invoke('vpn:add-only-vpn-domain', dom),
     removeOnlyVpnDomain: (dom) => ipcRenderer.invoke('vpn:remove-only-vpn-domain', dom),
-    setProtocol: (proto) => ipcRenderer.invoke('vpn:set-protocol', proto)
+    setProtocol: (proto) => ipcRenderer.invoke('vpn:set-protocol', proto),
+    setTurboAccelerator: (val) => ipcRenderer.invoke('vpn:set-turbo-accelerator', val),
+    runSpeedTest: () => ipcRenderer.invoke('vpn:run-speed-test'),
+    checkIpReputation: () => ipcRenderer.invoke('vpn:check-ip-reputation'),
+    setPostQuantum: (val) => ipcRenderer.invoke('vpn:set-post-quantum', val),
+    pause: (minutes) => ipcRenderer.invoke('vpn:pause', minutes),
+    resume: () => ipcRenderer.invoke('vpn:resume'),
+    setThreatLevel: (level) => ipcRenderer.invoke('vpn:set-threat-level', level)
   },
 
   // --- Triggers ---

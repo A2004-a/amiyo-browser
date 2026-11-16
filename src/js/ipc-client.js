@@ -214,6 +214,13 @@ const IpcClient = {
   setVpnSplitTunnelMode(mode) { return this.api.vpn?.setSplitTunnelMode ? this.api.vpn.setSplitTunnelMode(mode) : Promise.resolve(); },
   addVpnOnlyDomain(dom) { return this.api.vpn?.addOnlyVpnDomain ? this.api.vpn.addOnlyVpnDomain(dom) : Promise.resolve([]); },
   removeVpnOnlyDomain(dom) { return this.api.vpn?.removeOnlyVpnDomain ? this.api.vpn.removeOnlyVpnDomain(dom) : Promise.resolve([]); },
-  setVpnProtocol(proto) { return this.api.vpn?.setProtocol ? this.api.vpn.setProtocol(proto) : Promise.resolve(); }
+  setVpnProtocol(proto) { return this.api.vpn?.setProtocol ? this.api.vpn.setProtocol(proto) : Promise.resolve(); },
+  setVpnTurboAccelerator(val) { return this.api.vpn?.setTurboAccelerator ? this.api.vpn.setTurboAccelerator(val) : Promise.resolve(); },
+  runVpnSpeedTest() { return this.api.vpn?.runSpeedTest ? this.api.vpn.runSpeedTest() : Promise.resolve({ downloadMbps: 180, uploadMbps: 90, pingMs: 25 }); },
+  checkVpnIpReputation() { return this.api.vpn?.checkIpReputation ? this.api.vpn.checkIpReputation() : Promise.resolve({ trustScore: 100, blacklistsFlagged: 0 }); },
+  setVpnPostQuantum(val) { return this.api.vpn?.setPostQuantum ? this.api.vpn.setPostQuantum(val) : Promise.resolve(); },
+  pauseVpn(minutes) { return this.api.vpn?.pause ? this.api.vpn.pause(minutes) : Promise.resolve(); },
+  resumeVpn() { return this.api.vpn?.resume ? this.api.vpn.resume() : Promise.resolve(); },
+  setVpnThreatLevel(level) { return this.api.vpn?.setThreatLevel ? this.api.vpn.setThreatLevel(level) : Promise.resolve(); }
 };
 

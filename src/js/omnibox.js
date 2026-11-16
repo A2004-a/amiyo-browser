@@ -338,6 +338,53 @@ const Omnibox = {
       if (latencyVal) latencyVal.textContent = status.connected ? `${status.latency} ms` : '-- ms';
       if (trafficVal) trafficVal.textContent = status.stats?.bytesFormatted || '0 KB';
 
+      // Session Duration & Down/Up Breakdown
+      const sessionTimeVal = document.getElementById('vpn-session-time-val');
+      const downUpVal = document.getElementById('vpn-down-up-val');
+      if (sessionTimeVal) sessionTimeVal.textContent = status.sessionDuration || '00:00';
+      if (downUpVal) downUpVal.textContent = `${status.stats?.downloadFormatted || '0 KB'} / ${status.stats?.uploadFormatted || '0 KB'}`;
+
+      // Pause / Snooze Bar State
+      const pauseBar = document.getElementById('vpn-pause-bar');
+      const resumeBtn = document.getElementById('vpn-resume-btn');
+      const pauseCountdown = document.getElementById('vpn-pause-countdown');
+      if (status.paused) {
+        if (resumeBtn) resumeBtn.classList.remove('hidden');
+        if (pauseCountdown) {
+          pauseCountdown.classList.remove('hidden');
+          pauseCountdown.textContent = status.pauseRemainingFormatted || '00:00';
+        }
+        if (powerBtn) powerBtn.classList.remove('connected');
+        if (powerLabel) powerLabel.textContent = 'RESUME';
+        if (statusText) {
+          statusText.textContent = `Paused (${status.pauseRemainingFormatted} left)`;
+          statusText.style.color = '#F59E0B';
+        }
+      } else {
+        if (resumeBtn) resumeBtn.classList.add('hidden');
+        if (pauseCountdown) pauseCountdown.classList.add('hidden');
+      }
+
+      // Turbo Accelerator Toggle
+      const turboToggle = document.getElementById('vpn-turbo-toggle');
+      if (turboToggle) turboToggle.checked = status.turboAccelerator?.enabled !== false;
+
+      // Post-Quantum Toggle
+      const quantumToggle = document.getElementById('vpn-quantum-toggle');
+      if (quantumToggle) quantumToggle.checked = status.postQuantum?.enabled !== false;
+
+      // Threat Filtering Level Select
+      const threatLevelSelect = document.getElementById('vpn-threat-level-select');
+      if (threatLevelSelect && status.threatProtection?.level) {
+        threatLevelSelect.value = status.threatProtection.level;
+      }
+
+      // IP Reputation Card
+      const trustBadge = document.getElementById('vpn-ip-trust-badge');
+      if (trustBadge) {
+        trustBadge.textContent = `${status.ipReputation?.trustScore || 100}% Clean`;
+      }
+
       // Protocol indicator
       const activeProtoVal = document.getElementById('vpn-active-proto-val');
       if (activeProtoVal) {
@@ -440,6 +487,105 @@ const Omnibox = {
     const autoconnect = document.getElementById('vpn-autoconnect-toggle');
     const addBtn = document.getElementById('vpn-add-bypass-btn');
     const addInput = document.getElementById('vpn-new-bypass-input');
+
+    // Specialty Location Filter Pills
+    const pills = this.vpnPopoverEl.querySelectorAll('.vpn-pill');
+    pills.forEach(pill => {
+      pill.onclick = async () => {
+        pills.forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        const spec = pill.getAttribute('data-specialty');
+        const locs = await IpcClient.getVpnLocations(spec);
+        if (locSelect && locs) {
+          const currentVal = locSelect.value;
+          locSelect.innerHTML = locs.map(l => {
+            const label = l.id === 'optimal'
+              ? `${l.flag} ${l.name} (${l.region})`
+              : `${l.flag} ${l.name} [${l.latency}ms]`;
+            return `<option value="${l.id}">${label}</option>`;
+          }).join('');
+          locSelect.value = locs.some(l => l.id === currentVal) ? currentVal : (locs[0]?.id || 'optimal');
+        }
+      };
+    });
+
+    // Pause / Snooze Buttons
+    const snoozeBtns = this.vpnPopoverEl.querySelectorAll('.vpn-snooze-btn');
+    snoozeBtns.forEach(btn => {
+      btn.onclick = async () => {
+        const mins = parseInt(btn.getAttribute('data-pause')) || 5;
+        await IpcClient.pauseVpn(mins);
+        await renderVpnUi();
+      };
+    });
+
+    const resumeBtn = document.getElementById('vpn-resume-btn');
+    if (resumeBtn) {
+      resumeBtn.onclick = async () => {
+        await IpcClient.resumeVpn();
+        await renderVpnUi();
+      };
+    }
+
+    // Turbo Accelerator Toggle
+    const turboToggle = document.getElementById('vpn-turbo-toggle');
+    if (turboToggle) {
+      turboToggle.onchange = async () => {
+        await IpcClient.setVpnTurboAccelerator(turboToggle.checked);
+        await renderVpnUi();
+      };
+    }
+
+    // Speed Test Runner
+    const speedtestBtn = document.getElementById('vpn-speedtest-btn');
+    const speedResults = document.getElementById('vpn-speedtest-results');
+    const speedDown = document.getElementById('vpn-speed-down');
+    const speedUp = document.getElementById('vpn-speed-up');
+    const speedPing = document.getElementById('vpn-speed-ping');
+    const speedQuality = document.getElementById('vpn-speed-quality');
+    if (speedtestBtn) {
+      speedtestBtn.onclick = async () => {
+        speedtestBtn.disabled = true;
+        speedtestBtn.textContent = 'Testing...';
+        if (speedResults) speedResults.classList.remove('hidden');
+        if (speedDown) speedDown.textContent = '...';
+        if (speedUp) speedUp.textContent = '...';
+        if (speedPing) speedPing.textContent = '...';
+        try {
+          const res = await IpcClient.runVpnSpeedTest();
+          if (res) {
+            if (speedDown) speedDown.textContent = `${res.downloadMbps} Mbps`;
+            if (speedUp) speedUp.textContent = `${res.uploadMbps} Mbps`;
+            if (speedPing) speedPing.textContent = `${res.pingMs} ms (${res.jitterMs}ms jitter)`;
+            if (speedQuality) {
+              speedQuality.textContent = `✨ ${res.quality}`;
+              speedQuality.classList.remove('hidden');
+            }
+          }
+        } finally {
+          speedtestBtn.disabled = false;
+          speedtestBtn.textContent = 'Run Test';
+        }
+      };
+    }
+
+    // Post-Quantum Toggle
+    const quantumToggle = document.getElementById('vpn-quantum-toggle');
+    if (quantumToggle) {
+      quantumToggle.onchange = async () => {
+        await IpcClient.setVpnPostQuantum(quantumToggle.checked);
+        await renderVpnUi();
+      };
+    }
+
+    // Threat Filtering Sensitivity
+    const threatLevelSelect = document.getElementById('vpn-threat-level-select');
+    if (threatLevelSelect) {
+      threatLevelSelect.onchange = async () => {
+        await IpcClient.setVpnThreatLevel(threatLevelSelect.value);
+        await renderVpnUi();
+      };
+    }
 
     // Protocol Tabs Listeners
     const btnWg = document.getElementById('vpn-proto-wireguard');
@@ -637,6 +783,10 @@ const Omnibox = {
         const trafficVal = document.getElementById('vpn-traffic-val');
         const latencyVal = document.getElementById('vpn-latency-val');
         const ipVal = document.getElementById('vpn-ip-val');
+        const sessionTimeVal = document.getElementById('vpn-session-time-val');
+        const downUpVal = document.getElementById('vpn-down-up-val');
+        const pauseCountdown = document.getElementById('vpn-pause-countdown');
+
         if (trafficVal && st.stats?.bytesFormatted) {
           trafficVal.textContent = st.stats.bytesFormatted;
         }
@@ -645,6 +795,15 @@ const Omnibox = {
         }
         if (ipVal && st.connected) {
           ipVal.textContent = st.virtualIp;
+        }
+        if (sessionTimeVal && st.sessionDuration) {
+          sessionTimeVal.textContent = st.sessionDuration;
+        }
+        if (downUpVal && st.stats) {
+          downUpVal.textContent = `${st.stats.downloadFormatted || '0 KB'} / ${st.stats.uploadFormatted || '0 KB'}`;
+        }
+        if (pauseCountdown && st.paused) {
+          pauseCountdown.textContent = st.pauseRemainingFormatted || '00:00';
         }
       } catch (e) {}
     }, 1500);
