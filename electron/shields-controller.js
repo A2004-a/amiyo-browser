@@ -188,7 +188,12 @@ class ShieldsController {
       /youtube\.com\/api\/stats\/qoe\?.*adformat=/i,
       /youtube\.com\/get_midroll_info/i,
       /youtube\.com\/youtubei\/v1\/player\/ad_break/i,
-      /googlevideo\.com\/videoplayback\?.*&adformat=/i
+      /googlevideo\.com\/videoplayback\?.*&(adformat|ad_type|ctier)=/i,
+      /static\.doubleclick\.net\/instream\/ad_status\.js/i,
+      /googleads\.g\.doubleclick\.net\/pagead\//i,
+      /youtube\.com\/api\/stats\/watchtime\?.*&ns=yt&.*el=ad/i,
+      /youtube\.com\/get_video_info\?.*&adformat=/i,
+      /youtube\.com\/youtubei\/v1\/log_event/i
     ];
 
     // Memoized injected CSS & Scriptlet strings for zero-cost repeated injection
@@ -577,6 +582,9 @@ class ShieldsController {
       [data-ad-unit],
       [data-ad-slot],
       [data-ad-client],
+      [data-ad-zone],
+      [data-ad-name],
+      [data-ad-id],
       .adsbygoogle,
       .ad,
       .ads,
@@ -588,12 +596,18 @@ class ShieldsController {
       .ad-box,
       .ad-unit,
       .ad-placement,
+      .ad-holder,
+      .ad-card,
+      .ad_wrapper,
+      .ad_container,
       .sponsored-content,
       .sponsored-post,
+      .sponsored-link,
       .taboola-ad,
       .outbrain-ad,
       .revcontent-ad,
       .mgid-ad,
+      .zergnet-widget,
       [class*="sponsored_"],
       [id*="sponsored_"],
       [class*="floating-ad"],
@@ -601,18 +615,68 @@ class ShieldsController {
       [id*="bottom-sticky-ad"],
       [id*="floating_ad"],
       .video-ads,
+      /* YouTube Ad Modules, Player Overlays & Sponsored Cards */
       .ytp-ad-module,
       .ytp-ad-overlay-container,
       .ytp-ad-player-overlay,
       .ytp-ad-text,
       .ytp-ad-message-container,
-      ytd-promoted-video-renderer,
-      ytd-promoted-sparkles-web-renderer,
-      ytd-display-ad-renderer,
-      ytd-banner-promo-renderer,
-      ytd-in-feed-ad-layout-renderer,
+      .ytp-ad-preview-container,
+      .ytp-ad-skip-button-container,
       ytd-ad-slot-renderer,
-      ytd-rich-item-renderer:has(.ytd-ad-slot-renderer),
+      ytd-in-feed-ad-layout-renderer,
+      ytd-banner-promo-renderer,
+      ytd-statement-banner-renderer,
+      ytd-promoted-sparkles-web-renderer,
+      ytd-promoted-video-renderer,
+      ytd-compact-promoted-video-renderer,
+      ytd-companion-slot-renderer,
+      ytd-companion-ad-renderer,
+      ytd-player-legacy-desktop-watch-ads-renderer,
+      ytd-action-companion-ad-renderer,
+      ytd-engagement-panel-section-list-renderer[target-id="engagement-panel-ads"],
+      ytd-video-masthead-ad-v3-renderer,
+      ytd-primetime-promo-renderer,
+      ytd-mealbar-promo-renderer,
+      ytd-brand-video-singleton-renderer,
+      ytd-merch-shelf-renderer,
+      ytd-display-ad-renderer,
+      #player-ads,
+      #masthead-ad,
+      #merchandise-shelf,
+      ytd-popup-container:has(ytd-enforcement-message-view-model),
+      tp-yt-paper-dialog:has(ytd-enforcement-message-view-model),
+      ytd-enforcement-message-view-model,
+      div#below ytd-ad-slot-renderer,
+      div#secondary ytd-ad-slot-renderer,
+      div#secondary ytd-in-feed-ad-layout-renderer,
+      div#secondary ytd-companion-slot-renderer,
+      div#secondary ytd-promoted-sparkles-web-renderer,
+      ytd-watch-next-secondary-results-renderer ytd-ad-slot-renderer,
+      ytd-watch-next-secondary-results-renderer ytd-in-feed-ad-layout-renderer,
+      ytd-watch-next-secondary-results-renderer ytd-companion-slot-renderer,
+      ytd-watch-next-secondary-results-renderer ytd-promoted-sparkles-web-renderer,
+      ytd-rich-item-renderer:has(ytd-ad-slot-renderer),
+      ytd-rich-item-renderer:has(ytd-in-feed-ad-layout-renderer),
+      ytd-rich-section-renderer:has(ytd-ad-slot-renderer),
+      ytd-rich-section-renderer:has(ytd-statement-banner-renderer),
+      ytd-rich-section-renderer:has(ytd-in-feed-ad-layout-renderer),
+      ytd-compact-video-renderer:has(.badge-shape-wiz--thumbnail-badge),
+      ytd-compact-video-renderer:has(span[aria-label*="Sponsored"]),
+      [target-id="engagement-panel-ads"],
+      .ytd-ad-slot-renderer,
+      /* Social Feed Promoted Ads */
+      shreddit-post[is-promoted],
+      div[data-promoted="true"],
+      div[data-testid="cellInnerDiv"]:has([data-testid="placementTracking"]),
+      div[data-pagelet*="FeedUnit"]:has(a[href*="/ads/about"]),
+      /* Content Recommendation Widgets */
+      #taboola-below-article-thumbnails,
+      #taboola-right-rail-thumbnails,
+      .trc_rbox_container,
+      .OUTBRAIN,
+      .rc-container,
+      .mgbox,
       /* Cookie Consent Notices (Fanboy's Annoyance / Easylist Cookie) */
       #onetrust-consent-sdk,
       #onetrust-banner-sdk,
@@ -645,11 +709,16 @@ class ShieldsController {
         visibility: hidden !important;
         height: 0 !important;
         max-height: 0 !important;
+        min-height: 0 !important;
+        width: 0 !important;
+        max-width: 0 !important;
         margin: 0 !important;
         padding: 0 !important;
         opacity: 0 !important;
         pointer-events: none !important;
         overflow: hidden !important;
+        position: absolute !important;
+        z-index: -99999 !important;
       }
     `;
 
@@ -756,34 +825,121 @@ class ShieldsController {
 
           // 3. YouTube Ad-Skipper & Video Fast-Forward Engine v2.0
           if (location.hostname.includes('youtube.com')) {
-            // Neutralize player response ad queues if accessible
-            if (window.ytInitialPlayerResponse) {
+            // Neutralize player response and browse response ad queues
+            const sanitizePlayerResponse = (obj) => {
+              if (!obj || typeof obj !== 'object') return obj;
               try {
-                delete window.ytInitialPlayerResponse.adPlacements;
-                delete window.ytInitialPlayerResponse.playerAds;
-                delete window.ytInitialPlayerResponse.adSlots;
+                delete obj.adPlacements;
+                delete obj.playerAds;
+                delete obj.adSlots;
+                delete obj.adBreakHeartbeatParams;
+                if (obj.playbackTracking) {
+                  delete obj.playbackTracking.videostatsPlaybackUrl;
+                  delete obj.playbackTracking.qoeUrl;
+                }
               } catch (e) {}
-            }
+              return obj;
+            };
 
-            const skipYouTubeAds = () => {
+            const sanitizeBrowseResponse = (obj) => {
+              if (!obj || typeof obj !== 'object') return obj;
               try {
+                if (obj.contents?.twoColumnWatchNextResults?.secondaryResults?.secondaryResults?.results) {
+                  const arr = obj.contents.twoColumnWatchNextResults.secondaryResults.secondaryResults.results;
+                  obj.contents.twoColumnWatchNextResults.secondaryResults.secondaryResults.results = arr.filter(item => {
+                    return !item.adSlotRenderer && !item.inFeedAdLayoutRenderer && !item.promotedSparklesWebRenderer && !item.companionSlotRenderer;
+                  });
+                }
+              } catch (e) {}
+              return obj;
+            };
+
+            if (window.ytInitialPlayerResponse) sanitizePlayerResponse(window.ytInitialPlayerResponse);
+            if (window.ytInitialData) sanitizeBrowseResponse(window.ytInitialData);
+
+            // Hook JSON.parse for YouTube dynamic API responses
+            try {
+              const _origParse = JSON.parse;
+              JSON.parse = function(text, reviver) {
+                const res = _origParse.apply(this, arguments);
+                if (res && typeof res === 'object') {
+                  sanitizePlayerResponse(res);
+                  sanitizeBrowseResponse(res);
+                }
+                return res;
+              };
+            } catch (e) {}
+
+            const purgeYouTubeAds = () => {
+              try {
+                // Remove all sponsored/ad custom elements from DOM
+                const adSelectors = [
+                  'ytd-ad-slot-renderer',
+                  'ytd-in-feed-ad-layout-renderer',
+                  'ytd-banner-promo-renderer',
+                  'ytd-statement-banner-renderer',
+                  'ytd-promoted-sparkles-web-renderer',
+                  'ytd-promoted-video-renderer',
+                  'ytd-compact-promoted-video-renderer',
+                  'ytd-companion-slot-renderer',
+                  'ytd-companion-ad-renderer',
+                  'ytd-player-legacy-desktop-watch-ads-renderer',
+                  'ytd-action-companion-ad-renderer',
+                  'ytd-engagement-panel-section-list-renderer[target-id="engagement-panel-ads"]',
+                  'ytd-brand-video-singleton-renderer',
+                  'ytd-merch-shelf-renderer',
+                  '#player-ads',
+                  '#masthead-ad',
+                  '#merchandise-shelf',
+                  '.ytp-ad-module',
+                  '.ytp-ad-overlay-container',
+                  '.ytp-ad-player-overlay',
+                  '.ytp-ad-text',
+                  '.ytp-ad-message-container',
+                  '.ytp-ad-preview-container',
+                  '.ytp-ad-skip-button-container',
+                  'div#secondary ytd-ad-slot-renderer',
+                  'div#secondary ytd-in-feed-ad-layout-renderer',
+                  'div#secondary ytd-companion-slot-renderer',
+                  'div#secondary ytd-promoted-sparkles-web-renderer',
+                  'ytd-watch-next-secondary-results-renderer ytd-ad-slot-renderer',
+                  'ytd-watch-next-secondary-results-renderer ytd-in-feed-ad-layout-renderer',
+                  'ytd-watch-next-secondary-results-renderer ytd-companion-slot-renderer',
+                  'ytd-watch-next-secondary-results-renderer ytd-promoted-sparkles-web-renderer'
+                ];
+
+                const adElements = document.querySelectorAll(adSelectors.join(','));
+                for (let i = 0; i < adElements.length; i++) {
+                  adElements[i].remove();
+                }
+
+                // Remove sponsored badge cards in recommended list
+                const badges = document.querySelectorAll('.badge-shape-wiz--thumbnail-badge, ytd-badge-supported-renderer');
+                for (let i = 0; i < badges.length; i++) {
+                  const txt = (badges[i].textContent || '').trim().toLowerCase();
+                  if (txt.includes('sponsored') || txt.includes('promoted')) {
+                    const card = badges[i].closest('ytd-compact-video-renderer, ytd-rich-item-renderer, ytd-video-renderer, ytd-item-section-renderer');
+                    if (card) card.remove();
+                  }
+                }
+
                 // Auto-close overlay ads
                 const overlayClose = document.querySelector('.ytp-ad-overlay-close-button');
                 if (overlayClose) overlayClose.click();
 
-                // Skip video ads
+                // Video Ad Instant Bypass & Skip
                 const video = document.querySelector('video.html5-main-video') || document.querySelector('video');
                 const adShowing = document.querySelector('.ad-showing') || document.querySelector('.ad-interrupting');
                 if (video && adShowing) {
                   video.muted = true;
                   video.playbackRate = 16.0;
                   if (isFinite(video.duration) && video.duration > 0) {
-                    video.currentTime = video.duration - 0.05;
+                    video.currentTime = video.duration - 0.01;
                   }
                 }
 
                 // Click skip button immediately
-                const skipBtn = document.querySelector('.ytp-ad-skip-button, .ytp-ad-skip-button-modern, button.ytp-ad-skip-button, .ytp-skip-ad-button');
+                const skipBtn = document.querySelector('.ytp-ad-skip-button, .ytp-ad-skip-button-modern, button.ytp-ad-skip-button, .ytp-skip-ad-button, .ytp-ad-skip-button-slot');
                 if (skipBtn) {
                   skipBtn.click();
                 }
@@ -794,11 +950,19 @@ class ShieldsController {
                   dismissBtn.click();
                   if (video && video.paused) video.play();
                 }
+                const enforcementDialog = document.querySelector('tp-yt-paper-dialog:has(ytd-enforcement-message-view-model)');
+                if (enforcementDialog) enforcementDialog.remove();
 
                 // Strip progress bar mid-roll markers
                 document.querySelectorAll('.ytp-ad-progress-list, .ytp-ad-marker').forEach(el => el.remove());
               } catch (e) {}
             };
+
+            const skipYouTubeAds = purgeYouTubeAds;
+            purgeYouTubeAds();
+            window.addEventListener('yt-navigate-finish', purgeYouTubeAds);
+            window.addEventListener('spfdone', purgeYouTubeAds);
+            window.addEventListener('popstate', purgeYouTubeAds);
             setInterval(skipYouTubeAds, 50);
           }
 
@@ -818,19 +982,26 @@ class ShieldsController {
           // 5. Dynamic Ad Mutation Observer for SPAs
           const removeAdElements = (root) => {
             if (!root || !root.querySelectorAll) return;
-            const selectors = 'ins.adsbygoogle, [id^="google_ads"], .ad-slot, .ad-container, [data-ad-unit], ytd-ad-slot-renderer';
+            const selectors = 'ins.adsbygoogle, [id^="google_ads"], .ad-slot, .ad-container, [data-ad-unit], ytd-ad-slot-renderer, ytd-in-feed-ad-layout-renderer, ytd-promoted-sparkles-web-renderer, ytd-companion-slot-renderer, shreddit-post[is-promoted], div[data-promoted="true"]';
             root.querySelectorAll(selectors).forEach(el => {
-              el.style.display = 'none';
-              el.style.height = '0px';
+              try { el.remove(); } catch (e) {
+                el.style.display = 'none';
+                el.style.height = '0px';
+              }
             });
           };
 
+          let mutationRaf = null;
           const observer = new MutationObserver((mutations) => {
-            for (const mutation of mutations) {
-              for (const node of mutation.addedNodes) {
-                if (node.nodeType === 1) removeAdElements(node);
+            if (mutationRaf) return;
+            mutationRaf = requestAnimationFrame(() => {
+              mutationRaf = null;
+              for (const mutation of mutations) {
+                for (const node of mutation.addedNodes) {
+                  if (node.nodeType === 1) removeAdElements(node);
+                }
               }
-            }
+            });
           });
           observer.observe(document.documentElement || document.body, { childList: true, subtree: true });
 

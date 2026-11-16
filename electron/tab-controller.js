@@ -487,11 +487,18 @@ class TabController {
     });
 
     // Brave Shields: Cosmetic Ad Hiding + YouTube Defuser + Anti-AdBlock Scriptlet
-    wc.on('dom-ready', () => {
+    const injectShields = () => {
       if (!tab.isInternal && shieldsController.enabled && !shieldsController.isSiteWhitelisted(tab.url)) {
-        wc.insertCSS(shieldsController.getCosmeticCss()).catch(() => {});
+        wc.insertCSS(shieldsController.getCosmeticCss(), { cssOrigin: 'user' }).catch(() => {});
         wc.executeJavaScript(shieldsController.getInPageScriptlet()).catch(() => {});
       }
+    };
+
+    wc.on('dom-ready', injectShields);
+    wc.on('did-navigate-in-page', injectShields);
+    wc.on('did-finish-load', injectShields);
+    wc.on('did-frame-finish-load', (e, isMainFrame) => {
+      if (isMainFrame) injectShields();
     });
 
     // Universal In-Page Keyboard Shortcuts (Forward events from webview)
