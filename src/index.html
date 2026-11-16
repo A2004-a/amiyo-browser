@@ -276,16 +276,21 @@
                   <div class="vpn-subtitle" id="vpn-status-text">Disconnected</div>
                 </div>
               </div>
-              <label class="toggle-switch">
-                <input type="checkbox" id="vpn-master-toggle" />
-                <span class="toggle-slider"></span>
-              </label>
+              <div class="vpn-header-actions">
+                <label class="toggle-switch small">
+                  <input type="checkbox" id="vpn-master-toggle" />
+                  <span class="toggle-slider"></span>
+                </label>
+                <button class="vpn-close-btn" id="vpn-close-btn" title="Close VPN panel (Esc)">
+                  <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+                </button>
+              </div>
             </div>
 
             <!-- Category Navigation Tabs -->
             <div class="vpn-cat-tabs">
               <button class="vpn-cat-tab active" id="vpn-cat-tunnel-btn" data-vpn-tab="tunnel">⚡ Tunnel</button>
-              <button class="vpn-cat-tab" id="vpn-cat-shields-btn" data-vpn-tab="shields">🛡️ Security (7)</button>
+              <button class="vpn-cat-tab" id="vpn-cat-shields-btn" data-vpn-tab="shields">🛡️ Security &amp; Privacy</button>
               <button class="vpn-cat-tab" id="vpn-cat-split-btn" data-vpn-tab="split">🔀 Split Tunnel</button>
             </div>
 
@@ -299,13 +304,6 @@
                   </span>
                   <span id="vpn-power-label">QUICK CONNECT</span>
                 </button>
-              </div>
-
-              <!-- Protocol Mode Selector -->
-              <div class="vpn-protocol-tabs">
-                <button class="vpn-proto-btn active" id="vpn-proto-wireguard" data-proto="wireguard">⚡ WireGuard</button>
-                <button class="vpn-proto-btn" id="vpn-proto-stealth" data-proto="stealth-tls">🛡️ Stealth TLS</button>
-                <button class="vpn-proto-btn" id="vpn-proto-openvpn" data-proto="openvpn">🔒 OpenVPN</button>
               </div>
 
               <!-- Server Location Selector -->
@@ -327,6 +325,13 @@
                 </select>
               </div>
 
+              <!-- Protocol Mode Selector -->
+              <div class="vpn-protocol-tabs">
+                <button class="vpn-proto-btn active" id="vpn-proto-wireguard" data-proto="wireguard">⚡ WireGuard</button>
+                <button class="vpn-proto-btn" id="vpn-proto-stealth" data-proto="stealth-tls">🛡️ Stealth TLS</button>
+                <button class="vpn-proto-btn" id="vpn-proto-openvpn" data-proto="openvpn">🔒 OpenVPN</button>
+              </div>
+
               <!-- Real-time Stats Grid -->
               <div class="vpn-stat-grid">
                 <div class="vpn-stat-card">
@@ -346,7 +351,10 @@
                   <div class="vpn-stat-val" id="vpn-traffic-val">0 KB</div>
                 </div>
               </div>
+            </div>
 
+            <!-- Panel 2: Security & Protection -->
+            <div id="vpn-panel-shields" class="vpn-panel hidden">
               <!-- Multi-Hop (Double VPN) Card -->
               <div class="vpn-multihop-card">
                 <div class="vpn-toggle-row">
@@ -390,10 +398,7 @@
                   <span id="vpn-rotation-status" class="vpn-rotation-badge">Static</span>
                 </div>
               </div>
-            </div>
 
-            <!-- Panel 2: Security & Protection -->
-            <div id="vpn-panel-shields" class="vpn-panel hidden">
               <div class="vpn-toggle-list">
                 <div class="vpn-toggle-row">
                   <div>

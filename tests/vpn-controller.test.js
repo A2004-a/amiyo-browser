@@ -249,7 +249,8 @@ async function run() {
   assert.ok(html.includes('id="vpn-stealth-toggle"'), 'Stealth toggle exists');
   assert.ok(html.includes('id="vpn-tor-toggle"'), 'Tor over VPN toggle exists');
   assert.ok(html.includes('id="vpn-split-mode-select"'), 'Split tunnel mode selector exists');
-  console.log('    ✔ All 13 UI control and tab components confirmed in index.html');
+  assert.ok(html.includes('id="vpn-close-btn"'), 'VPN close button exists');
+  console.log('    ✔ All 14 UI control and tab components confirmed in index.html');
 
   // ==========================================
   // [24/24] Theme System Styling Consistency

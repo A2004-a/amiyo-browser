@@ -558,16 +558,49 @@ const Omnibox = {
       };
     }
 
+    // Explicit Close Button
+    const vpnCloseBtn = document.getElementById('vpn-close-btn');
+    if (vpnCloseBtn) {
+      vpnCloseBtn.onclick = (e) => {
+        e.stopPropagation();
+        this.closeVpnPopover();
+      };
+    }
+
+    // Dynamic right-alignment to VPN button
+    try {
+      if (this.vpnBtnEl && this.vpnPopoverEl) {
+        const btnRect = this.vpnBtnEl.getBoundingClientRect();
+        const omni = document.getElementById('omnibox-container');
+        if (omni) {
+          const omniRect = omni.getBoundingClientRect();
+          const offset = Math.max(8, Math.round(omniRect.right - btnRect.right - 6));
+          this.vpnPopoverEl.style.right = `${offset}px`;
+        }
+      }
+    } catch (e) {}
+
     this.vpnPopoverEl.classList.remove('hidden');
 
-    // Close on click outside
+    // Close on click outside or Escape key
+    const escListener = (e) => {
+      if (e.key === 'Escape') {
+        this.closeVpnPopover();
+        document.removeEventListener('keydown', escListener);
+        document.removeEventListener('click', closeListener);
+      }
+    };
     const closeListener = (e) => {
       if (!this.vpnPopoverEl.contains(e.target) && !this.vpnBtnEl.contains(e.target)) {
         this.closeVpnPopover();
         document.removeEventListener('click', closeListener);
+        document.removeEventListener('keydown', escListener);
       }
     };
-    setTimeout(() => document.addEventListener('click', closeListener), 0);
+    setTimeout(() => {
+      document.addEventListener('click', closeListener);
+      document.addEventListener('keydown', escListener);
+    }, 0);
   },
 
   closeShieldsPopover() {
