@@ -2,6 +2,7 @@ package com.amiyo.browser;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.DownloadManager;
 import android.content.Context;
 import android.content.Intent;
@@ -9,6 +10,10 @@ import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.Typeface;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.net.http.SslError;
 import android.os.Build;
@@ -16,9 +21,14 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Message;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
 import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -37,11 +47,14 @@ import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.ProgressBar;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -62,8 +75,8 @@ import java.util.Set;
 public class MainActivity extends AppCompatActivity {
 
     public static final String HOME_URL = "file:///android_asset/www/index.html";
-    public static final String APP_VERSION_NAME = "0.2.5";
-    public static final int APP_VERSION_CODE = 10;
+    public static final String APP_VERSION_NAME = "0.2.6";
+    public static final int APP_VERSION_CODE = 11;
     public static final String DESKTOP_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
     private WebView webView;
     private EditText urlInput;
@@ -901,30 +914,301 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showTabSwitcher() {
-        CharSequence[] items = new CharSequence[tabs.size()];
+        Dialog dialog = new Dialog(this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+
+        float dp = getResources().getDisplayMetrics().density;
+
+        // Outer Root Container
+        LinearLayout root = new LinearLayout(this);
+        root.setOrientation(LinearLayout.VERTICAL);
+        int pad18 = (int) (18 * dp);
+        root.setPadding(pad18, pad18, pad18, pad18);
+
+        // Root Background: Deep Obsidian #0B0F19 with border #1E293B and 22dp radius
+        GradientDrawable rootBg = new GradientDrawable();
+        rootBg.setColor(0xFF0B0F19);
+        rootBg.setCornerRadius(22 * dp);
+        rootBg.setStroke((int) (1.5f * dp), 0xFF1E293B);
+        root.setBackground(rootBg);
+
+        // Header Bar (Horizontal)
+        LinearLayout header = new LinearLayout(this);
+        header.setOrientation(LinearLayout.HORIZONTAL);
+        header.setGravity(Gravity.CENTER_VERTICAL);
+        header.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+
+        // Header Title Wrap
+        LinearLayout titleWrap = new LinearLayout(this);
+        titleWrap.setOrientation(LinearLayout.HORIZONTAL);
+        titleWrap.setGravity(Gravity.CENTER_VERTICAL);
+        LinearLayout.LayoutParams titleWrapParams = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1.0f);
+        titleWrap.setLayoutParams(titleWrapParams);
+
+        TextView iconTv = new TextView(this);
+        iconTv.setText("🗂️");
+        iconTv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
+        iconTv.setPadding(0, 0, (int) (8 * dp), 0);
+        titleWrap.addView(iconTv);
+
+        TextView titleTv = new TextView(this);
+        titleTv.setText("Open Tabs");
+        titleTv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 17);
+        titleTv.setTypeface(Typeface.DEFAULT_BOLD);
+        titleTv.setTextColor(0xFFF8FAFC);
+        titleWrap.addView(titleTv);
+
+        // Count Badge
+        TextView countBadge = new TextView(this);
+        countBadge.setText(" " + tabs.size() + " ");
+        countBadge.setTextSize(TypedValue.COMPLEX_UNIT_SP, 11);
+        countBadge.setTypeface(Typeface.DEFAULT_BOLD);
+        countBadge.setTextColor(0xFF38BDF8);
+        GradientDrawable badgeBg = new GradientDrawable();
+        badgeBg.setColor(0x2238BDF8);
+        badgeBg.setCornerRadius(10 * dp);
+        countBadge.setBackground(badgeBg);
+        countBadge.setPadding((int) (6 * dp), (int) (2 * dp), (int) (6 * dp), (int) (2 * dp));
+        LinearLayout.LayoutParams badgeParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        badgeParams.leftMargin = (int) (8 * dp);
+        countBadge.setLayoutParams(badgeParams);
+        titleWrap.addView(countBadge);
+
+        header.addView(titleWrap);
+
+        // Close Button (✕)
+        TextView btnClose = new TextView(this);
+        btnClose.setText("✕");
+        btnClose.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
+        btnClose.setTypeface(Typeface.DEFAULT_BOLD);
+        btnClose.setTextColor(0xFF94A3B8);
+        btnClose.setGravity(Gravity.CENTER);
+        GradientDrawable closeBg = new GradientDrawable();
+        closeBg.setColor(0x1AFFFFFF);
+        closeBg.setCornerRadius(14 * dp);
+        btnClose.setBackground(closeBg);
+        LinearLayout.LayoutParams closeParams = new LinearLayout.LayoutParams((int) (28 * dp), (int) (28 * dp));
+        btnClose.setLayoutParams(closeParams);
+        btnClose.setOnClickListener(v -> dialog.dismiss());
+        header.addView(btnClose);
+
+        root.addView(header);
+
+        // Subtitle
+        TextView subtitleTv = new TextView(this);
+        subtitleTv.setText("Switch, create, or close active browser tabs");
+        subtitleTv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 11);
+        subtitleTv.setTextColor(0xFF64748B);
+        subtitleTv.setPadding(0, (int) (4 * dp), 0, (int) (12 * dp));
+        root.addView(subtitleTv);
+
+        // Scrollable Tabs Container
+        ScrollView scrollView = new ScrollView(this);
+        LinearLayout.LayoutParams scrollParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1.0f);
+        scrollView.setLayoutParams(scrollParams);
+        scrollView.setVerticalScrollBarEnabled(false);
+
+        LinearLayout listContainer = new LinearLayout(this);
+        listContainer.setOrientation(LinearLayout.VERTICAL);
+        listContainer.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+
         for (int i = 0; i < tabs.size(); i++) {
-            TabItem t = tabs.get(i);
-            String prefix = (i == activeTabIndex ? "▶ " : "   ") + (t.isIncognito ? "🕶️ " : "📄 ");
-            items[i] = prefix + t.title;
+            final int tabIndex = i;
+            TabItem tab = tabs.get(i);
+            boolean isActive = (i == activeTabIndex);
+
+            LinearLayout tabCard = new LinearLayout(this);
+            tabCard.setOrientation(LinearLayout.HORIZONTAL);
+            tabCard.setGravity(Gravity.CENTER_VERTICAL);
+            int cardPad = (int) (12 * dp);
+            tabCard.setPadding(cardPad, cardPad, cardPad, cardPad);
+
+            GradientDrawable cardBg = new GradientDrawable();
+            if (isActive) {
+                cardBg.setColor(0xFF14243B); // Cyan tinted obsidian card
+                cardBg.setStroke((int) (1.5f * dp), 0xFF38BDF8); // Bright Cyan Border
+            } else {
+                cardBg.setColor(0xFF111827); // Dark Slate Card
+                cardBg.setStroke((int) (1.0f * dp), 0xFF1E293B);
+            }
+            cardBg.setCornerRadius(14 * dp);
+            tabCard.setBackground(cardBg);
+
+            LinearLayout.LayoutParams cardParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            cardParams.bottomMargin = (int) (8 * dp);
+            tabCard.setLayoutParams(cardParams);
+
+            // Tab Icon
+            TextView tabIcon = new TextView(this);
+            String iconSymbol = tab.isIncognito ? "🕶️" : (tab.url == null || tab.url.contains("index.html") ? "🏠" : "🌐");
+            tabIcon.setText(iconSymbol);
+            tabIcon.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+            tabIcon.setGravity(Gravity.CENTER);
+            GradientDrawable iconBg = new GradientDrawable();
+            iconBg.setColor(tab.isIncognito ? 0x22C084FC : (isActive ? 0x2238BDF8 : 0x1AFFFFFF));
+            iconBg.setCornerRadius(10 * dp);
+            tabIcon.setBackground(iconBg);
+            LinearLayout.LayoutParams iconParams = new LinearLayout.LayoutParams((int) (36 * dp), (int) (36 * dp));
+            iconParams.rightMargin = (int) (10 * dp);
+            tabIcon.setLayoutParams(iconParams);
+            tabCard.addView(tabIcon);
+
+            // Tab Details (Title + Subtitle/URL)
+            LinearLayout details = new LinearLayout(this);
+            details.setOrientation(LinearLayout.VERTICAL);
+            LinearLayout.LayoutParams detailsParams = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1.0f);
+            details.setLayoutParams(detailsParams);
+
+            // Row for Title + Active Badge
+            LinearLayout titleRow = new LinearLayout(this);
+            titleRow.setOrientation(LinearLayout.HORIZONTAL);
+            titleRow.setGravity(Gravity.CENTER_VERTICAL);
+
+            TextView tabTitle = new TextView(this);
+            tabTitle.setText(tab.title != null && !tab.title.isEmpty() ? tab.title : (tab.isIncognito ? "Incognito Tab" : "AETHER Browser"));
+            tabTitle.setTextSize(TypedValue.COMPLEX_UNIT_SP, 13);
+            tabTitle.setTypeface(Typeface.DEFAULT_BOLD);
+            tabTitle.setTextColor(isActive ? 0xFFFFFFFF : 0xFFE2E8F0);
+            tabTitle.setSingleLine(true);
+            tabTitle.setEllipsize(TextUtils.TruncateAt.END);
+            LinearLayout.LayoutParams tParams = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1.0f);
+            tabTitle.setLayoutParams(tParams);
+            titleRow.addView(tabTitle);
+
+            if (isActive) {
+                TextView activeBadge = new TextView(this);
+                activeBadge.setText("ACTIVE");
+                activeBadge.setTextSize(TypedValue.COMPLEX_UNIT_SP, 9);
+                activeBadge.setTypeface(Typeface.DEFAULT_BOLD);
+                activeBadge.setTextColor(0xFF38BDF8);
+                GradientDrawable abBg = new GradientDrawable();
+                abBg.setColor(0x2238BDF8);
+                abBg.setCornerRadius(6 * dp);
+                activeBadge.setBackground(abBg);
+                activeBadge.setPadding((int) (5 * dp), (int) (1 * dp), (int) (5 * dp), (int) (1 * dp));
+                LinearLayout.LayoutParams abParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                abParams.leftMargin = (int) (6 * dp);
+                activeBadge.setLayoutParams(abParams);
+                titleRow.addView(activeBadge);
+            }
+            details.addView(titleRow);
+
+            // Tab URL
+            TextView tabUrl = new TextView(this);
+            String displayUrl = tab.url;
+            if (displayUrl == null || displayUrl.contains("index.html")) {
+                displayUrl = tab.isIncognito ? "aether://incognito" : "aether://home";
+            } else {
+                try {
+                    android.net.Uri uri = android.net.Uri.parse(displayUrl);
+                    if (uri.getHost() != null) displayUrl = uri.getHost();
+                } catch (Exception ignored) {}
+            }
+            tabUrl.setText(displayUrl);
+            tabUrl.setTextSize(TypedValue.COMPLEX_UNIT_SP, 11);
+            tabUrl.setTextColor(tab.isIncognito ? 0xFFA855F7 : 0xFF64748B);
+            tabUrl.setSingleLine(true);
+            tabUrl.setEllipsize(TextUtils.TruncateAt.END);
+            tabUrl.setPadding(0, (int) (2 * dp), 0, 0);
+            details.addView(tabUrl);
+
+            tabCard.addView(details);
+
+            // Close Tab Button (if more than 1 tab)
+            if (tabs.size() > 1) {
+                TextView btnCloseTab = new TextView(this);
+                btnCloseTab.setText("✕");
+                btnCloseTab.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
+                btnCloseTab.setTypeface(Typeface.DEFAULT_BOLD);
+                btnCloseTab.setTextColor(0xFFEF4444);
+                btnCloseTab.setGravity(Gravity.CENTER);
+                GradientDrawable ctBg = new GradientDrawable();
+                ctBg.setColor(0x22EF4444);
+                ctBg.setCornerRadius(10 * dp);
+                btnCloseTab.setBackground(ctBg);
+                LinearLayout.LayoutParams ctParams = new LinearLayout.LayoutParams((int) (26 * dp), (int) (26 * dp));
+                ctParams.leftMargin = (int) (8 * dp);
+                btnCloseTab.setLayoutParams(ctParams);
+                btnCloseTab.setOnClickListener(v -> {
+                    closeTab(tabIndex);
+                    dialog.dismiss();
+                    showTabSwitcher();
+                });
+                tabCard.addView(btnCloseTab);
+            }
+
+            // Click Card to Switch
+            tabCard.setOnClickListener(v -> {
+                switchToTab(tabIndex);
+                dialog.dismiss();
+            });
+
+            listContainer.addView(tabCard);
         }
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Open Tabs (" + tabs.size() + ")");
-        builder.setItems(items, (dialog, which) -> {
-            switchToTab(which);
-        });
-        builder.setPositiveButton("＋ New Tab", (dialog, which) -> {
-            createNewTab(false);
-        });
-        builder.setNeutralButton("🕶️ Incognito", (dialog, which) -> {
+        scrollView.addView(listContainer);
+        root.addView(scrollView);
+
+        // Action Buttons Row (Footer)
+        LinearLayout actionsRow = new LinearLayout(this);
+        actionsRow.setOrientation(LinearLayout.HORIZONTAL);
+        LinearLayout.LayoutParams actionsParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        actionsParams.topMargin = (int) (12 * dp);
+        actionsRow.setLayoutParams(actionsParams);
+
+        // 1. Incognito Button
+        Button btnIncognito = new Button(this);
+        btnIncognito.setText("🕶️ Incognito");
+        btnIncognito.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
+        btnIncognito.setTypeface(Typeface.DEFAULT_BOLD);
+        btnIncognito.setTextColor(0xFFC084FC);
+        btnIncognito.setAllCaps(false);
+        GradientDrawable incogBg = new GradientDrawable();
+        incogBg.setColor(0x22A855F7);
+        incogBg.setStroke((int) (1.2f * dp), 0xFFA855F7);
+        incogBg.setCornerRadius(12 * dp);
+        btnIncognito.setBackground(incogBg);
+        LinearLayout.LayoutParams btnIncogParams = new LinearLayout.LayoutParams(0, (int) (44 * dp), 1.0f);
+        btnIncogParams.rightMargin = (int) (8 * dp);
+        btnIncognito.setLayoutParams(btnIncogParams);
+        btnIncognito.setOnClickListener(v -> {
+            dialog.dismiss();
             createNewTab(true);
         });
-        if (tabs.size() > 1) {
-            builder.setNegativeButton("Close Current Tab", (dialog, which) -> {
-                closeTab(activeTabIndex);
-            });
+        actionsRow.addView(btnIncognito);
+
+        // 2. New Tab Button
+        Button btnNewTab = new Button(this);
+        btnNewTab.setText("＋ New Tab");
+        btnNewTab.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
+        btnNewTab.setTypeface(Typeface.DEFAULT_BOLD);
+        btnNewTab.setTextColor(0xFF090D16);
+        btnNewTab.setAllCaps(false);
+        GradientDrawable newTabBg = new GradientDrawable();
+        newTabBg.setColor(0xFF38BDF8); // Vibrant AETHER Cyan
+        newTabBg.setCornerRadius(12 * dp);
+        btnNewTab.setBackground(newTabBg);
+        LinearLayout.LayoutParams btnNewTabParams = new LinearLayout.LayoutParams(0, (int) (44 * dp), 1.2f);
+        btnNewTab.setLayoutParams(btnNewTabParams);
+        btnNewTab.setOnClickListener(v -> {
+            dialog.dismiss();
+            createNewTab(false);
+        });
+        actionsRow.addView(btnNewTab);
+
+        root.addView(actionsRow);
+
+        dialog.setContentView(root);
+
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            int screenWidth = getResources().getDisplayMetrics().widthPixels;
+            int dialogWidth = Math.min(screenWidth - (int) (32 * dp), (int) (420 * dp));
+            dialog.getWindow().setLayout(dialogWidth, ViewGroup.LayoutParams.WRAP_CONTENT);
+            dialog.getWindow().setDimAmount(0.65f);
         }
-        builder.show();
+
+        dialog.show();
     }
 
     private void applyIncognitoSettings(boolean isIncognito) {
@@ -1240,6 +1524,7 @@ public class MainActivity extends AppCompatActivity {
             .setTitle("🚀 AETHER Browser v" + APP_VERSION_NAME)
             .setMessage("Version Code: " + APP_VERSION_CODE + " (Official Update)\n\n" +
                         "✨ Installed Features:\n" +
+                        "• 🎨 Obsidian & Cyberpunk Cyan Dark Tab Switcher Dialog\n" +
                         "• 💡 AETHER Notes with + Multi-Note & Checklists\n" +
                         "• 👁️ Hide & Unhide Features (AETHER Notes, Shortcuts, Quick Strip, Shields)\n" +
                         "• 🛡️ AETHER Secure VPN (32 Enterprise Superpowers)\n" +
@@ -1253,7 +1538,7 @@ public class MainActivity extends AppCompatActivity {
                 loadTarget("https://github.com/A2004-a/amiyo-browser/releases");
             })
             .setNeutralButton("Direct APK", (dialog, which) -> {
-                loadTarget("https://github.com/A2004-a/amiyo-browser/releases/download/v0.1.0/AETHER-Browser-v0.2.5-Android.apk");
+                loadTarget("https://github.com/A2004-a/amiyo-browser/releases/download/v0.1.0/AETHER-Browser-v0.2.6-Android.apk");
             })
             .setNegativeButton("Close", null)
             .show();

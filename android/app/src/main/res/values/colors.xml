@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="primary">#1a73e8</color>
-    <color name="primary_dark">#1557b0</color>
-    <color name="accent">#4285f4</color>
-    <color name="bg_dark">#202124</color>
-    <color name="bg_card">#292a2d</color>
+    <color name="primary">#38bdf8</color>
+    <color name="primary_dark">#0284c7</color>
+    <color name="accent">#38bdf8</color>
+    <color name="bg_dark">#0b0f19</color>
+    <color name="bg_card">#131c2e</color>
     <color name="text_primary">#ffffff</color>
-    <color name="text_secondary">#9aa0a6</color>
+    <color name="text_secondary">#94a3b8</color>
     <color name="ic_launcher_background">#0B0F14</color>
 </resources>
 
