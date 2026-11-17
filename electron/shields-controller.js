@@ -188,12 +188,11 @@ class ShieldsController {
       /youtube\.com\/api\/stats\/qoe\?.*adformat=/i,
       /youtube\.com\/get_midroll_info/i,
       /youtube\.com\/youtubei\/v1\/player\/ad_break/i,
-      /googlevideo\.com\/videoplayback\?.*&(adformat|ad_type|ctier)=/i,
+      /googlevideo\.com\/videoplayback\?.*&adformat=/i,
       /static\.doubleclick\.net\/instream\/ad_status\.js/i,
       /googleads\.g\.doubleclick\.net\/pagead\//i,
       /youtube\.com\/api\/stats\/watchtime\?.*&ns=yt&.*el=ad/i,
-      /youtube\.com\/get_video_info\?.*&adformat=/i,
-      /youtube\.com\/youtubei\/v1\/log_event/i
+      /youtube\.com\/get_video_info\?.*&adformat=/i
     ];
 
     // Memoized injected CSS & Scriptlet strings for zero-cost repeated injection
@@ -644,7 +643,6 @@ class ShieldsController {
       #player-ads,
       #masthead-ad,
       #merchandise-shelf,
-      ytd-popup-container:has(ytd-enforcement-message-view-model),
       tp-yt-paper-dialog:has(ytd-enforcement-message-view-model),
       ytd-enforcement-message-view-model,
       div#below ytd-ad-slot-renderer,
@@ -717,8 +715,6 @@ class ShieldsController {
         opacity: 0 !important;
         pointer-events: none !important;
         overflow: hidden !important;
-        position: absolute !important;
-        z-index: -99999 !important;
       }
     `;
 
@@ -825,54 +821,18 @@ class ShieldsController {
 
           // 3. YouTube Ad-Skipper & Video Fast-Forward Engine v2.0
           if (location.hostname.includes('youtube.com')) {
-            // Neutralize player response and browse response ad queues
-            const sanitizePlayerResponse = (obj) => {
-              if (!obj || typeof obj !== 'object') return obj;
+            // Neutralize ad queues from player response without breaking playback tracking
+            if (window.ytInitialPlayerResponse) {
               try {
-                delete obj.adPlacements;
-                delete obj.playerAds;
-                delete obj.adSlots;
-                delete obj.adBreakHeartbeatParams;
-                if (obj.playbackTracking) {
-                  delete obj.playbackTracking.videostatsPlaybackUrl;
-                  delete obj.playbackTracking.qoeUrl;
-                }
+                if (window.ytInitialPlayerResponse.adPlacements) delete window.ytInitialPlayerResponse.adPlacements;
+                if (window.ytInitialPlayerResponse.playerAds) delete window.ytInitialPlayerResponse.playerAds;
+                if (window.ytInitialPlayerResponse.adSlots) delete window.ytInitialPlayerResponse.adSlots;
               } catch (e) {}
-              return obj;
-            };
-
-            const sanitizeBrowseResponse = (obj) => {
-              if (!obj || typeof obj !== 'object') return obj;
-              try {
-                if (obj.contents?.twoColumnWatchNextResults?.secondaryResults?.secondaryResults?.results) {
-                  const arr = obj.contents.twoColumnWatchNextResults.secondaryResults.secondaryResults.results;
-                  obj.contents.twoColumnWatchNextResults.secondaryResults.secondaryResults.results = arr.filter(item => {
-                    return !item.adSlotRenderer && !item.inFeedAdLayoutRenderer && !item.promotedSparklesWebRenderer && !item.companionSlotRenderer;
-                  });
-                }
-              } catch (e) {}
-              return obj;
-            };
-
-            if (window.ytInitialPlayerResponse) sanitizePlayerResponse(window.ytInitialPlayerResponse);
-            if (window.ytInitialData) sanitizeBrowseResponse(window.ytInitialData);
-
-            // Hook JSON.parse for YouTube dynamic API responses
-            try {
-              const _origParse = JSON.parse;
-              JSON.parse = function(text, reviver) {
-                const res = _origParse.apply(this, arguments);
-                if (res && typeof res === 'object') {
-                  sanitizePlayerResponse(res);
-                  sanitizeBrowseResponse(res);
-                }
-                return res;
-              };
-            } catch (e) {}
+            }
 
             const purgeYouTubeAds = () => {
               try {
-                // Remove all sponsored/ad custom elements from DOM
+                // 1. Remove sidebar and in-feed sponsored ads (strictly outside the video player)
                 const adSelectors = [
                   'ytd-ad-slot-renderer',
                   'ytd-in-feed-ad-layout-renderer',
@@ -883,7 +843,6 @@ class ShieldsController {
                   'ytd-compact-promoted-video-renderer',
                   'ytd-companion-slot-renderer',
                   'ytd-companion-ad-renderer',
-                  'ytd-player-legacy-desktop-watch-ads-renderer',
                   'ytd-action-companion-ad-renderer',
                   'ytd-engagement-panel-section-list-renderer[target-id="engagement-panel-ads"]',
                   'ytd-brand-video-singleton-renderer',
@@ -891,13 +850,6 @@ class ShieldsController {
                   '#player-ads',
                   '#masthead-ad',
                   '#merchandise-shelf',
-                  '.ytp-ad-module',
-                  '.ytp-ad-overlay-container',
-                  '.ytp-ad-player-overlay',
-                  '.ytp-ad-text',
-                  '.ytp-ad-message-container',
-                  '.ytp-ad-preview-container',
-                  '.ytp-ad-skip-button-container',
                   'div#secondary ytd-ad-slot-renderer',
                   'div#secondary ytd-in-feed-ad-layout-renderer',
                   'div#secondary ytd-companion-slot-renderer',
@@ -923,34 +875,35 @@ class ShieldsController {
                   }
                 }
 
-                // Auto-close overlay ads
-                const overlayClose = document.querySelector('.ytp-ad-overlay-close-button');
-                if (overlayClose) overlayClose.click();
-
-                // Video Ad Instant Bypass & Skip
+                // 2. Video Ad Fast-Forward & Skip (Mute + Fast Forward to End of Ad)
+                const player = document.querySelector('.html5-video-player');
+                const isAdActive = player && (player.classList.contains('ad-showing') || player.classList.contains('ad-interrupting'));
                 const video = document.querySelector('video.html5-main-video') || document.querySelector('video');
-                const adShowing = document.querySelector('.ad-showing') || document.querySelector('.ad-interrupting');
-                if (video && adShowing) {
+                if (video && isAdActive) {
                   video.muted = true;
                   video.playbackRate = 16.0;
                   if (isFinite(video.duration) && video.duration > 0) {
-                    video.currentTime = video.duration - 0.01;
+                    video.currentTime = video.duration - 0.05;
                   }
                 }
 
-                // Click skip button immediately
+                // Auto-close in-video overlay ads
+                const overlayClose = document.querySelector('.ytp-ad-overlay-close-button');
+                if (overlayClose) overlayClose.click();
+
+                // Click skip button immediately when available
                 const skipBtn = document.querySelector('.ytp-ad-skip-button, .ytp-ad-skip-button-modern, button.ytp-ad-skip-button, .ytp-skip-ad-button, .ytp-ad-skip-button-slot');
                 if (skipBtn) {
                   skipBtn.click();
                 }
 
-                // Dismiss anti-adblock modal and resume
+                // Dismiss anti-adblock modal and resume playback
                 const dismissBtn = document.querySelector('ytd-enforcement-message-view-model #dismiss-button, tp-yt-paper-dialog #dismiss-button');
                 if (dismissBtn) {
                   dismissBtn.click();
                   if (video && video.paused) video.play();
                 }
-                const enforcementDialog = document.querySelector('tp-yt-paper-dialog:has(ytd-enforcement-message-view-model)');
+                const enforcementDialog = document.querySelector('tp-yt-paper-dialog:has(ytd-enforcement-message-view-model), ytd-enforcement-message-view-model');
                 if (enforcementDialog) enforcementDialog.remove();
 
                 // Strip progress bar mid-roll markers
@@ -959,11 +912,11 @@ class ShieldsController {
             };
 
             const skipYouTubeAds = purgeYouTubeAds;
-            purgeYouTubeAds();
-            window.addEventListener('yt-navigate-finish', purgeYouTubeAds);
-            window.addEventListener('spfdone', purgeYouTubeAds);
-            window.addEventListener('popstate', purgeYouTubeAds);
-            setInterval(skipYouTubeAds, 50);
+            skipYouTubeAds();
+            window.addEventListener('yt-navigate-finish', skipYouTubeAds);
+            window.addEventListener('spfdone', skipYouTubeAds);
+            window.addEventListener('popstate', skipYouTubeAds);
+            setInterval(skipYouTubeAds, 100);
           }
 
           // 4. Pop-under & Click-Hijack Defusers
