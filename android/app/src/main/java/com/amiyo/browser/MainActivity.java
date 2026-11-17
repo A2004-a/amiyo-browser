@@ -62,8 +62,8 @@ import java.util.Set;
 public class MainActivity extends AppCompatActivity {
 
     public static final String HOME_URL = "file:///android_asset/www/index.html";
-    public static final String APP_VERSION_NAME = "0.2.1";
-    public static final int APP_VERSION_CODE = 6;
+    public static final String APP_VERSION_NAME = "0.2.2";
+    public static final int APP_VERSION_CODE = 7;
     private WebView webView;
     private EditText urlInput;
     private ProgressBar pageProgressBar;
@@ -87,6 +87,7 @@ public class MainActivity extends AppCompatActivity {
     private FrameLayout customViewContainer;
     private View customView = null;
     private WebChromeClient.CustomViewCallback customViewCallback = null;
+    private boolean isManualFullscreen = false;
     private int currentTextZoom = 100;
 
     // AETHER Secure VPN State
@@ -246,6 +247,11 @@ public class MainActivity extends AppCompatActivity {
         @JavascriptInterface
         public void checkForUpdates() {
             runOnUiThread(MainActivity.this::showUpdateDialog);
+        }
+
+        @JavascriptInterface
+        public void triggerNativeFullscreen() {
+            MainActivity.this.triggerNativeFullscreen();
         }
     }
 
@@ -435,8 +441,10 @@ public class MainActivity extends AppCompatActivity {
         } catch (Exception ignored) {}
 
         defaultUserAgent = settings.getUserAgentString();
-        String customUA = defaultUserAgent + " AETHERBrowser/0.2.0";
-        settings.setUserAgentString(customUA);
+        // Remove 'Version/4.0' from User-Agent so mobile video sites (YouTube, Vimeo, etc.)
+        // enable full HTML5 fullscreen and native video player controls
+        String cleanUA = defaultUserAgent != null ? defaultUserAgent.replace("Version/4.0 ", "") : null;
+        settings.setUserAgentString(cleanUA);
 
         CookieManager.getInstance().setAcceptCookie(true);
         CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
@@ -498,8 +506,18 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
+            public void onShowCustomView(View view, int requestedOrientation, CustomViewCallback callback) {
+                showCustomView(view, callback);
+            }
+
+            @Override
             public void onHideCustomView() {
                 hideCustomView();
+            }
+
+            @Override
+            public Bitmap getDefaultVideoPoster() {
+                return Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
             }
 
             @Override
@@ -951,6 +969,10 @@ public class MainActivity extends AppCompatActivity {
                     hideCustomView();
                     return;
                 }
+                if (isManualFullscreen) {
+                    exitManualFullscreen();
+                    return;
+                }
                 if (findInPageBar.getVisibility() == View.VISIBLE) {
                     webView.clearMatches();
                     findInPageBar.setVisibility(View.GONE);
@@ -1226,7 +1248,8 @@ public class MainActivity extends AppCompatActivity {
             settings.setBuiltInZoomControls(true);
             settings.setDisplayZoomControls(false);
         } else {
-            settings.setUserAgentString(defaultUserAgent != null ? defaultUserAgent + " AETHERBrowser/0.1.0" : null);
+            String cleanUA = defaultUserAgent != null ? defaultUserAgent.replace("Version/4.0 ", "") : null;
+            settings.setUserAgentString(cleanUA);
             settings.setUseWideViewPort(false);
             settings.setLoadWithOverviewMode(false);
         }
@@ -1300,9 +1323,34 @@ public class MainActivity extends AppCompatActivity {
             "        }" +
             "      } catch(e) {}" +
             "    }" +
+            "    function attachFullscreenTriggers() {" +
+            "      try {" +
+            "        const selectors = '.fullscreen-icon, .ytp-fullscreen-button, .ytm-fullscreen-button, button[aria-label*=\"Full screen\" i], button[aria-label*=\"Fullscreen\" i], button[aria-label*=\"Cinema\" i]';" +
+            "        const buttons = document.querySelectorAll(selectors);" +
+            "        buttons.forEach(btn => {" +
+            "          if (!btn._aetherAttached) {" +
+            "            btn._aetherAttached = true;" +
+            "            const trigger = function(e) {" +
+            "              const vid = document.querySelector('video');" +
+            "              if (vid) {" +
+            "                if (typeof vid.webkitEnterFullscreen === 'function') { vid.webkitEnterFullscreen(); }" +
+            "                else if (typeof vid.requestFullscreen === 'function') { vid.requestFullscreen().catch(()=>{}); }" +
+            "              }" +
+            "              if (window.AetherAndroid && window.AetherAndroid.triggerNativeFullscreen) {" +
+            "                window.AetherAndroid.triggerNativeFullscreen();" +
+            "              }" +
+            "            };" +
+            "            btn.addEventListener('click', trigger, false);" +
+            "            btn.addEventListener('touchend', trigger, false);" +
+            "          }" +
+            "        });" +
+            "      } catch(e) {}" +
+            "    }" +
             "    set4KQuality();" +
+            "    attachFullscreenTriggers();" +
             "    setInterval(() => {" +
             "      try {" +
+            "        attachFullscreenTriggers();" +
             "        const consent = document.querySelector('button[aria-label*=\"Accept\"], button[aria-label*=\"agree\"], .ytd-consent-bump-v2-lightbox button');" +
             "        if (consent) consent.click();" +
             "        const skip = document.querySelector('.ytp-ad-skip-button, .ytp-ad-skip-button-modern, .ytp-skip-ad-button');" +
@@ -1319,7 +1367,7 @@ public class MainActivity extends AppCompatActivity {
             "        document.querySelectorAll('ytd-action-companion-ad-renderer, ytd-banner-promo-renderer-background, .ytp-ad-overlay-container, #masthead-ad').forEach(el => el.remove());" +
             "      } catch(e) {}" +
             "    }, 400);" +
-            "    window.addEventListener('yt-navigate-finish', () => { setTimeout(set4KQuality, 600); });" +
+            "    window.addEventListener('yt-navigate-finish', () => { setTimeout(() => { set4KQuality(); attachFullscreenTriggers(); }, 600); });" +
             "  }" +
             "})();";
         view.evaluateJavascript(ytScript, null);
@@ -1396,6 +1444,48 @@ public class MainActivity extends AppCompatActivity {
             customViewCallback = null;
         }
         customView = null;
+        isManualFullscreen = false;
+    }
+
+    public void triggerNativeFullscreen() {
+        runOnUiThread(() -> {
+            if (customView != null) {
+                return;
+            }
+            if (isManualFullscreen) {
+                exitManualFullscreen();
+            } else {
+                enterManualFullscreen();
+            }
+        });
+    }
+
+    private void enterManualFullscreen() {
+        isManualFullscreen = true;
+        if (findViewById(R.id.topBar) != null) findViewById(R.id.topBar).setVisibility(View.GONE);
+        if (findViewById(R.id.bottomBar) != null) findViewById(R.id.bottomBar).setVisibility(View.GONE);
+        if (swipeRefresh != null) swipeRefresh.setEnabled(false);
+
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        getWindow().getDecorView().setSystemUiVisibility(
+            View.SYSTEM_UI_FLAG_FULLSCREEN |
+            View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
+            View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY |
+            View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
+            View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
+            View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+        );
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
+    }
+
+    private void exitManualFullscreen() {
+        isManualFullscreen = false;
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+        if (findViewById(R.id.topBar) != null) findViewById(R.id.topBar).setVisibility(View.VISIBLE);
+        if (findViewById(R.id.bottomBar) != null) findViewById(R.id.bottomBar).setVisibility(View.VISIBLE);
+        if (swipeRefresh != null) swipeRefresh.setEnabled(true);
     }
 
     private void zoomIn() {
