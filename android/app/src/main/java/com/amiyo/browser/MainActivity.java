@@ -75,8 +75,8 @@ import java.util.Set;
 public class MainActivity extends AppCompatActivity {
 
     public static final String HOME_URL = "file:///android_asset/www/index.html";
-    public static final String APP_VERSION_NAME = "0.2.6";
-    public static final int APP_VERSION_CODE = 11;
+    public static final String APP_VERSION_NAME = "0.2.7";
+    public static final int APP_VERSION_CODE = 12;
     public static final String DESKTOP_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
     private WebView webView;
     private EditText urlInput;
@@ -431,7 +431,7 @@ public class MainActivity extends AppCompatActivity {
         btnFindClose = findViewById(R.id.btnFindClose);
         customViewContainer = findViewById(R.id.customViewContainer);
         if (customViewContainer != null) {
-            customViewContainer.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+            customViewContainer.setLayerType(View.LAYER_TYPE_NONE, null);
         }
 
         swipeRefresh.setColorSchemeResources(R.color.accent, R.color.primary);
@@ -439,7 +439,7 @@ public class MainActivity extends AppCompatActivity {
 
     @SuppressLint("SetJavaScriptEnabled")
     private void setupWebView() {
-        webView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+        webView.setLayerType(View.LAYER_TYPE_NONE, null);
         webView.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
         webView.setOverScrollMode(View.OVER_SCROLL_IF_CONTENT_SCROLLS);
 
@@ -1538,7 +1538,7 @@ public class MainActivity extends AppCompatActivity {
                 loadTarget("https://github.com/A2004-a/amiyo-browser/releases");
             })
             .setNeutralButton("Direct APK", (dialog, which) -> {
-                loadTarget("https://github.com/A2004-a/amiyo-browser/releases/download/v0.1.0/AETHER-Browser-v0.2.6-Android.apk");
+                loadTarget("https://github.com/A2004-a/amiyo-browser/releases/download/v0.1.0/AETHER-Browser-v0.2.7-Android.apk");
             })
             .setNegativeButton("Close", null)
             .show();
@@ -1707,42 +1707,17 @@ public class MainActivity extends AppCompatActivity {
             "          style = document.createElement('style');" +
             "          style.id = 'aether-yt-clear-video-css';" +
             "          style.textContent = `" +
-            "            .ambient-mode-canvas, .player-ambient-mode, #ambient-mode, .ytp-ambient-mode, .cinematic_lighting, canvas.ambient-mode-canvas, .ytm-cinema-overlay, .ytp-cued-thumbnail-overlay, .ytp-cued-thumbnail-overlay-image {" +
-            "              display: none !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; filter: none !important; backdrop-filter: none !important; width: 0 !important; height: 0 !important;" +
-            "            }" +
-            "            video.video-stream, .html5-main-video, video {" +
-            "              display: block !important; visibility: visible !important; opacity: 1 !important; filter: none !important; backdrop-filter: none !important; max-width: 100% !important; max-height: 100% !important; object-fit: contain !important; z-index: 1 !important;" +
-            "            }" +
-            "            .html5-video-player, .html5-video-container, #movie_player, .player-container {" +
-            "              background: #000000 !important;" +
-            "            }" +
-            "            .ytp-chrome-bottom, .player-controls-middle, .player-controls-bottom, .ytm-custom-controls, .ytp-caption-window-container, .caption-window {" +
-            "              z-index: 2147483647 !important;" +
+            "            /* Cleanly hide ambient lighting blur canvas without touching video stream */" +
+            "            canvas.ambient-mode-canvas, canvas[class*='ambient'], .ambient-mode-canvas {" +
+            "              display: none !important;" +
+            "              visibility: hidden !important;" +
+            "              opacity: 0 !important;" +
+            "              width: 0 !important;" +
+            "              height: 0 !important;" +
+            "              pointer-events: none !important;" +
             "            }" +
             "          `;" +
             "          (document.head || document.documentElement).appendChild(style);" +
-            "        }" +
-            "      } catch(e) {}" +
-            "    }" +
-            "    function clearBlurAndFitVideo() {" +
-            "      try {" +
-            "        injectClearVideoStyles();" +
-            "        document.querySelectorAll('.ambient-mode-canvas, .player-ambient-mode, #ambient-mode, .ytp-ambient-mode, canvas.ambient-mode-canvas, .cinematic_lighting, .ytm-cinema-overlay').forEach(el => {" +
-            "          el.style.display = 'none';" +
-            "          el.remove();" +
-            "        });" +
-            "        const vid = document.querySelector('video');" +
-            "        if (vid) {" +
-            "          vid.style.setProperty('filter', 'none', 'important');" +
-            "          vid.style.setProperty('backdrop-filter', 'none', 'important');" +
-            "          vid.style.setProperty('opacity', '1', 'important');" +
-            "          vid.style.setProperty('visibility', 'visible', 'important');" +
-            "          vid.style.setProperty('z-index', '1', 'important');" +
-            "          if (document.fullscreenElement || window.innerWidth > window.innerHeight) {" +
-            "            vid.style.setProperty('width', '100%', 'important');" +
-            "            vid.style.setProperty('height', '100%', 'important');" +
-            "            vid.style.setProperty('object-fit', 'contain', 'important');" +
-            "          }" +
             "        }" +
             "      } catch(e) {}" +
             "    }" +
@@ -1757,44 +1732,28 @@ public class MainActivity extends AppCompatActivity {
             "    }" +
             "    function attachFullscreenTriggers() {" +
             "      try {" +
-            "        const selectors = '.fullscreen-icon, .ytp-fullscreen-button, .ytm-fullscreen-button, button[aria-label*=\"Full screen\" i], button[aria-label*=\"Fullscreen\" i], button[aria-label*=\"Cinema\" i], button[aria-label*=\"Exit full screen\" i], button[aria-label*=\"Exit fullscreen\" i], button[aria-label*=\"Shrink\" i]';" +
+            "        const selectors = '.fullscreen-icon, .ytp-fullscreen-button, .ytm-fullscreen-button, button[aria-label*=\"Full screen\" i], button[aria-label*=\"Fullscreen\" i], button[aria-label*=\"Cinema\" i]';" +
             "        const buttons = document.querySelectorAll(selectors);" +
             "        buttons.forEach(btn => {" +
             "          if (!btn._aetherAttached) {" +
             "            btn._aetherAttached = true;" +
-            "            const trigger = function(e) {" +
-            "              clearBlurAndFitVideo();" +
+            "            btn.addEventListener('click', function(e) {" +
             "              const vid = document.querySelector('video');" +
-            "              const isFull = document.fullscreenElement || document.webkitFullscreenElement || (window.AetherAndroid && window.AetherAndroid.isManualFullscreenActive && window.AetherAndroid.isManualFullscreenActive());" +
-            "              if (isFull) {" +
-            "                if (document.exitFullscreen) document.exitFullscreen().catch(()=>{});" +
-            "                else if (document.webkitExitFullscreen) document.webkitExitFullscreen();" +
-            "              } else {" +
-            "                if (vid) {" +
-            "                  if (typeof vid.webkitEnterFullscreen === 'function') { vid.webkitEnterFullscreen(); }" +
-            "                  else if (typeof vid.requestFullscreen === 'function') { vid.requestFullscreen().catch(()=>{}); }" +
-            "                }" +
+            "              if (vid) {" +
+            "                if (typeof vid.webkitEnterFullscreen === 'function') { vid.webkitEnterFullscreen(); }" +
+            "                else if (typeof vid.requestFullscreen === 'function') { vid.requestFullscreen().catch(()=>{}); }" +
             "              }" +
-            "              if (window.AetherAndroid && window.AetherAndroid.triggerNativeFullscreen) {" +
-            "                window.AetherAndroid.triggerNativeFullscreen();" +
-            "              }" +
-            "              setTimeout(clearBlurAndFitVideo, 200);" +
-            "              setTimeout(clearBlurAndFitVideo, 500);" +
-            "            };" +
-            "            btn.addEventListener('click', trigger, false);" +
-            "            btn.addEventListener('touchend', trigger, false);" +
+            "            }, { passive: true });" +
             "          }" +
             "        });" +
             "      } catch(e) {}" +
             "    }" +
             "    injectClearVideoStyles();" +
-            "    clearBlurAndFitVideo();" +
             "    set4KQuality();" +
             "    attachFullscreenTriggers();" +
             "    setInterval(() => {" +
             "      try {" +
             "        attachFullscreenTriggers();" +
-            "        clearBlurAndFitVideo();" +
             "        const consent = document.querySelector('button[aria-label*=\"Accept\"], button[aria-label*=\"agree\"], .ytd-consent-bump-v2-lightbox button');" +
             "        if (consent) consent.click();" +
             "        const skip = document.querySelector('.ytp-ad-skip-button, .ytp-ad-skip-button-modern, .ytp-skip-ad-button');" +
@@ -1810,9 +1769,8 @@ public class MainActivity extends AppCompatActivity {
             "        }" +
             "        document.querySelectorAll('ytd-action-companion-ad-renderer, ytd-banner-promo-renderer-background, #masthead-ad').forEach(el => el.remove());" +
             "      } catch(e) {}" +
-            "    }, 350);" +
-            "    window.addEventListener('resize', () => { setTimeout(clearBlurAndFitVideo, 150); });" +
-            "    window.addEventListener('yt-navigate-finish', () => { setTimeout(() => { set4KQuality(); attachFullscreenTriggers(); clearBlurAndFitVideo(); }, 600); });" +
+            "    }, 600);" +
+            "    window.addEventListener('yt-navigate-finish', () => { setTimeout(() => { set4KQuality(); attachFullscreenTriggers(); }, 600); });" +
             "  }" +
             "})();";
         view.evaluateJavascript(ytScript, null);
