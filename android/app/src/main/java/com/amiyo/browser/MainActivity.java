@@ -62,8 +62,9 @@ import java.util.Set;
 public class MainActivity extends AppCompatActivity {
 
     public static final String HOME_URL = "file:///android_asset/www/index.html";
-    public static final String APP_VERSION_NAME = "0.2.2";
-    public static final int APP_VERSION_CODE = 7;
+    public static final String APP_VERSION_NAME = "0.2.3";
+    public static final int APP_VERSION_CODE = 8;
+    public static final String DESKTOP_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
     private WebView webView;
     private EditText urlInput;
     private ProgressBar pageProgressBar;
@@ -253,6 +254,11 @@ public class MainActivity extends AppCompatActivity {
         public void triggerNativeFullscreen() {
             MainActivity.this.triggerNativeFullscreen();
         }
+
+        @JavascriptInterface
+        public boolean isDesktopSiteActive() {
+            return isDesktopSite;
+        }
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -269,11 +275,15 @@ public class MainActivity extends AppCompatActivity {
             ArrayList<String> tabTitles = savedInstanceState.getStringArrayList("tab_titles");
             ArrayList<String> tabUrls = savedInstanceState.getStringArrayList("tab_urls");
             ArrayList<String> tabIncognitos = savedInstanceState.getStringArrayList("tab_incognitos");
+            ArrayList<String> tabDesktopSites = savedInstanceState.getStringArrayList("tab_desktop_sites");
             if (tabTitles != null && tabUrls != null && tabTitles.size() == tabUrls.size()) {
                 tabs.clear();
                 for (int i = 0; i < tabTitles.size(); i++) {
                     boolean isIncog = tabIncognitos != null && i < tabIncognitos.size() && "1".equals(tabIncognitos.get(i));
-                    tabs.add(new TabItem(tabTitles.get(i), tabUrls.get(i), isIncog));
+                    boolean isDesk = tabDesktopSites != null && i < tabDesktopSites.size() && "1".equals(tabDesktopSites.get(i));
+                    TabItem tab = new TabItem(tabTitles.get(i), tabUrls.get(i), isIncog);
+                    tab.isDesktopSite = isDesk;
+                    tabs.add(tab);
                 }
             }
         }
@@ -361,14 +371,17 @@ public class MainActivity extends AppCompatActivity {
         ArrayList<String> tabTitles = new ArrayList<>();
         ArrayList<String> tabUrls = new ArrayList<>();
         ArrayList<String> tabIncognitos = new ArrayList<>();
+        ArrayList<String> tabDesktopSites = new ArrayList<>();
         for (TabItem t : tabs) {
             tabTitles.add(t.title != null ? t.title : "AETHER");
             tabUrls.add(t.url != null ? t.url : HOME_URL);
             tabIncognitos.add(t.isIncognito ? "1" : "0");
+            tabDesktopSites.add(t.isDesktopSite ? "1" : "0");
         }
         outState.putStringArrayList("tab_titles", tabTitles);
         outState.putStringArrayList("tab_urls", tabUrls);
         outState.putStringArrayList("tab_incognitos", tabIncognitos);
+        outState.putStringArrayList("tab_desktop_sites", tabDesktopSites);
     }
 
     private void initViews() {
@@ -614,7 +627,11 @@ public class MainActivity extends AppCompatActivity {
                 if (activeTabIndex >= 0 && activeTabIndex < tabs.size()) {
                     tabs.get(activeTabIndex).url = url;
                 }
-                injectZoomUnlocker(view);
+                if (isDesktopSite) {
+                    injectDesktopViewport(view);
+                } else {
+                    injectZoomUnlocker(view);
+                }
             }
 
             @Override
@@ -631,7 +648,11 @@ public class MainActivity extends AppCompatActivity {
                     cur.title = (pageTitle != null && !pageTitle.isEmpty()) ? pageTitle : "AETHER";
                 }
 
-                injectZoomUnlocker(view);
+                if (isDesktopSite) {
+                    injectDesktopViewport(view);
+                } else {
+                    injectZoomUnlocker(view);
+                }
                 injectYouTubeOptimizations(view);
                 injectCosmeticAdBlocker(view);
             }
@@ -916,6 +937,7 @@ public class MainActivity extends AppCompatActivity {
         activeTabIndex = tabs.size() - 1;
         updateTabCountDisplay();
         applyIncognitoSettings(isIncognito);
+        applyDesktopSiteSettings(false);
         loadHome();
         if (isIncognito) {
             Toast.makeText(this, "🕶️ Incognito tab opened", Toast.LENGTH_SHORT).show();
@@ -1117,7 +1139,7 @@ public class MainActivity extends AppCompatActivity {
         popup.getMenu().add(0, 4, 9, "Downloads");
         popup.getMenu().add(0, 5, 10, "Bookmarks");
         popup.getMenu().add(0, 7, 11, "Find in page");
-        popup.getMenu().add(0, 8, 12, isDesktopSite ? "Mobile site" : "Desktop site");
+        popup.getMenu().add(0, 8, 12, isDesktopSite ? "☑ Desktop site" : "☐ Desktop site");
         popup.getMenu().add(0, 10, 13, "Zoom in (+)");
         popup.getMenu().add(0, 11, 14, "Zoom out (-)");
         popup.getMenu().add(0, 12, 15, "Reset zoom (" + currentTextZoom + "%)");
@@ -1240,18 +1262,18 @@ public class MainActivity extends AppCompatActivity {
         this.isDesktopSite = enableDesktop;
         if (webView == null) return;
         WebSettings settings = webView.getSettings();
+        settings.setUseWideViewPort(true);
+        settings.setLoadWithOverviewMode(true);
+        settings.setSupportZoom(true);
+        settings.setBuiltInZoomControls(true);
+        settings.setDisplayZoomControls(false);
         if (enableDesktop) {
-            settings.setUserAgentString("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
-            settings.setUseWideViewPort(true);
-            settings.setLoadWithOverviewMode(true);
-            settings.setSupportZoom(true);
-            settings.setBuiltInZoomControls(true);
-            settings.setDisplayZoomControls(false);
+            settings.setUserAgentString(DESKTOP_USER_AGENT);
+            injectDesktopViewport(webView);
         } else {
             String cleanUA = defaultUserAgent != null ? defaultUserAgent.replace("Version/4.0 ", "") : null;
             settings.setUserAgentString(cleanUA);
-            settings.setUseWideViewPort(false);
-            settings.setLoadWithOverviewMode(false);
+            injectZoomUnlocker(webView);
         }
     }
 
@@ -1262,6 +1284,43 @@ public class MainActivity extends AppCompatActivity {
         }
         applyDesktopSiteSettings(isDesktopSite);
         Toast.makeText(this, isDesktopSite ? "Desktop site enabled" : "Mobile site enabled", Toast.LENGTH_SHORT).show();
+
+        String curUrl = webView != null ? webView.getUrl() : null;
+        if (curUrl != null && curUrl.startsWith("file:///android_asset")) {
+            webView.evaluateJavascript(isDesktopSite ? 
+                "document.body.classList.add('desktop-site-active');" : 
+                "document.body.classList.remove('desktop-site-active');", null);
+        }
+
+        if (curUrl != null && !curUrl.startsWith("file://")) {
+            if (isDesktopSite) {
+                if (curUrl.contains("://m.youtube.com")) {
+                    webView.loadUrl(curUrl.replace("://m.youtube.com", "://www.youtube.com"));
+                    return;
+                } else if (curUrl.contains("://m.facebook.com")) {
+                    webView.loadUrl(curUrl.replace("://m.facebook.com", "://www.facebook.com"));
+                    return;
+                } else if (curUrl.contains(".m.wikipedia.org")) {
+                    webView.loadUrl(curUrl.replace(".m.wikipedia.org", ".wikipedia.org"));
+                    return;
+                } else if (curUrl.contains("://mobile.twitter.com")) {
+                    webView.loadUrl(curUrl.replace("://mobile.twitter.com", "://twitter.com"));
+                    return;
+                }
+            } else {
+                if (curUrl.contains("://www.youtube.com")) {
+                    webView.loadUrl(curUrl.replace("://www.youtube.com", "://m.youtube.com"));
+                    return;
+                } else if (curUrl.contains("://www.facebook.com")) {
+                    webView.loadUrl(curUrl.replace("://www.facebook.com", "://m.facebook.com"));
+                    return;
+                } else if (curUrl.contains(".wikipedia.org") && !curUrl.contains(".m.wikipedia.org")) {
+                    webView.loadUrl(curUrl.replace(".wikipedia.org", ".m.wikipedia.org"));
+                    return;
+                }
+            }
+        }
+
         if (webView != null) webView.reload();
     }
 
@@ -1283,6 +1342,34 @@ public class MainActivity extends AppCompatActivity {
         } else {
             Toast.makeText(this, "AETHER VPN Disconnected", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void injectDesktopViewport(WebView view) {
+        if (view == null) return;
+        String desktopScript = "(function() {" +
+            "  function applyDesktop() {" +
+            "    try {" +
+            "      let meta = document.querySelector('meta[name=\"viewport\"]');" +
+            "      if (!meta) {" +
+            "        meta = document.createElement('meta');" +
+            "        meta.name = 'viewport';" +
+            "        (document.head || document.documentElement).appendChild(meta);" +
+            "      }" +
+            "      meta.setAttribute('content', 'width=1180, initial-scale=0.35, minimum-scale=0.1, maximum-scale=5.0, user-scalable=yes');" +
+            "      if (document.documentElement) {" +
+            "        document.documentElement.style.minWidth = '1180px';" +
+            "        document.documentElement.style.overflowX = 'auto';" +
+            "      }" +
+            "      if (document.body) {" +
+            "        document.body.style.minWidth = '1180px';" +
+            "      }" +
+            "    } catch(e) {}" +
+            "  }" +
+            "  applyDesktop();" +
+            "  document.addEventListener('DOMContentLoaded', applyDesktop);" +
+            "  window.addEventListener('load', applyDesktop);" +
+            "})();";
+        view.evaluateJavascript(desktopScript, null);
     }
 
     private void injectZoomUnlocker(WebView view) {
