@@ -116,11 +116,13 @@
   top: 36px;
   left: 0;
   right: 0;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+  overflow-x: hidden;
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-xl);
-  overflow: hidden;
   z-index: 300;
   display: flex;
   flex-direction: column;
@@ -499,19 +501,40 @@
 /* Shields Popover Dropdown */
 .shields-popover {
   position: absolute;
-  top: 38px;
-  right: 28px;
-  width: 320px;
+  top: calc(100% + 6px);
+  right: 24px;
+  width: 330px;
+  max-height: min(560px, calc(100vh - 90px));
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-xl);
-  padding: 16px;
+  padding: 14px;
   z-index: 500;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  backdrop-filter: blur(12px);
+  gap: 10px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.35) transparent;
+}
+
+.shields-popover::-webkit-scrollbar {
+  width: 5px;
+}
+.shields-popover::-webkit-scrollbar-track {
+  background: transparent;
+}
+.shields-popover::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.35);
+  border-radius: 4px;
+}
+.shields-popover::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.6);
 }
 
 [data-theme="dark"] .shields-popover {
@@ -631,7 +654,27 @@
 .shields-options {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
+  max-height: 230px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.3) transparent;
+}
+
+.shields-options::-webkit-scrollbar {
+  width: 4px;
+}
+.shields-options::-webkit-scrollbar-track {
+  background: transparent;
+}
+.shields-options::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.3);
+  border-radius: 4px;
+}
+.shields-options::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.5);
 }
 
 .shields-toggle-row {
