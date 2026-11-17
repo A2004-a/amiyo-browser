@@ -13,6 +13,7 @@ const incognitoTests = require('./incognito.test');
 const superFeatureTests = require('./browser-super-features.test');
 const aetherShieldSuperTests = require('./aether-shield-and-super-features.test');
 const vpnTests = require('./vpn-controller.test');
+const mobileTests = require('./mobile-features.test');
 
 console.log('========================================');
 console.log('       AETHER Browser Test Suite       ');
@@ -35,9 +36,10 @@ async function main() {
     superFeatureTests.run();
     aetherShieldSuperTests.run();
     await vpnTests.run();
+    mobileTests.run();
 
     console.log('\n========================================');
-    console.log('  ALL UNIT TEST SUITES PASSED (15/15)!  ');
+    console.log('  ALL UNIT TEST SUITES PASSED (16/16)!  ');
     console.log('========================================');
   } catch (err) {
     console.error('\n❌ Test failure:', err);

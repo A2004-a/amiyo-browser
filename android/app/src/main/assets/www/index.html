@@ -613,7 +613,7 @@
       <div style="font-size:42px;margin-bottom:12px;">📥</div>
       <p style="font-weight:600;font-size:15px;color:var(--text-primary);margin-bottom:6px;">Your Downloaded Files</p>
       <p style="margin-bottom:20px;">Downloads are saved to your device's default Downloads folder.</p>
-      <button onclick="location.href='content://downloads/all_downloads'" class="btn-primary" style="max-width:240px;margin:0 auto;display:block;">Open Device Downloads</button>
+      <button onclick="if(window.AetherAndroid && AetherAndroid.openDownloads) { AetherAndroid.openDownloads(); } else { location.href='content://downloads/all_downloads'; }" class="btn-primary" style="max-width:240px;margin:0 auto;display:block;">Open Device Downloads</button>
     </div>
   </section>
 
@@ -668,6 +668,7 @@
     // 1. Hash Routing
     function navigateTo(hash) {
       window.location.hash = hash;
+      renderRoute();
     }
 
     function renderRoute() {
@@ -771,6 +772,9 @@
     function selectEngine(engine) {
       localStorage.setItem('aether_search_engine', engine);
       localStorage.setItem('amiyo_search_engine', engine);
+      if (window.AetherAndroid && AetherAndroid.setSearchEngine) {
+        AetherAndroid.setSearchEngine(engine);
+      }
       highlightCurrentSettings();
       loadSettingsView();
     }
@@ -857,6 +861,19 @@
     }
 
     // 5. Bookmarks View Logic
+    function addBookmarkItem(title, url) {
+      if (!url || url.startsWith('file://')) return;
+      try {
+        let bookmarks = JSON.parse(localStorage.getItem('aether_bookmarks') || '[]');
+        bookmarks = bookmarks.filter(b => b.url !== url);
+        bookmarks.unshift({ title: title || url, url: url, time: Date.now() });
+        localStorage.setItem('aether_bookmarks', JSON.stringify(bookmarks));
+        if (document.getElementById('view-bookmarks')?.classList.contains('active')) {
+          loadBookmarksView();
+        }
+      } catch (e) {}
+    }
+
     function loadBookmarksView() {
       const container = document.getElementById('bookmarks-list');
       if (!container) return;
@@ -911,6 +928,9 @@
       const desc = document.getElementById('shields-status-desc');
       if (desc) desc.textContent = cb.checked ? 'Active • High Protection' : 'Disabled';
       localStorage.setItem('aether_shields_enabled', cb.checked ? 'true' : 'false');
+      if (window.AetherAndroid && AetherAndroid.setShieldsEnabled) {
+        AetherAndroid.setShieldsEnabled(cb.checked);
+      }
     }
 
     function escapeHtml(str) {

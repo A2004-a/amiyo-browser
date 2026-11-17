@@ -5,34 +5,37 @@ import android.app.AlertDialog;
 import android.app.DownloadManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.net.http.SslError;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Message;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.CookieManager;
 import android.webkit.DownloadListener;
+import android.webkit.GeolocationPermissions;
+import android.webkit.JavascriptInterface;
+import android.webkit.PermissionRequest;
+import android.webkit.SslErrorHandler;
 import android.webkit.URLUtil;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
+import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import java.io.ByteArrayInputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
-import android.os.Build;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -42,9 +45,18 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
+import java.io.ByteArrayInputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -78,6 +90,14 @@ public class MainActivity extends AppCompatActivity {
     private boolean isVpnEnabled = false;
     private String vpnLocation = "Optimal (Fastest)";
 
+    // Brave-Grade Shields Status
+    private boolean shieldsEnabled = true;
+
+    // Pending Permissions Callbacks
+    private GeolocationPermissions.Callback pendingGeoCallback = null;
+    private String pendingGeoOrigin = null;
+    private PermissionRequest pendingWebPermissionRequest = null;
+
     public static class TabItem {
         public String id;
         public String title;
@@ -98,6 +118,8 @@ public class MainActivity extends AppCompatActivity {
 
     private ValueCallback<Uri[]> fileUploadCallback;
     private static final int FILE_CHOOSER_REQUEST_CODE = 1001;
+    private static final int PERMISSION_REQUEST_LOCATION = 1002;
+    private static final int PERMISSION_REQUEST_CAMERA_MIC = 1003;
 
     // Brave-grade ad and tracker blocklist for mobile (O(1) HashSet lookup)
     private static final Set<String> AD_TRACKER_DOMAINS = new HashSet<>(Arrays.asList(
@@ -129,15 +151,76 @@ public class MainActivity extends AppCompatActivity {
         return false;
     }
 
+    public class AetherWebBridge {
+        @JavascriptInterface
+        public void openDownloads() {
+            runOnUiThread(() -> {
+                try {
+                    startActivity(new Intent(DownloadManager.ACTION_VIEW_DOWNLOADS));
+                } catch (Exception e) {
+                    openInternalPage("downloads");
+                }
+            });
+        }
+
+        @JavascriptInterface
+        public void setSearchEngine(String engine) {
+            runOnUiThread(() -> {
+                android.content.SharedPreferences prefs = getSharedPreferences("amiyo_prefs", MODE_PRIVATE);
+                prefs.edit().putString("search_engine", engine).apply();
+            });
+        }
+
+        @JavascriptInterface
+        public void setShieldsEnabled(boolean enabled) {
+            shieldsEnabled = enabled;
+        }
+
+        @JavascriptInterface
+        public void sharePage(String title, String url) {
+            runOnUiThread(() -> {
+                Intent sendIntent = new Intent();
+                sendIntent.setAction(Intent.ACTION_SEND);
+                sendIntent.putExtra(Intent.EXTRA_TITLE, title);
+                sendIntent.putExtra(Intent.EXTRA_TEXT, url);
+                sendIntent.setType("text/plain");
+                startActivity(Intent.createChooser(sendIntent, "Share link via"));
+            });
+        }
+
+        @JavascriptInterface
+        public void showToast(String message) {
+            runOnUiThread(() -> Toast.makeText(MainActivity.this, message, Toast.LENGTH_SHORT).show());
+        }
+    }
+
     @SuppressLint("SetJavaScriptEnabled")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Initialize primary default tab
-        tabs.add(new TabItem("New Tab", HOME_URL, false));
-        activeTabIndex = 0;
+        // Restore tabs on Activity recreation if present
+        if (savedInstanceState != null) {
+            activeTabIndex = savedInstanceState.getInt("active_tab_index", 0);
+            isDesktopSite = savedInstanceState.getBoolean("desktop_site", false);
+            isVpnEnabled = savedInstanceState.getBoolean("vpn_enabled", false);
+            ArrayList<String> tabTitles = savedInstanceState.getStringArrayList("tab_titles");
+            ArrayList<String> tabUrls = savedInstanceState.getStringArrayList("tab_urls");
+            ArrayList<String> tabIncognitos = savedInstanceState.getStringArrayList("tab_incognitos");
+            if (tabTitles != null && tabUrls != null && tabTitles.size() == tabUrls.size()) {
+                tabs.clear();
+                for (int i = 0; i < tabTitles.size(); i++) {
+                    boolean isIncog = tabIncognitos != null && i < tabIncognitos.size() && "1".equals(tabIncognitos.get(i));
+                    tabs.add(new TabItem(tabTitles.get(i), tabUrls.get(i), isIncog));
+                }
+            }
+        }
+
+        if (tabs.isEmpty()) {
+            tabs.add(new TabItem("New Tab", HOME_URL, false));
+            activeTabIndex = 0;
+        }
 
         initViews();
         setupWebView();
@@ -150,9 +233,81 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = getIntent();
         if (intent != null && Intent.ACTION_VIEW.equals(intent.getAction()) && intent.getData() != null) {
             loadTarget(intent.getData().toString());
+        } else if (savedInstanceState != null && activeTabIndex >= 0 && activeTabIndex < tabs.size()) {
+            TabItem cur = tabs.get(activeTabIndex);
+            if (cur.url != null && !cur.url.isEmpty()) {
+                loadTarget(cur.url);
+            } else {
+                loadHome();
+            }
         } else {
             loadHome();
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (webView != null) {
+            webView.onResume();
+            webView.resumeTimers();
+            webView.post(() -> {
+                webView.requestLayout();
+                webView.invalidate();
+                // Recover any paused video element on resume (fixes black screen / blank video on reopen)
+                webView.evaluateJavascript(
+                    "(function() {" +
+                    "  try {" +
+                    "    const v = document.querySelector('video');" +
+                    "    if (v && v.paused && !v.ended) { v.play().catch(()=>{}); }" +
+                    "  } catch(e) {}" +
+                    "})();", null);
+            });
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (webView != null) {
+            webView.onPause();
+            webView.pauseTimers();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (customView != null) {
+            hideCustomView();
+        }
+        if (webView != null) {
+            webView.loadUrl("about:blank");
+            webView.stopLoading();
+            webView.setWebChromeClient(null);
+            webView.setWebViewClient(null);
+            webView.destroy();
+            webView = null;
+        }
+        super.onDestroy();
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt("active_tab_index", activeTabIndex);
+        outState.putBoolean("desktop_site", isDesktopSite);
+        outState.putBoolean("vpn_enabled", isVpnEnabled);
+        ArrayList<String> tabTitles = new ArrayList<>();
+        ArrayList<String> tabUrls = new ArrayList<>();
+        ArrayList<String> tabIncognitos = new ArrayList<>();
+        for (TabItem t : tabs) {
+            tabTitles.add(t.title != null ? t.title : "AETHER");
+            tabUrls.add(t.url != null ? t.url : HOME_URL);
+            tabIncognitos.add(t.isIncognito ? "1" : "0");
+        }
+        outState.putStringArrayList("tab_titles", tabTitles);
+        outState.putStringArrayList("tab_urls", tabUrls);
+        outState.putStringArrayList("tab_incognitos", tabIncognitos);
     }
 
     private void initViews() {
@@ -185,8 +340,6 @@ public class MainActivity extends AppCompatActivity {
 
     @SuppressLint("SetJavaScriptEnabled")
     private void setupWebView() {
-        // Hardware accelerated graphics rendering & smooth scrolling
-        webView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
         webView.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
         webView.setOverScrollMode(View.OVER_SCROLL_IF_CONTENT_SCROLLS);
 
@@ -196,12 +349,18 @@ public class MainActivity extends AppCompatActivity {
         settings.setDatabaseEnabled(true);
         settings.setAllowFileAccess(true);
         settings.setAllowContentAccess(true);
+        settings.setAllowFileAccessFromFileURLs(true);
+        settings.setAllowUniversalAccessFromFileURLs(true);
         settings.setSupportZoom(true);
         settings.setBuiltInZoomControls(true);
         settings.setDisplayZoomControls(false);
         settings.setLoadWithOverviewMode(true);
         settings.setUseWideViewPort(true);
         settings.setMediaPlaybackRequiresUserGesture(false);
+        settings.setSupportMultipleWindows(true);
+        settings.setJavaScriptCanOpenWindowsAutomatically(true);
+        settings.setGeolocationEnabled(true);
+        settings.setMixedContentMode(WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE);
 
         // High-Performance Caching & Rendering
         settings.setCacheMode(WebSettings.LOAD_DEFAULT);
@@ -221,6 +380,9 @@ public class MainActivity extends AppCompatActivity {
         CookieManager.getInstance().setAcceptCookie(true);
         CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
 
+        // Native JavaScript Interface Bridge
+        webView.addJavascriptInterface(new AetherWebBridge(), "AetherAndroid");
+
         webView.setWebChromeClient(new WebChromeClient() {
             @Override
             public void onProgressChanged(WebView view, int newProgress) {
@@ -234,6 +396,16 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
+            public void onReceivedTitle(WebView view, String title) {
+                super.onReceivedTitle(view, title);
+                if (activeTabIndex >= 0 && activeTabIndex < tabs.size()) {
+                    if (title != null && !title.isEmpty() && !title.startsWith("http")) {
+                        tabs.get(activeTabIndex).title = title;
+                    }
+                }
+            }
+
+            @Override
             public boolean onShowFileChooser(WebView webView, ValueCallback<Uri[]> filePathCallback,
                     FileChooserParams fileChooserParams) {
                 if (fileUploadCallback != null) {
@@ -241,14 +413,22 @@ public class MainActivity extends AppCompatActivity {
                 }
                 fileUploadCallback = filePathCallback;
 
-                Intent intent = fileChooserParams.createIntent();
                 try {
+                    Intent intent = fileChooserParams.createIntent();
                     startActivityForResult(intent, FILE_CHOOSER_REQUEST_CODE);
+                    return true;
                 } catch (Exception e) {
-                    fileUploadCallback = null;
-                    return false;
+                    try {
+                        Intent fallback = new Intent(Intent.ACTION_GET_CONTENT);
+                        fallback.addCategory(Intent.CATEGORY_OPENABLE);
+                        fallback.setType("*/*");
+                        startActivityForResult(Intent.createChooser(fallback, "Select File"), FILE_CHOOSER_REQUEST_CODE);
+                        return true;
+                    } catch (Exception ex) {
+                        fileUploadCallback = null;
+                        return false;
+                    }
                 }
-                return true;
             }
 
             @Override
@@ -259,6 +439,91 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onHideCustomView() {
                 hideCustomView();
+            }
+
+            @Override
+            public boolean onCreateWindow(WebView view, boolean isDialog, boolean isUserGesture, Message resultMsg) {
+                WebView newWebView = new WebView(MainActivity.this);
+                newWebView.getSettings().setJavaScriptEnabled(true);
+                newWebView.setWebViewClient(new WebViewClient() {
+                    @Override
+                    public boolean shouldOverrideUrlLoading(WebView v, WebResourceRequest req) {
+                        createNewTab(false);
+                        loadTarget(req.getUrl().toString());
+                        return true;
+                    }
+                });
+                WebView.WebViewTransport transport = (WebView.WebViewTransport) resultMsg.obj;
+                transport.setWebView(newWebView);
+                resultMsg.sendToTarget();
+                return true;
+            }
+
+            @Override
+            public void onCloseWindow(WebView window) {
+                super.onCloseWindow(window);
+                if (tabs.size() > 1) {
+                    closeTab(activeTabIndex);
+                }
+            }
+
+            @Override
+            public void onGeolocationPermissionsShowPrompt(String origin, GeolocationPermissions.Callback callback) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    if (checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                        callback.invoke(origin, true, true);
+                    } else {
+                        pendingGeoOrigin = origin;
+                        pendingGeoCallback = callback;
+                        requestPermissions(new String[] {
+                            android.Manifest.permission.ACCESS_FINE_LOCATION,
+                            android.Manifest.permission.ACCESS_COARSE_LOCATION
+                        }, PERMISSION_REQUEST_LOCATION);
+                    }
+                } else {
+                    callback.invoke(origin, true, true);
+                }
+            }
+
+            @Override
+            public void onGeolocationPermissionsHidePrompt() {
+                pendingGeoCallback = null;
+                pendingGeoOrigin = null;
+            }
+
+            @Override
+            public void onPermissionRequest(final PermissionRequest request) {
+                runOnUiThread(() -> {
+                    List<String> neededPermissions = new ArrayList<>();
+                    for (String resource : request.getResources()) {
+                        if (PermissionRequest.RESOURCE_VIDEO_CAPTURE.equals(resource)) {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
+                                checkSelfPermission(android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                                neededPermissions.add(android.Manifest.permission.CAMERA);
+                            }
+                        } else if (PermissionRequest.RESOURCE_AUDIO_CAPTURE.equals(resource)) {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
+                                checkSelfPermission(android.Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+                                neededPermissions.add(android.Manifest.permission.RECORD_AUDIO);
+                            }
+                        }
+                    }
+                    if (neededPermissions.isEmpty()) {
+                        request.grant(request.getResources());
+                    } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        pendingWebPermissionRequest = request;
+                        requestPermissions(neededPermissions.toArray(new String[0]), PERMISSION_REQUEST_CAMERA_MIC);
+                    } else {
+                        request.grant(request.getResources());
+                    }
+                });
+            }
+
+            @Override
+            public void onPermissionRequestCanceled(PermissionRequest request) {
+                if (pendingWebPermissionRequest != null && pendingWebPermissionRequest.equals(request)) {
+                    pendingWebPermissionRequest = null;
+                }
             }
         });
 
@@ -288,28 +553,36 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 injectZoomUnlocker(view);
-
-                // Inject YouTube Video Ad Fast-Forward & Skipper for mobile
-                String script = "(function() {" +
-                    "  if (location.hostname.includes('youtube.com')) {" +
-                    "    setInterval(() => {" +
-                    "      const skip = document.querySelector('.ytp-ad-skip-button, .ytp-ad-skip-button-modern, .ytp-skip-ad-button');" +
-                    "      if (skip) { skip.click(); }" +
-                    "      const vid = document.querySelector('video');" +
-                    "      const ad = document.querySelector('.ad-showing, .ytp-ad-player-overlay');" +
-                    "      if (vid && ad && isFinite(vid.duration)) { vid.currentTime = vid.duration; }" +
-                    "    }, 500);" +
-                    "  }" +
-                    "})();";
-                view.evaluateJavascript(script, null);
+                injectYouTubeOptimizations(view);
             }
 
             @Override
             public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
                 Uri uri = request.getUrl();
                 String host = uri != null ? uri.getHost() : null;
-                if (host != null && isAdOrTracker(host)) {
-                    return new WebResourceResponse("text/plain", "UTF-8", new ByteArrayInputStream("".getBytes()));
+                String urlStr = uri != null ? uri.toString() : "";
+
+                // NEVER block video / audio streaming segments or manifest files (prevents black screen on YouTube/media)
+                if (host != null && (
+                    host.contains("googlevideo.com") ||
+                    host.contains("videoplayback") ||
+                    host.contains("youtubei.googleapis.com") ||
+                    urlStr.contains("/videoplayback") ||
+                    urlStr.contains(".m3u8") ||
+                    urlStr.contains(".mpd") ||
+                    urlStr.contains(".mp4") ||
+                    urlStr.contains(".webm")
+                )) {
+                    return super.shouldInterceptRequest(view, request);
+                }
+
+                if (shieldsEnabled && host != null && isAdOrTracker(host)) {
+                    String mime = "text/plain";
+                    String path = uri.getPath() != null ? uri.getPath().toLowerCase(Locale.ROOT) : "";
+                    if (path.endsWith(".js") || urlStr.contains(".js?")) mime = "application/javascript";
+                    else if (path.endsWith(".css")) mime = "text/css";
+                    else if (path.endsWith(".png") || path.endsWith(".jpg") || path.endsWith(".gif") || path.endsWith(".webp")) mime = "image/png";
+                    return new WebResourceResponse(mime, "UTF-8", new ByteArrayInputStream("".getBytes()));
                 }
                 return super.shouldInterceptRequest(view, request);
             }
@@ -320,12 +593,54 @@ public class MainActivity extends AppCompatActivity {
                 if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("file://")) {
                     return false;
                 }
+                if (url.equals("content://downloads/all_downloads") || url.startsWith("aether://downloads") || url.startsWith("amiyo://downloads")) {
+                    try {
+                        startActivity(new Intent(DownloadManager.ACTION_VIEW_DOWNLOADS));
+                    } catch (Exception e) {
+                        openInternalPage("downloads");
+                    }
+                    return true;
+                }
                 try {
                     Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
                     startActivity(intent);
                     return true;
                 } catch (Exception e) {
                     return true;
+                }
+            }
+
+            @Override
+            public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
+                new AlertDialog.Builder(MainActivity.this)
+                    .setTitle("Security Warning")
+                    .setMessage("The SSL certificate for this site is not trusted (" + (error != null ? error.getUrl() : "site") + "). Do you want to proceed anyway?")
+                    .setPositiveButton("Proceed (Unsafe)", (dialog, which) -> handler.proceed())
+                    .setNegativeButton("Go Back", (dialog, which) -> {
+                        handler.cancel();
+                        if (view.canGoBack()) view.goBack(); else loadHome();
+                    })
+                    .setCancelable(false)
+                    .show();
+            }
+
+            @Override
+            public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
+                super.onReceivedError(view, request, error);
+                if (request != null && request.isForMainFrame()) {
+                    pageProgressBar.setVisibility(View.GONE);
+                    swipeRefresh.setRefreshing(false);
+                    String failingUrl = request.getUrl().toString();
+                    if (!failingUrl.startsWith("file://")) {
+                        String errorHtml = "<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width, initial-scale=1.0'></head><body style='background:#12141a;color:#f8fafc;font-family:-apple-system,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;height:90vh;text-align:center;padding:20px;box-sizing:border-box;margin:0;'>" +
+                            "<div style='font-size:52px;margin-bottom:16px;'>📡</div>" +
+                            "<h2 style='font-size:22px;margin-bottom:8px;font-weight:700;'>You're Offline or Site Unreachable</h2>" +
+                            "<p style='color:#94a3b8;font-size:14px;max-width:320px;line-height:1.5;margin-bottom:24px;'>AETHER could not connect to this site. Check your mobile data or Wi-Fi connection.</p>" +
+                            "<button onclick='location.reload()' style='background:#38bdf8;color:#0f172a;border:none;border-radius:24px;padding:12px 28px;font-size:14px;font-weight:bold;cursor:pointer;'>Retry Connection</button>" +
+                            "<br><a href='file:///android_asset/www/index.html' style='color:#94a3b8;font-size:13px;margin-top:20px;text-decoration:none;'>Return to New Tab</a>" +
+                            "</body></html>";
+                        view.loadDataWithBaseURL(null, errorHtml, "text/html", "UTF-8", null);
+                    }
                 }
             }
         });
@@ -361,6 +676,9 @@ public class MainActivity extends AppCompatActivity {
 
     private void setupEvents() {
         swipeRefresh.setOnRefreshListener(() -> webView.reload());
+        swipeRefresh.setOnChildScrollUpCallback((parent, child) -> {
+            return webView != null && webView.getScrollY() > 0;
+        });
 
         urlInput.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_GO || actionId == EditorInfo.IME_ACTION_DONE ||
@@ -563,6 +881,8 @@ public class MainActivity extends AppCompatActivity {
 
     private void setupBackNavigation() {
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            private long lastBackPressTime = 0;
+
             @Override
             public void handleOnBackPressed() {
                 if (customView != null) {
@@ -572,14 +892,28 @@ public class MainActivity extends AppCompatActivity {
                 if (findInPageBar.getVisibility() == View.VISIBLE) {
                     webView.clearMatches();
                     findInPageBar.setVisibility(View.GONE);
+                    hideKeyboard();
                     return;
                 }
                 if (webView.canGoBack()) {
                     webView.goBack();
-                } else if (tabs.size() > 1) {
+                    return;
+                }
+                String curUrl = webView.getUrl();
+                if (curUrl != null && !curUrl.startsWith("file:///android_asset/www/index.html")) {
+                    loadHome();
+                    return;
+                }
+                if (tabs.size() > 1) {
                     closeTab(activeTabIndex);
-                } else {
+                    return;
+                }
+                long now = System.currentTimeMillis();
+                if (now - lastBackPressTime < 2000) {
                     finish();
+                } else {
+                    lastBackPressTime = now;
+                    Toast.makeText(MainActivity.this, "Press back again to exit AETHER", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -796,7 +1130,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onConfigurationChanged(android.content.res.Configuration newConfig) {
+    public void onConfigurationChanged(@NonNull android.content.res.Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         if (webView != null) {
             webView.post(() -> {
@@ -840,6 +1174,44 @@ public class MainActivity extends AppCompatActivity {
         view.evaluateJavascript(zoomScript, null);
     }
 
+    private void injectYouTubeOptimizations(WebView view) {
+        if (view == null) return;
+        String ytScript = "(function() {" +
+            "  if (location.hostname.includes('youtube.com')) {" +
+            "    function set4KQuality() {" +
+            "      try {" +
+            "        const player = document.getElementById('movie_player') || document.querySelector('.html5-video-player');" +
+            "        if (player) {" +
+            "          if (typeof player.setPlaybackQualityRange === 'function') { player.setPlaybackQualityRange('highres', 'hd2160'); }" +
+            "          if (typeof player.setPlaybackQuality === 'function') { player.setPlaybackQuality('hd2160'); }" +
+            "        }" +
+            "      } catch(e) {}" +
+            "    }" +
+            "    set4KQuality();" +
+            "    setInterval(() => {" +
+            "      try {" +
+            "        const consent = document.querySelector('button[aria-label*=\"Accept\"], button[aria-label*=\"agree\"], .ytd-consent-bump-v2-lightbox button');" +
+            "        if (consent) consent.click();" +
+            "        const skip = document.querySelector('.ytp-ad-skip-button, .ytp-ad-skip-button-modern, .ytp-skip-ad-button');" +
+            "        if (skip) { skip.click(); }" +
+            "        const vid = document.querySelector('video');" +
+            "        const ad = document.querySelector('.ad-showing, .ytp-ad-player-overlay');" +
+            "        if (vid && ad) {" +
+            "          vid.muted = true;" +
+            "          vid.playbackRate = 16.0;" +
+            "          if (isFinite(vid.duration) && vid.duration > 0.5) { vid.currentTime = vid.duration - 0.1; }" +
+            "        } else if (vid && !ad && vid.playbackRate > 2.0) {" +
+            "          vid.playbackRate = 1.0;" +
+            "        }" +
+            "        document.querySelectorAll('ytd-action-companion-ad-renderer, ytd-banner-promo-renderer-background, .ytp-ad-overlay-container, #masthead-ad').forEach(el => el.remove());" +
+            "      } catch(e) {}" +
+            "    }, 400);" +
+            "    window.addEventListener('yt-navigate-finish', () => { setTimeout(set4KQuality, 600); });" +
+            "  }" +
+            "})();";
+        view.evaluateJavascript(ytScript, null);
+    }
+
     private void showCustomView(View view, WebChromeClient.CustomViewCallback callback) {
         if (customView != null) {
             callback.onCustomViewHidden();
@@ -847,17 +1219,45 @@ public class MainActivity extends AppCompatActivity {
         }
         customView = view;
         customViewCallback = callback;
+
+        // Hide browser chrome
         if (findViewById(R.id.topBar) != null) findViewById(R.id.topBar).setVisibility(View.GONE);
         if (findViewById(R.id.bottomBar) != null) findViewById(R.id.bottomBar).setVisibility(View.GONE);
         if (swipeRefresh != null) swipeRefresh.setVisibility(View.GONE);
+        if (findInPageBar != null) findInPageBar.setVisibility(View.GONE);
+
+        // Setup container
         if (customViewContainer != null) {
-            customViewContainer.addView(view);
+            customViewContainer.addView(view, new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
             customViewContainer.setVisibility(View.VISIBLE);
         }
+
+        // Fullscreen immersive mode & keep screen awake for video
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        getWindow().getDecorView().setSystemUiVisibility(
+            View.SYSTEM_UI_FLAG_FULLSCREEN |
+            View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
+            View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY |
+            View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
+            View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
+            View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+        );
+
+        // Auto-rotate to landscape for cinema viewing
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
     }
 
     private void hideCustomView() {
         if (customView == null) return;
+
+        // Restore orientation
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+
+        // Restore system UI
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+
         if (customViewContainer != null) {
             customViewContainer.removeView(customView);
             customViewContainer.setVisibility(View.GONE);
@@ -865,6 +1265,7 @@ public class MainActivity extends AppCompatActivity {
         if (findViewById(R.id.topBar) != null) findViewById(R.id.topBar).setVisibility(View.VISIBLE);
         if (findViewById(R.id.bottomBar) != null) findViewById(R.id.bottomBar).setVisibility(View.VISIBLE);
         if (swipeRefresh != null) swipeRefresh.setVisibility(View.VISIBLE);
+
         if (customViewCallback != null) {
             customViewCallback.onCustomViewHidden();
             customViewCallback = null;
@@ -904,6 +1305,29 @@ public class MainActivity extends AppCompatActivity {
             InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
             if (imm != null) {
                 imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+            }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == PERMISSION_REQUEST_LOCATION) {
+            boolean granted = grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED;
+            if (pendingGeoCallback != null && pendingGeoOrigin != null) {
+                pendingGeoCallback.invoke(pendingGeoOrigin, granted, true);
+                pendingGeoCallback = null;
+                pendingGeoOrigin = null;
+            }
+        } else if (requestCode == PERMISSION_REQUEST_CAMERA_MIC) {
+            if (pendingWebPermissionRequest != null) {
+                boolean hasGranted = grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED;
+                if (hasGranted) {
+                    pendingWebPermissionRequest.grant(pendingWebPermissionRequest.getResources());
+                } else {
+                    pendingWebPermissionRequest.deny();
+                }
+                pendingWebPermissionRequest = null;
             }
         }
     }
