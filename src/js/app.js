@@ -304,8 +304,7 @@ const App = {
     if (maxBtn) {
       maxBtn.innerHTML = Utils.icons.maximize;
       maxBtn.addEventListener('click', async () => {
-        const snapFlyout = document.getElementById('snap-layouts-flyout');
-        if (snapFlyout) snapFlyout.classList.add('hidden');
+        if (typeof hideSnapFlyout === 'function') hideSnapFlyout();
         await IpcClient.maximize();
         const isMax = await IpcClient.isMaximized();
         maxBtn.innerHTML = isMax ? Utils.icons.restore : Utils.icons.maximize;
@@ -314,23 +313,70 @@ const App = {
       // Windows 11 Snap Layouts Flyout on Hover / Context Menu
       const snapFlyout = document.getElementById('snap-layouts-flyout');
       let snapHoverTimer = null;
+      let hideSnapFlyout = null;
 
       if (snapFlyout) {
-        const showFlyout = () => {
+        let isFlyoutOpen = false;
+
+        const showFlyout = async () => {
           clearTimeout(snapHoverTimer);
+          if (isFlyoutOpen) return;
+          isFlyoutOpen = true;
+
+          // Suppress native OS tooltip from covering the flyout
+          maxBtn.removeAttribute('title');
+
+          // Freeze-frame snapshot backdrop to prevent WebContentsView from clipping the flyout
+          const tab = typeof State !== 'undefined' && State.getActiveTab ? State.getActiveTab() : null;
+          const isWeb = tab && !tab.isInternal && tab.url && tab.url.startsWith('http');
+          if (isWeb) {
+            try {
+              const res = await IpcClient.captureViewport(tab.id);
+              if (res && res.dataUrl) {
+                const freeze = document.getElementById('freeze-backdrop');
+                if (freeze) {
+                  freeze.style.backgroundImage = `url(${res.dataUrl})`;
+                  freeze.classList.remove('hidden');
+                }
+              }
+            } catch (e) {}
+            if (IpcClient.setViewVisible) {
+              await IpcClient.setViewVisible(false);
+            }
+          }
+
           snapFlyout.classList.remove('hidden');
+        };
+
+        hideSnapFlyout = () => {
+          clearTimeout(snapHoverTimer);
+          if (!isFlyoutOpen && snapFlyout.classList.contains('hidden')) return;
+          isFlyoutOpen = false;
+          snapFlyout.classList.add('hidden');
+
+          // Restore native tooltip
+          maxBtn.setAttribute('title', 'Maximize / Snap Layouts');
+
+          // Restore WebContentsView
+          const freeze = document.getElementById('freeze-backdrop');
+          if (freeze) {
+            freeze.classList.add('hidden');
+            freeze.style.backgroundImage = '';
+          }
+          const tab = typeof State !== 'undefined' && State.getActiveTab ? State.getActiveTab() : null;
+          if (tab && !tab.isInternal && IpcClient.setViewVisible) {
+            IpcClient.setViewVisible(true);
+          }
         };
 
         const hideFlyoutWithDelay = () => {
           clearTimeout(snapHoverTimer);
-          snapHoverTimer = setTimeout(() => {
-            snapFlyout.classList.add('hidden');
-          }, 240);
+          snapHoverTimer = setTimeout(hideSnapFlyout, 240);
         };
 
         maxBtn.addEventListener('mouseenter', () => {
           clearTimeout(snapHoverTimer);
-          snapHoverTimer = setTimeout(showFlyout, 180);
+          snapHoverTimer = setTimeout(showFlyout, 150);
         });
 
         maxBtn.addEventListener('mouseleave', hideFlyoutWithDelay);
@@ -343,14 +389,18 @@ const App = {
 
         maxBtn.addEventListener('contextmenu', (e) => {
           e.preventDefault();
-          snapFlyout.classList.toggle('hidden');
+          if (snapFlyout.classList.contains('hidden')) {
+            showFlyout();
+          } else {
+            hideSnapFlyout();
+          }
         });
 
         snapFlyout.querySelectorAll('.snap-zone').forEach((zone) => {
           zone.addEventListener('click', async (e) => {
             e.stopPropagation();
             const layout = zone.dataset.snap;
-            snapFlyout.classList.add('hidden');
+            hideSnapFlyout();
             if (layout && IpcClient.snapWindow) {
               await IpcClient.snapWindow(layout);
             }
@@ -359,7 +409,13 @@ const App = {
 
         document.addEventListener('click', (e) => {
           if (!snapFlyout.contains(e.target) && e.target !== maxBtn && !maxBtn.contains(e.target)) {
-            snapFlyout.classList.add('hidden');
+            hideSnapFlyout();
+          }
+        });
+
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' && isFlyoutOpen) {
+            hideSnapFlyout();
           }
         });
       }
