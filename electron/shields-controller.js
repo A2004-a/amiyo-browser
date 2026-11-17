@@ -708,6 +708,12 @@ class ShieldsController {
         pointer-events: none !important;
         overflow: hidden !important;
       }
+
+      /* YouTube True-Color Fidelity & High-DPI 4K Video Sharpness */
+      video.html5-main-video {
+        image-rendering: high-quality !important;
+        color-interpolation: sRGB !important;
+      }
     `;
 
     return this._cachedCosmeticCss;
@@ -930,19 +936,52 @@ class ShieldsController {
               } catch (e) {}
             };
 
+            // Auto 4K (2160p) & Max Resolution Enforcer (Bypass low-res Auto defaults)
+            const enforce4kQuality = () => {
+              try {
+                const player = document.getElementById('movie_player') || document.querySelector('.html5-video-player');
+                if (player && typeof player.getAvailableQualityLevels === 'function') {
+                  const levels = player.getAvailableQualityLevels();
+                  if (levels && levels.length > 0) {
+                    const topQuality = levels[0]; // Ordered highest to lowest (e.g. 'hd2160', 'hd1440', 'hd1080')
+                    const current = typeof player.getPlaybackQuality === 'function' ? player.getPlaybackQuality() : null;
+                    if (current !== topQuality && current !== 'highres') {
+                      if (typeof player.setPlaybackQualityRange === 'function') {
+                        player.setPlaybackQualityRange(topQuality, topQuality);
+                      }
+                      if (typeof player.setPlaybackQuality === 'function') {
+                        player.setPlaybackQuality(topQuality);
+                      }
+                    }
+                  }
+                }
+              } catch (e) {}
+            };
+
+            // Pre-seed YouTube localStorage for permanent 4K preference
+            try {
+              localStorage.setItem('yt-player-quality', JSON.stringify({
+                data: 'highres',
+                expiration: Date.now() + 315360000000,
+                creation: Date.now()
+              }));
+            } catch (e) {}
+
             const hookVideoEvents = () => {
               const video = document.querySelector('video');
               if (video && !video.__aether_hooked) {
                 video.__aether_hooked = true;
                 video.addEventListener('timeupdate', purgeYouTubeAds);
-                video.addEventListener('playing', purgeYouTubeAds);
-                video.addEventListener('play', purgeYouTubeAds);
+                video.addEventListener('playing', () => { purgeYouTubeAds(); enforce4kQuality(); });
+                video.addEventListener('play', () => { purgeYouTubeAds(); enforce4kQuality(); });
+                video.addEventListener('loadedmetadata', enforce4kQuality);
                 video.addEventListener('seeking', purgeYouTubeAds);
               }
             };
 
             const skipYouTubeAds = () => {
               purgeYouTubeAds();
+              enforce4kQuality();
               hookVideoEvents();
             };
 

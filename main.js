@@ -45,7 +45,13 @@ if (typeof electron === 'string') {
   const flags = [
     '--no-sandbox',
     '--log-level=3',
-    ...(explicitDisableGpu ? ['--disable-gpu'] : []),
+    '--force-color-profile=srgb',
+    ...(explicitDisableGpu ? ['--disable-gpu'] : [
+      '--ignore-gpu-blocklist',
+      '--enable-gpu-rasterization',
+      '--enable-zero-copy',
+      '--enable-accelerated-video-decode'
+    ]),
     '--no-deprecation',
     '.',
     ...process.argv.slice(2).filter(arg => arg !== '--disable-gpu')
@@ -70,13 +76,15 @@ if (app && app.commandLine) {
   app.commandLine.appendSwitch('log-level', '3');
   app.commandLine.appendSwitch('disable-logging');
 
-  // Hardware Acceleration & High-Performance Switches (only when GPU is enabled)
+  // Hardware Acceleration, 4K Video Playback & True-Color Fidelity Switches
   const isGpuDisabled = process.argv.includes('--disable-gpu') || process.env.AETHER_DISABLE_GPU === '1';
   if (!isGpuDisabled) {
+    app.commandLine.appendSwitch('ignore-gpu-blocklist');
     app.commandLine.appendSwitch('enable-gpu-rasterization');
     app.commandLine.appendSwitch('enable-zero-copy');
     app.commandLine.appendSwitch('enable-accelerated-2d-canvas');
     app.commandLine.appendSwitch('enable-accelerated-video-decode');
+    app.commandLine.appendSwitch('force-color-profile', 'srgb');
   } else {
     app.commandLine.appendSwitch('disable-gpu-shader-disk-cache');
     app.commandLine.appendSwitch('disable-gpu-program-cache');
@@ -92,7 +100,7 @@ if (app && app.commandLine) {
   app.commandLine.appendSwitch('disk-cache-size', '1048576000'); // 1GB high-speed disk cache
   app.commandLine.appendSwitch('enable-features', isGpuDisabled
     ? 'OverlayScrollbar,SmoothScrolling,ParallelDownloading,AsyncDns,BackForwardCache,TcpFastOpen,EarlyHintsPreloadForNavigation'
-    : 'VaapiVideoDecoder,OverlayScrollbar,CanvasOopRasterization,SmoothScrolling,ParallelDownloading,AsyncDns,BackForwardCache,ZeroCopy,TcpFastOpen,EarlyHintsPreloadForNavigation');
+    : 'VaapiVideoDecoder,OverlayScrollbar,CanvasOopRasterization,SmoothScrolling,ParallelDownloading,AsyncDns,BackForwardCache,ZeroCopy,TcpFastOpen,EarlyHintsPreloadForNavigation,VideoBlitColorAccuracy,PlatformHEVCDecoderSupport,UseSkiaRenderer');
   app.commandLine.appendSwitch('disable-features', 'CalculateNativeWinOcclusion,InterestCohort,Translate');
   app.commandLine.appendSwitch('js-flags', '--max-old-space-size=2048');
 }
