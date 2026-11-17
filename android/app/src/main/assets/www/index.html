@@ -992,7 +992,7 @@
     </div>
 
     <!-- AETHER Shields Stats Live Banner -->
-    <div class="shields-banner">
+    <div class="shields-banner" id="home-shields-banner">
       <div class="shields-stat-group">
         <div class="shields-stat-item">
           <span class="shields-stat-val" id="stats-trackers-val">1,420</span>
@@ -1034,7 +1034,7 @@
     </form>
 
     <!-- Feature Quick-Launch Strip -->
-    <div class="features-strip">
+    <div class="features-strip" id="home-features-strip">
       <div class="feature-chip" onclick="openCommandPaletteModal()" style="border-color:var(--accent);background:rgba(56,189,248,0.12);">
         <span style="color:var(--accent);">⚡ Palette</span>
       </div>
@@ -1100,45 +1100,63 @@
     </div>
 
     <!-- ================= INTERACTIVE AETHER NOTES CARD ON HOME ================= -->
-    <div class="notes-section">
+    <div class="notes-section" id="home-notes-section">
       <div class="notes-header">
         <div class="notes-title-wrap">
           <span style="font-size:18px;">💡</span>
           <span class="notes-title">AETHER Notes</span>
           <span class="chip-badge" id="home-notes-counter">0</span>
         </div>
-        <button class="notes-add-btn" onclick="startNewNoteFocus()">+ Note</button>
-      </div>
-
-      <!-- Category Filter Pills -->
-      <div class="notes-pills">
-        <div class="note-pill active" data-filter="all" onclick="filterNotes('all', this)">All</div>
-        <div class="note-pill" data-filter="pinned" onclick="filterNotes('pinned', this)">📌 Pinned</div>
-        <div class="note-pill" data-filter="todo" onclick="filterNotes('todo', this)">☑️ Todo</div>
-        <div class="note-pill" data-filter="clip" onclick="filterNotes('clip', this)">🔗 Web Clips</div>
-      </div>
-
-      <!-- Quick Note Creator -->
-      <div class="note-creator-card" id="note-creator-box">
-        <input type="text" id="note-input-title" class="note-input-title" placeholder="Title (optional)..." />
-        <textarea id="note-input-body" class="note-input-body" placeholder="Take a note, todo checklist, or web clip..."></textarea>
-        
-        <!-- Checklist builder container (hidden unless checklist mode toggled) -->
-        <div id="note-checklist-builder" style="display:none;flex-direction:column;gap:6px;margin:6px 0;"></div>
-        
-        <div class="note-creator-actions">
-          <div class="note-tool-icons">
-            <button type="button" class="note-tool-btn" id="btn-toggle-todo" title="Todo Checklist" onclick="toggleTodoCreator()">☑️</button>
-            <button type="button" class="note-tool-btn" id="btn-toggle-clip" title="Clip Current Page" onclick="toggleClipCreator()">🔗</button>
-            <button type="button" class="note-tool-btn" id="btn-color-tag" title="Color" onclick="cycleNoteColor()">🎨</button>
-            <button type="button" class="note-tool-btn" id="btn-pin-note" title="Pin Note" onclick="togglePinCreator()">📌</button>
-          </div>
-          <button type="button" class="btn-primary" style="padding:6px 14px;font-size:12px;" onclick="saveCurrentNote()">+ Add</button>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <button class="notes-add-btn" onclick="startNewNoteFocus()">+ Note</button>
+          <button type="button" class="notes-header-action-btn" id="btn-collapse-notes" onclick="toggleNotesCollapse()" title="Minimize / Expand Notes" style="background:rgba(255,255,255,0.06);border:1px solid var(--border);color:var(--text-secondary);border-radius:10px;padding:5px 8px;font-size:12px;cursor:pointer;line-height:1;">
+            <span id="collapse-notes-icon">▼</span>
+          </button>
+          <button type="button" class="notes-header-action-btn" onclick="hideNotesFeature()" title="Hide AETHER Notes from Home" style="background:rgba(255,255,255,0.06);border:1px solid var(--border);color:var(--text-secondary);border-radius:10px;padding:5px 9px;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:3px;line-height:1;">
+            <span>✕</span> Hide
+          </button>
         </div>
       </div>
 
-      <!-- Notes Grid -->
-      <div class="notes-grid" id="notes-cards-list"></div>
+      <!-- Collapsible Container -->
+      <div id="notes-collapsible-body">
+        <!-- Category Filter Pills -->
+        <div class="notes-pills">
+          <div class="note-pill active" data-filter="all" onclick="filterNotes('all', this)">All</div>
+          <div class="note-pill" data-filter="pinned" onclick="filterNotes('pinned', this)">📌 Pinned</div>
+          <div class="note-pill" data-filter="todo" onclick="filterNotes('todo', this)">☑️ Todo</div>
+          <div class="note-pill" data-filter="clip" onclick="filterNotes('clip', this)">🔗 Web Clips</div>
+        </div>
+
+        <!-- Quick Note Creator -->
+        <div class="note-creator-card" id="note-creator-box">
+          <input type="text" id="note-input-title" class="note-input-title" placeholder="Title (optional)..." />
+          <textarea id="note-input-body" class="note-input-body" placeholder="Take a note, todo checklist, or web clip..."></textarea>
+          
+          <!-- Checklist builder container (hidden unless checklist mode toggled) -->
+          <div id="note-checklist-builder" style="display:none;flex-direction:column;gap:6px;margin:6px 0;"></div>
+          
+          <div class="note-creator-actions">
+            <div class="note-tool-icons">
+              <button type="button" class="note-tool-btn" id="btn-toggle-todo" title="Todo Checklist" onclick="toggleTodoCreator()">☑️</button>
+              <button type="button" class="note-tool-btn" id="btn-toggle-clip" title="Clip Current Page" onclick="toggleClipCreator()">🔗</button>
+              <button type="button" class="note-tool-btn" id="btn-color-tag" title="Color" onclick="cycleNoteColor()">🎨</button>
+              <button type="button" class="note-tool-btn" id="btn-pin-note" title="Pin Note" onclick="togglePinCreator()">📌</button>
+            </div>
+            <button type="button" class="btn-primary" style="padding:6px 14px;font-size:12px;" onclick="saveCurrentNote()">+ Add</button>
+          </div>
+        </div>
+
+        <!-- Notes Grid -->
+        <div class="notes-grid" id="notes-cards-list"></div>
+      </div>
+    </div>
+
+    <!-- Notes Hidden Hint (shows when user hid notes, allowing 1-tap unhide) -->
+    <div id="notes-hidden-hint" style="display:none;margin-bottom:20px;text-align:center;">
+      <button type="button" onclick="toggleNotesVisibility()" style="background:rgba(56,189,248,0.08);border:1px dashed var(--accent);color:var(--text-secondary);border-radius:18px;padding:8px 16px;font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;">
+        <span>💡</span> <span>AETHER Notes is hidden • <b style="color:var(--accent);">Tap to Unhide</b></span>
+      </button>
     </div>
 
     <!-- Customize Pill Button -->
@@ -1482,10 +1500,10 @@
         </div>
         <span style="color:var(--text-secondary);">›</span>
       </div>
-      <div class="list-item" onclick="if(window.AetherAndroid && AetherAndroid.checkForUpdates){ AetherAndroid.checkForUpdates(); } else { alert('AETHER Browser v0.2.4 (Build 9) is up to date with full features!'); }">
+      <div class="list-item" onclick="if(window.AetherAndroid && AetherAndroid.checkForUpdates){ AetherAndroid.checkForUpdates(); } else { alert('AETHER Browser v0.2.5 (Build 10) is up to date with full features!'); }">
         <div class="list-item-content">
           <span class="item-title">🚀 Software Update</span>
-          <span class="item-url" id="app-update-status">Version 0.2.4 (Build 9) • Tap to check updates</span>
+          <span class="item-url" id="app-update-status">Version 0.2.5 (Build 10) • Tap to check updates</span>
         </div>
         <span class="chip-badge" style="background:rgba(16,185,129,0.15);color:var(--success);border:1px solid rgba(16,185,129,0.3);">Up to Date</span>
       </div>
@@ -1499,7 +1517,7 @@
 
     <div style="text-align:center;padding:24px 0;color:var(--text-secondary);font-size:12px;line-height:1.6;">
       <strong style="color:var(--accent);">AETHER Browser for Android</strong><br>
-      <span id="app-version-label">Version 0.2.4 (Build 9 — Clear Video &amp; Zero-Blur Cinema Release)</span><br>
+      <span id="app-version-label">Version 0.2.5 (Build 10 — Hide &amp; Unhide Homepage Features Release)</span><br>
       Explore Without Limits • Chromium &amp; Android Native
     </div>
   </section>
@@ -1525,7 +1543,7 @@
       <p style="font-weight:700;font-size:15px;color:var(--text-primary);margin-bottom:4px;">AETHER Android APK Update</p>
       <p style="margin-bottom:14px;font-size:12px;color:var(--text-secondary);">Download the latest version with Desktop Site, YouTube Cinema Zoom &amp; VPN.</p>
       <div style="display:flex;gap:10px;justify-content:center;">
-        <button onclick="location.href='https://github.com/A2004-a/amiyo-browser/releases/download/v0.1.0/AETHER-Browser-v0.2.4-Android.apk'" class="btn-primary" style="font-size:12px;padding:8px 16px;">⬇️ Download v0.2.4 APK</button>
+        <button onclick="location.href='https://github.com/A2004-a/amiyo-browser/releases/download/v0.1.0/AETHER-Browser-v0.2.5-Android.apk'" class="btn-primary" style="font-size:12px;padding:8px 16px;">⬇️ Download v0.2.5 APK</button>
       </div>
     </div>
   </section>
@@ -1613,10 +1631,55 @@
       </div>
 
       <div class="setting-group">
-        <div class="setting-label">New Tab Shortcuts</div>
-        <div class="option-card" id="toggle-shortcuts-btn" onclick="toggleShortcutsVisibility()" style="width:100%;">
-          <span>Show Shortcuts Grid</span>
-          <span style="margin-left:auto;color:var(--accent);" id="shortcuts-state-text">Enabled</span>
+        <div class="setting-label">Homepage Features (Show / Hide)</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <!-- AETHER Notes Card -->
+          <div class="option-card" id="toggle-notes-btn" onclick="toggleNotesVisibility()" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:12px 14px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="font-size:20px;">💡</span>
+              <div style="text-align:left;">
+                <div style="font-weight:600;font-size:13px;color:var(--text-primary);">AETHER Notes Card</div>
+                <div style="font-size:11px;color:var(--text-secondary);">Interactive notes &amp; checklist widget</div>
+              </div>
+            </div>
+            <span style="color:var(--accent);font-weight:600;font-size:12px;" id="notes-state-text">Enabled</span>
+          </div>
+
+          <!-- Shortcuts Grid -->
+          <div class="option-card" id="toggle-shortcuts-btn" onclick="toggleShortcutsVisibility()" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:12px 14px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="font-size:20px;">🚀</span>
+              <div style="text-align:left;">
+                <div style="font-weight:600;font-size:13px;color:var(--text-primary);">Shortcuts Grid</div>
+                <div style="font-size:11px;color:var(--text-secondary);">Frequent site circles &amp; links</div>
+              </div>
+            </div>
+            <span style="color:var(--accent);font-weight:600;font-size:12px;" id="shortcuts-state-text">Enabled</span>
+          </div>
+
+          <!-- Quick Action Strip -->
+          <div class="option-card" id="toggle-quickstrip-btn" onclick="toggleQuickStripVisibility()" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:12px 14px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="font-size:20px;">⚡</span>
+              <div style="text-align:left;">
+                <div style="font-weight:600;font-size:13px;color:var(--text-primary);">Quick Action Strip</div>
+                <div style="font-size:11px;color:var(--text-secondary);">Feature chips: Palette, VPN, AI, Vault</div>
+              </div>
+            </div>
+            <span style="color:var(--accent);font-weight:600;font-size:12px;" id="quickstrip-state-text">Enabled</span>
+          </div>
+
+          <!-- Shields Statistics Card -->
+          <div class="option-card" id="toggle-shieldscard-btn" onclick="toggleShieldsCardVisibility()" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:12px 14px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="font-size:20px;">🛡️</span>
+              <div style="text-align:left;">
+                <div style="font-weight:600;font-size:13px;color:var(--text-primary);">Shields Statistics Card</div>
+                <div style="font-size:11px;color:var(--text-secondary);">Trackers blocked &amp; data saved badge</div>
+              </div>
+            </div>
+            <span style="color:var(--accent);font-weight:600;font-size:12px;" id="shieldscard-state-text">Enabled</span>
+          </div>
         </div>
       </div>
 
@@ -2333,7 +2396,105 @@
       const container = document.getElementById('shortcuts-container');
       if (container) container.style.display = show ? 'grid' : 'none';
       const text = document.getElementById('shortcuts-state-text');
-      if (text) text.textContent = show ? 'Enabled' : 'Hidden';
+      if (text) {
+        text.textContent = show ? 'Enabled' : 'Hidden';
+        text.style.color = show ? 'var(--accent)' : 'var(--text-secondary)';
+      }
+    }
+
+    function toggleNotesVisibility() {
+      const current = localStorage.getItem('aether_show_notes') !== 'false';
+      const next = !current;
+      localStorage.setItem('aether_show_notes', next ? 'true' : 'false');
+      applyNotesVisibility();
+      highlightCurrentSettings();
+      if (window.AetherAndroid && AetherAndroid.showToast) {
+        AetherAndroid.showToast(next ? '💡 AETHER Notes card unhidden!' : 'AETHER Notes hidden. Unhide anytime in Customize.');
+      }
+    }
+
+    function hideNotesFeature() {
+      localStorage.setItem('aether_show_notes', 'false');
+      applyNotesVisibility();
+      highlightCurrentSettings();
+      if (window.AetherAndroid && AetherAndroid.showToast) {
+        AetherAndroid.showToast('AETHER Notes hidden. Unhide anytime in Customize AETHER Browser.');
+      }
+    }
+
+    function applyNotesVisibility() {
+      const show = localStorage.getItem('aether_show_notes') !== 'false';
+      const container = document.getElementById('home-notes-section');
+      if (container) container.style.display = show ? 'block' : 'none';
+      const hint = document.getElementById('notes-hidden-hint');
+      if (hint) hint.style.display = show ? 'none' : 'block';
+      const text = document.getElementById('notes-state-text');
+      if (text) {
+        text.textContent = show ? 'Enabled' : 'Hidden';
+        text.style.color = show ? 'var(--accent)' : 'var(--text-secondary)';
+      }
+    }
+
+    function toggleNotesCollapse() {
+      const body = document.getElementById('notes-collapsible-body');
+      const icon = document.getElementById('collapse-notes-icon');
+      if (!body) return;
+      const isHidden = body.style.display === 'none';
+      if (isHidden) {
+        body.style.display = 'block';
+        if (icon) icon.textContent = '▼';
+        localStorage.setItem('aether_notes_collapsed', 'false');
+      } else {
+        body.style.display = 'none';
+        if (icon) icon.textContent = '▲';
+        localStorage.setItem('aether_notes_collapsed', 'true');
+      }
+    }
+
+    function applyNotesCollapse() {
+      const isCollapsed = localStorage.getItem('aether_notes_collapsed') === 'true';
+      const body = document.getElementById('notes-collapsible-body');
+      const icon = document.getElementById('collapse-notes-icon');
+      if (body) body.style.display = isCollapsed ? 'none' : 'block';
+      if (icon) icon.textContent = isCollapsed ? '▲' : '▼';
+    }
+
+    function toggleQuickStripVisibility() {
+      const current = localStorage.getItem('aether_show_quickstrip') !== 'false';
+      const next = !current;
+      localStorage.setItem('aether_show_quickstrip', next ? 'true' : 'false');
+      applyQuickStripVisibility();
+      highlightCurrentSettings();
+    }
+
+    function applyQuickStripVisibility() {
+      const show = localStorage.getItem('aether_show_quickstrip') !== 'false';
+      const strip = document.getElementById('home-features-strip');
+      if (strip) strip.style.display = show ? 'flex' : 'none';
+      const text = document.getElementById('quickstrip-state-text');
+      if (text) {
+        text.textContent = show ? 'Enabled' : 'Hidden';
+        text.style.color = show ? 'var(--accent)' : 'var(--text-secondary)';
+      }
+    }
+
+    function toggleShieldsCardVisibility() {
+      const current = localStorage.getItem('aether_show_shieldscard') !== 'false';
+      const next = !current;
+      localStorage.setItem('aether_show_shieldscard', next ? 'true' : 'false');
+      applyShieldsCardVisibility();
+      highlightCurrentSettings();
+    }
+
+    function applyShieldsCardVisibility() {
+      const show = localStorage.getItem('aether_show_shieldscard') !== 'false';
+      const banner = document.getElementById('home-shields-banner');
+      if (banner) banner.style.display = show ? 'flex' : 'none';
+      const text = document.getElementById('shieldscard-state-text');
+      if (text) {
+        text.textContent = show ? 'Enabled' : 'Hidden';
+        text.style.color = show ? 'var(--accent)' : 'var(--text-secondary)';
+      }
     }
 
     function highlightCurrentSettings() {
@@ -2345,6 +2506,10 @@
       document.querySelectorAll('#theme-options .option-card').forEach(el => {
         el.classList.toggle('selected', el.dataset.theme === theme);
       });
+      applyShortcutsVisibility();
+      applyNotesVisibility();
+      applyQuickStripVisibility();
+      applyShieldsCardVisibility();
     }
 
     function loadSettingsView() {
@@ -2573,6 +2738,10 @@
       const savedTheme = localStorage.getItem(THEME_KEY) || 'dark';
       document.body.setAttribute('data-theme', savedTheme);
       applyShortcutsVisibility();
+      applyNotesVisibility();
+      applyNotesCollapse();
+      applyQuickStripVisibility();
+      applyShieldsCardVisibility();
       generatePasswordAction();
       renderHomeNotes();
       updateVpnDisplay();

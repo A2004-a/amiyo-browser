@@ -62,8 +62,8 @@ import java.util.Set;
 public class MainActivity extends AppCompatActivity {
 
     public static final String HOME_URL = "file:///android_asset/www/index.html";
-    public static final String APP_VERSION_NAME = "0.2.4";
-    public static final int APP_VERSION_CODE = 9;
+    public static final String APP_VERSION_NAME = "0.2.5";
+    public static final int APP_VERSION_CODE = 10;
     public static final String DESKTOP_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
     private WebView webView;
     private EditText urlInput;
@@ -1241,6 +1241,7 @@ public class MainActivity extends AppCompatActivity {
             .setMessage("Version Code: " + APP_VERSION_CODE + " (Official Update)\n\n" +
                         "✨ Installed Features:\n" +
                         "• 💡 AETHER Notes with + Multi-Note & Checklists\n" +
+                        "• 👁️ Hide & Unhide Features (AETHER Notes, Shortcuts, Quick Strip, Shields)\n" +
                         "• 🛡️ AETHER Secure VPN (32 Enterprise Superpowers)\n" +
                         "• ✨ AETHER Intelligence AI Assistant\n" +
                         "• 🔐 Passwords Vault & Cryptographic Generator\n" +
@@ -1252,7 +1253,7 @@ public class MainActivity extends AppCompatActivity {
                 loadTarget("https://github.com/A2004-a/amiyo-browser/releases");
             })
             .setNeutralButton("Direct APK", (dialog, which) -> {
-                loadTarget("https://github.com/A2004-a/amiyo-browser/releases/download/v0.1.0/AETHER-Browser-v0.2.4-Android.apk");
+                loadTarget("https://github.com/A2004-a/amiyo-browser/releases/download/v0.1.0/AETHER-Browser-v0.2.5-Android.apk");
             })
             .setNegativeButton("Close", null)
             .show();
