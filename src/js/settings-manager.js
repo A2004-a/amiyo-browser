@@ -702,12 +702,12 @@ const SettingsManager = {
                 <div style="display:flex;align-items:center;gap:8px;">
                   <span style="font-size:20px;">🤖</span>
                   <div>
-                    <div style="font-size:13px;font-weight:700;color:var(--text-primary);">Android APK (v0.2.8)</div>
+                    <div style="font-size:13px;font-weight:700;color:var(--text-primary);">Android APK (v1.3.0 - Latest)</div>
                     <div style="font-size:11px;color:var(--text-secondary);">Android 7.0 to 14+ • Interactive Timeline, Obsidian Theme, Cinema Zoom &amp; Fast Tabs</div>
                   </div>
                 </div>
                 <div style="display:flex;gap:6px;margin-top:4px;">
-                  <button class="btn btn-sm btn-primary" onclick="IpcClient.navigateTab(State.activeTabId, 'https://github.com/A2004-a/amiyo-browser/releases/download/v0.1.0/AETHER-Browser-v0.2.8-Android.apk')" style="font-size:11px;padding:6px 10px;flex:1;">⬇️ Download v0.2.8</button>
+                  <button class="btn btn-sm btn-primary" onclick="IpcClient.navigateTab(State.activeTabId, 'https://github.com/A2004-a/amiyo-browser/releases/download/v1.3.0/AETHER-Browser-v1.3.0-Android.apk')" style="font-size:11px;padding:6px 10px;flex:1;">⬇️ Download v1.3.0</button>
                   <button class="btn btn-sm btn-secondary" onclick="IpcClient.navigateTab(State.activeTabId, 'https://github.com/A2004-a/amiyo-browser/releases/download/v0.1.0/AETHER-Browser-v0.1.0-Android.apk')" style="font-size:11px;padding:6px 10px;flex:1;">Direct Link</button>
                 </div>
               </div>

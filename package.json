@@ -1,6 +1,6 @@
 {
   "name": "aether-browser",
-  "version": "0.1.0",
+  "version": "1.3.0",
   "description": "AETHER Browser — Explore Without Limits. Modern, fast, and secure desktop web browser built with Electron and Chromium",
   "main": "main.js",
   "scripts": {

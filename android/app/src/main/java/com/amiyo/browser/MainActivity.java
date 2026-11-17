@@ -75,8 +75,8 @@ import java.util.Set;
 public class MainActivity extends AppCompatActivity {
 
     public static final String HOME_URL = "file:///android_asset/www/index.html";
-    public static final String APP_VERSION_NAME = "0.2.8";
-    public static final int APP_VERSION_CODE = 13;
+    public static final String APP_VERSION_NAME = "1.3.0";
+    public static final int APP_VERSION_CODE = 20;
     public static final String DESKTOP_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
     private WebView webView;
     private EditText urlInput;
@@ -1538,7 +1538,7 @@ public class MainActivity extends AppCompatActivity {
                 loadTarget("https://github.com/A2004-a/amiyo-browser/releases");
             })
             .setNeutralButton("Direct APK", (dialog, which) -> {
-                loadTarget("https://github.com/A2004-a/amiyo-browser/releases/download/v0.1.0/AETHER-Browser-v0.2.8-Android.apk");
+                loadTarget("https://github.com/A2004-a/amiyo-browser/releases/download/v1.3.0/AETHER-Browser-v1.3.0-Android.apk");
             })
             .setNegativeButton("Close", null)
             .show();
