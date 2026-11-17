@@ -75,8 +75,8 @@ import java.util.Set;
 public class MainActivity extends AppCompatActivity {
 
     public static final String HOME_URL = "file:///android_asset/www/index.html";
-    public static final String APP_VERSION_NAME = "0.2.7";
-    public static final int APP_VERSION_CODE = 12;
+    public static final String APP_VERSION_NAME = "0.2.8";
+    public static final int APP_VERSION_CODE = 13;
     public static final String DESKTOP_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
     private WebView webView;
     private EditText urlInput;
@@ -1538,7 +1538,7 @@ public class MainActivity extends AppCompatActivity {
                 loadTarget("https://github.com/A2004-a/amiyo-browser/releases");
             })
             .setNeutralButton("Direct APK", (dialog, which) -> {
-                loadTarget("https://github.com/A2004-a/amiyo-browser/releases/download/v0.1.0/AETHER-Browser-v0.2.7-Android.apk");
+                loadTarget("https://github.com/A2004-a/amiyo-browser/releases/download/v0.1.0/AETHER-Browser-v0.2.8-Android.apk");
             })
             .setNegativeButton("Close", null)
             .show();
@@ -1730,6 +1730,123 @@ public class MainActivity extends AppCompatActivity {
             "        }" +
             "      } catch(e) {}" +
             "    }" +
+            "    function getPlayerContainer() {" +
+            "      return document.getElementById('movie_player') || " +
+            "             document.querySelector('.html5-video-player') || " +
+            "             document.getElementById('player-container') || " +
+            "             document.querySelector('.player-container') || " +
+            "             document.getElementById('player') || " +
+            "             document.getElementById('player-container-id') || " +
+            "             document.documentElement;" +
+            "    }" +
+            "    let controlsVisible = true;" +
+            "    let autoHideTimer = null;" +
+            "    function showTimelineControls() {" +
+            "      controlsVisible = true;" +
+            "      try {" +
+            "        const mp = document.getElementById('movie_player') || document.querySelector('.html5-video-player');" +
+            "        if (mp) {" +
+            "          if (typeof mp.wakeUpControls === 'function') { mp.wakeUpControls(); }" +
+            "          mp.classList.remove('ytp-autohide');" +
+            "          const bottom = mp.querySelector('.ytp-chrome-bottom');" +
+            "          if (bottom) { bottom.style.opacity = '1'; bottom.style.visibility = 'visible'; }" +
+            "        }" +
+            "        const overlay = document.getElementById('player-control-overlay') || " +
+            "                        document.querySelector('.player-control-overlay') || " +
+            "                        document.querySelector('.ytm-custom-control');" +
+            "        if (overlay) {" +
+            "          overlay.classList.remove('hidden', 'fadeout', 'ytm-fade-out');" +
+            "          overlay.classList.add('fadein', 'ytm-fade-in');" +
+            "          overlay.style.opacity = '1';" +
+            "          overlay.style.visibility = 'visible';" +
+            "          overlay.style.pointerEvents = 'auto';" +
+            "        }" +
+            "        const elementsToReveal = document.querySelectorAll(" +
+            "          '.player-controls-bottom, .ytm-custom-control, .ytp-chrome-bottom, .ytp-progress-bar-container, .progress-bar-line, .player-seek-bar, .ytp-progress-bar, .ytp-time-display, .time-display'" +
+            "        );" +
+            "        elementsToReveal.forEach(el => {" +
+            "          el.style.opacity = '1';" +
+            "          el.style.visibility = 'visible';" +
+            "          if (el.style.display === 'none') el.style.display = '';" +
+            "        });" +
+            "        clearTimeout(autoHideTimer);" +
+            "        autoHideTimer = setTimeout(() => {" +
+            "          try {" +
+            "            const vid = document.querySelector('video');" +
+            "            if (vid && !vid.paused) { hideTimelineControls(); }" +
+            "          } catch(e) {}" +
+            "        }, 4000);" +
+            "      } catch(e) {}" +
+            "    }" +
+            "    function hideTimelineControls() {" +
+            "      controlsVisible = false;" +
+            "      try {" +
+            "        const mp = document.getElementById('movie_player') || document.querySelector('.html5-video-player');" +
+            "        if (mp) {" +
+            "          mp.classList.add('ytp-autohide');" +
+            "          const bottom = mp.querySelector('.ytp-chrome-bottom');" +
+            "          if (bottom) { bottom.style.opacity = '0'; }" +
+            "        }" +
+            "        const overlay = document.getElementById('player-control-overlay') || " +
+            "                        document.querySelector('.player-control-overlay');" +
+            "        if (overlay) {" +
+            "          overlay.classList.remove('fadein', 'ytm-fade-in');" +
+            "          overlay.classList.add('fadeout', 'ytm-fade-out');" +
+            "          overlay.style.opacity = '0';" +
+            "        }" +
+            "      } catch(e) {}" +
+            "    }" +
+            "    function onScreenTap(e) {" +
+            "      try {" +
+            "        const target = e.target;" +
+            "        if (target && target.closest && target.closest('button, .ytp-button, .player-seek-bar, .ytp-progress-bar, input, a, .ytp-time-display')) {" +
+            "          clearTimeout(autoHideTimer);" +
+            "          autoHideTimer = setTimeout(() => {" +
+            "            const vid = document.querySelector('video');" +
+            "            if (vid && !vid.paused) hideTimelineControls();" +
+            "          }, 4000);" +
+            "          return;" +
+            "        }" +
+            "        if (controlsVisible) { hideTimelineControls(); }" +
+            "        else { showTimelineControls(); }" +
+            "      } catch(e) {}" +
+            "    }" +
+            "    function setupScreenTapTimeline() {" +
+            "      try {" +
+            "        if (!window._aetherTapSetup) {" +
+            "          window._aetherTapSetup = true;" +
+            "          document.addEventListener('click', onScreenTap, true);" +
+            "          document.addEventListener('touchend', onScreenTap, { passive: true });" +
+            "        }" +
+            "      } catch(e) {}" +
+            "    }" +
+            "    function requestPlayerFullscreen() {" +
+            "      const isFull = document.fullscreenElement || document.webkitFullscreenElement || " +
+            "        (window.AetherAndroid && window.AetherAndroid.isManualFullscreenActive && window.AetherAndroid.isManualFullscreenActive());" +
+            "      if (isFull) {" +
+            "        if (document.exitFullscreen) { document.exitFullscreen().catch(()=>{}); }" +
+            "        else if (document.webkitExitFullscreen) { document.webkitExitFullscreen(); }" +
+            "        if (window.AetherAndroid && window.AetherAndroid.isManualFullscreenActive && window.AetherAndroid.isManualFullscreenActive()) {" +
+            "          window.AetherAndroid.triggerNativeFullscreen();" +
+            "        }" +
+            "      } else {" +
+            "        const container = getPlayerContainer();" +
+            "        if (container) {" +
+            "          if (typeof container.requestFullscreen === 'function') {" +
+            "            container.requestFullscreen().catch(() => {" +
+            "              if (window.AetherAndroid && window.AetherAndroid.triggerNativeFullscreen) {" +
+            "                window.AetherAndroid.triggerNativeFullscreen();" +
+            "              }" +
+            "            });" +
+            "          } else if (typeof container.webkitRequestFullscreen === 'function') {" +
+            "            container.webkitRequestFullscreen();" +
+            "          } else if (window.AetherAndroid && window.AetherAndroid.triggerNativeFullscreen) {" +
+            "            window.AetherAndroid.triggerNativeFullscreen();" +
+            "          }" +
+            "        }" +
+            "      }" +
+            "      setTimeout(showTimelineControls, 200);" +
+            "    }" +
             "    function attachFullscreenTriggers() {" +
             "      try {" +
             "        const selectors = '.fullscreen-icon, .ytp-fullscreen-button, .ytm-fullscreen-button, button[aria-label*=\"Full screen\" i], button[aria-label*=\"Fullscreen\" i], button[aria-label*=\"Cinema\" i]';" +
@@ -1738,11 +1855,17 @@ public class MainActivity extends AppCompatActivity {
             "          if (!btn._aetherAttached) {" +
             "            btn._aetherAttached = true;" +
             "            btn.addEventListener('click', function(e) {" +
-            "              const vid = document.querySelector('video');" +
-            "              if (vid) {" +
-            "                if (typeof vid.webkitEnterFullscreen === 'function') { vid.webkitEnterFullscreen(); }" +
-            "                else if (typeof vid.requestFullscreen === 'function') { vid.requestFullscreen().catch(()=>{}); }" +
-            "              }" +
+            "              requestPlayerFullscreen();" +
+            "            }, { passive: true });" +
+            "          }" +
+            "        });" +
+            "        const exitSelectors = 'button[aria-label*=\"Exit full screen\" i], button[aria-label*=\"Exit fullscreen\" i], button[aria-label*=\"Shrink\" i]';" +
+            "        const exitButtons = document.querySelectorAll(exitSelectors);" +
+            "        exitButtons.forEach(btn => {" +
+            "          if (!btn._aetherExitAttached) {" +
+            "            btn._aetherExitAttached = true;" +
+            "            btn.addEventListener('click', function(e) {" +
+            "              requestPlayerFullscreen();" +
             "            }, { passive: true });" +
             "          }" +
             "        });" +
@@ -1750,6 +1873,7 @@ public class MainActivity extends AppCompatActivity {
             "    }" +
             "    injectClearVideoStyles();" +
             "    set4KQuality();" +
+            "    setupScreenTapTimeline();" +
             "    attachFullscreenTriggers();" +
             "    setInterval(() => {" +
             "      try {" +
@@ -1770,7 +1894,7 @@ public class MainActivity extends AppCompatActivity {
             "        document.querySelectorAll('ytd-action-companion-ad-renderer, ytd-banner-promo-renderer-background, #masthead-ad').forEach(el => el.remove());" +
             "      } catch(e) {}" +
             "    }, 600);" +
-            "    window.addEventListener('yt-navigate-finish', () => { setTimeout(() => { set4KQuality(); attachFullscreenTriggers(); }, 600); });" +
+            "    window.addEventListener('yt-navigate-finish', () => { setTimeout(() => { set4KQuality(); attachFullscreenTriggers(); showTimelineControls(); }, 600); });" +
             "  }" +
             "})();";
         view.evaluateJavascript(ytScript, null);
@@ -1804,9 +1928,15 @@ public class MainActivity extends AppCompatActivity {
 
         // Setup container
         if (customViewContainer != null) {
+            view.setFocusable(true);
+            view.setFocusableInTouchMode(true);
+            view.setClickable(true);
+            customViewContainer.setFocusable(true);
+            customViewContainer.setClickable(true);
             customViewContainer.addView(view, new FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
             customViewContainer.setVisibility(View.VISIBLE);
+            view.requestFocus();
         }
 
         // Fullscreen immersive mode & keep screen awake for video
@@ -1835,7 +1965,7 @@ public class MainActivity extends AppCompatActivity {
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
 
         if (customViewContainer != null) {
-            customViewContainer.removeView(customView);
+            customViewContainer.removeAllViews();
             customViewContainer.setVisibility(View.GONE);
         }
         if (findViewById(R.id.topBar) != null) findViewById(R.id.topBar).setVisibility(View.VISIBLE);
