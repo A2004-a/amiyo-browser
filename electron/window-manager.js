@@ -104,6 +104,48 @@ class WindowManager {
       win.webContents.send('window-maximized-changed', false);
     });
 
+    // Handle Window Minimize / Restore (Unminimize) Lifecycle
+    // Guarantees webview bounds and compositor surfaces are never lost or left blank
+    const handleRestoreOrShow = () => {
+      if (win.isDestroyed()) return;
+      if (tabController.requestUpdateActiveViewBounds) {
+        tabController.requestUpdateActiveViewBounds(true);
+      } else {
+        tabController.updateActiveViewBounds();
+      }
+      // Follow-up frames to ensure correct layout after OS restore animations
+      setTimeout(() => {
+        if (!win.isDestroyed()) {
+          tabController.updateActiveViewBounds();
+          const activeTab = tabController.getActiveTab && tabController.getActiveTab();
+          if (activeTab && activeTab.view && activeTab.view.webContents) {
+            try { activeTab.view.webContents.invalidate(); } catch (e) {}
+          }
+        }
+      }, 50);
+      setTimeout(() => {
+        if (!win.isDestroyed()) {
+          tabController.updateActiveViewBounds();
+          const activeTab = tabController.getActiveTab && tabController.getActiveTab();
+          if (activeTab && activeTab.view && activeTab.view.webContents) {
+            try { activeTab.view.webContents.invalidate(); } catch (e) {}
+          }
+        }
+      }, 150);
+    };
+
+    win.on('restore', handleRestoreOrShow);
+    win.on('show', handleRestoreOrShow);
+    win.on('focus', () => {
+      if (!win.isDestroyed() && !win.isMinimized()) {
+        tabController.updateActiveViewBounds();
+        const activeTab = tabController.getActiveTab && tabController.getActiveTab();
+        if (activeTab && activeTab.view && activeTab.view.webContents) {
+          try { activeTab.view.webContents.invalidate(); } catch (e) {}
+        }
+      }
+    });
+
     win.on('close', () => {
       if (!isPrivate) {
         storageManager.saveSession(tabController.tabs);

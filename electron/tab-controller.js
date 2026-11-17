@@ -194,7 +194,7 @@ class TabController {
         sandbox: true,
         webSecurity: true,
         session: this.session,
-        backgroundThrottling: true
+        backgroundThrottling: false
       }
     });
 
@@ -767,7 +767,7 @@ class TabController {
         sandbox: true,
         webSecurity: true,
         session: this.session,
-        backgroundThrottling: true
+        backgroundThrottling: false
       }
     });
 
@@ -1322,7 +1322,15 @@ class TabController {
     const splitTab = this.splitTabId ? this.getTab(this.splitTabId) : null;
 
     try {
+      if (!this.browserWindow || this.browserWindow.isDestroyed()) return;
+      // Never crush view bounds or destroy surfaces when the window is minimized
+      if (typeof this.browserWindow.isMinimized === 'function' && this.browserWindow.isMinimized()) {
+        return;
+      }
+
       const [width, height] = this.browserWindow.getContentSize();
+      if (width <= 0 || height <= 0) return;
+
       const baseTopOffset = typeof this.topOffset === 'number' && this.topOffset > 0 ? this.topOffset : 84;
       const splitBarHeight = this.splitTabId ? 38 : 0;
       const topOffset = baseTopOffset + splitBarHeight;
@@ -1381,6 +1389,7 @@ class TabController {
             width: pWidth,
             height: availableHeight
           });
+          try { if (activeTab.view.webContents) activeTab.view.webContents.invalidate(); } catch (e) {}
         } else if (activeTab && activeTab.view) {
           try { activeTab.view.setVisible(false); } catch (e) {}
           activeTab.view.setBounds({ x: 0, y: 0, width: 0, height: 0 });
@@ -1397,6 +1406,7 @@ class TabController {
             width: pWidth,
             height: availableHeight
           });
+          try { if (splitTab.view.webContents) splitTab.view.webContents.invalidate(); } catch (e) {}
         } else if (splitTab && splitTab.view) {
           try { splitTab.view.setVisible(false); } catch (e) {}
           splitTab.view.setBounds({ x: 0, y: 0, width: 0, height: 0 });
@@ -1421,6 +1431,13 @@ class TabController {
         return;
       }
 
+      // Ensure activeTab.view is attached to window's contentView
+      if (!this.browserWindow.contentView.children.includes(activeTab.view)) {
+        try {
+          this.browserWindow.contentView.addChildView(activeTab.view);
+        } catch (e) {}
+      }
+
       try { activeTab.view.setVisible(true); } catch (e) {}
       if (activeTab.isMobileMode) {
         const mobileWidth = Math.min(412, availableWidth);
@@ -1439,6 +1456,13 @@ class TabController {
           height: availableHeight
         });
       }
+
+      // Force GPU compositor repaint on bounds change/window restore
+      try {
+        if (activeTab.view.webContents) {
+          activeTab.view.webContents.invalidate();
+        }
+      } catch (e) {}
     } catch (e) {
       console.error('Error updating view bounds:', e);
     }

@@ -64,6 +64,20 @@ const App = {
         });
       });
 
+      // Window Reopen / Unminimize Watchdog: Restore webview bounds on document visibility
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+          this.updateTopOffset();
+          const activeTab = typeof TabManager !== 'undefined' && TabManager.getActiveTab ? TabManager.getActiveTab() : null;
+          if (activeTab && !activeTab.isInternal && IpcClient.setViewVisible) {
+            IpcClient.setViewVisible(true);
+          }
+        }
+      });
+      window.addEventListener('focus', () => {
+        this.updateTopOffset();
+      });
+
       console.log('[App] Loading critical state from IPC...');
       // High-speed critical path: Fetch settings and initial tabs first to mount UI instantly
       const [settingsRes, initialTabsRes] = await Promise.allSettled([
