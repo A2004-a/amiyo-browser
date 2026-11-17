@@ -73,7 +73,7 @@
       "shortcutName": "AETHER Browser"
     },
     "mac": {
-      "icon": "build/icons",
+      "icon": "assets/branding/icon.png",
       "target": [
         {
           "target": "dmg",
@@ -108,7 +108,7 @@
       ]
     },
     "linux": {
-      "icon": "build/icons",
+      "icon": "assets/branding/icon.png",
       "target": [
         {
           "target": "AppImage",

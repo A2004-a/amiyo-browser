@@ -51,7 +51,8 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libfuse2 libarchive-tools
+          sudo apt-get install -y libarchive-tools fakeroot dpkg rpm || true
+          sudo apt-get install -y libfuse2 || sudo apt-get install -y libfuse2t64 || true
 
       - name: Build Desktop Package
         run: npx --yes electron-builder ${{ matrix.args }} --publish never
@@ -105,10 +106,13 @@ jobs:
         with:
           gradle-version: '8.5'
 
+      - name: Make Gradle Wrapper Executable
+        run: chmod +x android/gradlew
+
       - name: Build Android APK with Gradle
         run: |
           cd android
-          gradle assembleRelease --stacktrace || gradle assembleDebug --stacktrace
+          ./gradlew assembleRelease --stacktrace --no-daemon || ./gradlew assembleDebug --stacktrace --no-daemon || gradle assembleRelease --stacktrace || gradle assembleDebug --stacktrace
 
       - name: Prepare APK for Release
         run: |
