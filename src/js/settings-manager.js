@@ -627,7 +627,7 @@ const SettingsManager = {
                   </div>
                   <div>
                     <h4 style="font-size:18px;font-weight:800;color:var(--text-primary);letter-spacing:1px;">AETHER Browser</h4>
-                    <p style="font-size:12px;color:var(--cyan-accent, #35D8F2);font-weight:600;">Explore Without Limits &bull; Version 0.0.1 (Official Release)</p>
+                    <p style="font-size:12px;color:var(--cyan-accent, #35D8F2);font-weight:600;">Explore Without Limits &bull; Version 0.1.0 (Official Release)</p>
                   </div>
                 </div>
                 <p style="font-size:13px;color:var(--text-secondary);line-height:1.5;">
@@ -649,7 +649,7 @@ const SettingsManager = {
             </div>
 
             <!-- Download Official Apps for All Platforms -->
-            <h4 style="margin:16px 0 10px;font-size:14px;color:var(--text-primary);font-weight:600;">Download AETHER Browser v0.0.1 for All Platforms</h4>
+            <h4 style="margin:16px 0 10px;font-size:14px;color:var(--text-primary);font-weight:600;">Download AETHER Browser v0.1.0 for All Platforms</h4>
             <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:12px;">
               
               <!-- Windows -->
@@ -662,8 +662,8 @@ const SettingsManager = {
                   </div>
                 </div>
                 <div style="display:flex;gap:6px;margin-top:4px;">
-                  <button class="btn btn-sm btn-primary" onclick="IpcClient.navigateTab(State.activeTabId, 'https://github.com/A2004-a/amiyo-browser/releases/download/v0.0.1/AETHER-Browser-Setup-0.0.1-x64.zip')" style="font-size:11px;padding:6px 10px;flex:1;">⬇️ Portable</button>
-                  <button class="btn btn-sm btn-secondary" onclick="IpcClient.navigateTab(State.activeTabId, 'https://github.com/A2004-a/amiyo-browser/releases/download/v0.0.1/AETHER-Browser-Setup-0.0.1-x64.exe')" style="font-size:11px;padding:6px 10px;flex:1;">Setup.exe</button>
+                  <button class="btn btn-sm btn-primary" onclick="IpcClient.navigateTab(State.activeTabId, 'https://github.com/A2004-a/amiyo-browser/releases/download/v0.1.0/AETHER-Browser-Setup-0.1.0-x64.zip')" style="font-size:11px;padding:6px 10px;flex:1;">⬇️ Portable</button>
+                  <button class="btn btn-sm btn-secondary" onclick="IpcClient.navigateTab(State.activeTabId, 'https://github.com/A2004-a/amiyo-browser/releases/download/v0.1.0/AETHER-Browser-Setup-0.1.0-x64.exe')" style="font-size:11px;padding:6px 10px;flex:1;">Setup.exe</button>
                 </div>
               </div>
 
@@ -677,8 +677,8 @@ const SettingsManager = {
                   </div>
                 </div>
                 <div style="display:flex;gap:6px;margin-top:4px;">
-                  <button class="btn btn-sm btn-primary" onclick="IpcClient.navigateTab(State.activeTabId, 'https://github.com/A2004-a/amiyo-browser/releases/download/v0.0.1/AETHER-Browser-0.0.1-linux-x64.AppImage')" style="font-size:11px;padding:6px 10px;flex:1;">AppImage</button>
-                  <button class="btn btn-sm btn-secondary" onclick="IpcClient.navigateTab(State.activeTabId, 'https://github.com/A2004-a/amiyo-browser/releases/download/v0.0.1/AETHER-Browser-0.0.1-linux-x64.deb')" style="font-size:11px;padding:6px 10px;flex:1;">.deb</button>
+                  <button class="btn btn-sm btn-primary" onclick="IpcClient.navigateTab(State.activeTabId, 'https://github.com/A2004-a/amiyo-browser/releases/download/v0.1.0/AETHER-Browser-0.1.0-linux-x64.AppImage')" style="font-size:11px;padding:6px 10px;flex:1;">AppImage</button>
+                  <button class="btn btn-sm btn-secondary" onclick="IpcClient.navigateTab(State.activeTabId, 'https://github.com/A2004-a/amiyo-browser/releases/download/v0.1.0/AETHER-Browser-0.1.0-linux-x64.deb')" style="font-size:11px;padding:6px 10px;flex:1;">.deb</button>
                 </div>
               </div>
 
@@ -692,8 +692,8 @@ const SettingsManager = {
                   </div>
                 </div>
                 <div style="display:flex;gap:6px;margin-top:4px;">
-                  <button class="btn btn-sm btn-primary" onclick="IpcClient.navigateTab(State.activeTabId, 'https://github.com/A2004-a/amiyo-browser/releases/download/v0.0.1/AETHER-Browser-0.0.1-mac-universal.dmg')" style="font-size:11px;padding:6px 10px;flex:1;">DMG</button>
-                  <button class="btn btn-sm btn-secondary" onclick="IpcClient.navigateTab(State.activeTabId, 'https://github.com/A2004-a/amiyo-browser/releases/download/v0.0.1/AETHER-Browser-0.0.1-mac-universal.zip')" style="font-size:11px;padding:6px 10px;flex:1;">.zip</button>
+                  <button class="btn btn-sm btn-primary" onclick="IpcClient.navigateTab(State.activeTabId, 'https://github.com/A2004-a/amiyo-browser/releases/download/v0.1.0/AETHER-Browser-0.1.0-mac-universal.dmg')" style="font-size:11px;padding:6px 10px;flex:1;">DMG</button>
+                  <button class="btn btn-sm btn-secondary" onclick="IpcClient.navigateTab(State.activeTabId, 'https://github.com/A2004-a/amiyo-browser/releases/download/v0.1.0/AETHER-Browser-0.1.0-mac-universal.zip')" style="font-size:11px;padding:6px 10px;flex:1;">.zip</button>
                 </div>
               </div>
 
@@ -707,7 +707,7 @@ const SettingsManager = {
                   </div>
                 </div>
                 <div style="display:flex;gap:6px;margin-top:4px;">
-                  <button class="btn btn-sm btn-primary" onclick="IpcClient.navigateTab(State.activeTabId, 'https://github.com/A2004-a/amiyo-browser/releases/download/v0.0.1/AETHER-Browser-v0.0.1-Android.apk')" style="font-size:11px;padding:6px 10px;width:100%;">⬇️ Download APK</button>
+                  <button class="btn btn-sm btn-primary" onclick="IpcClient.navigateTab(State.activeTabId, 'https://github.com/A2004-a/amiyo-browser/releases/download/v0.1.0/AETHER-Browser-v0.1.0-Android.apk')" style="font-size:11px;padding:6px 10px;width:100%;">⬇️ Download APK</button>
                 </div>
               </div>
 
@@ -721,7 +721,7 @@ const SettingsManager = {
                   </div>
                 </div>
                 <div style="display:flex;gap:6px;margin-top:4px;">
-                  <button class="btn btn-sm btn-primary" onclick="IpcClient.navigateTab(State.activeTabId, 'https://github.com/A2004-a/amiyo-browser/releases/download/v0.0.1/AETHER-Browser-v0.0.1-iOS.ipa')" style="font-size:11px;padding:6px 10px;flex:1;">⬇️ IPA</button>
+                  <button class="btn btn-sm btn-primary" onclick="IpcClient.navigateTab(State.activeTabId, 'https://github.com/A2004-a/amiyo-browser/releases/download/v0.1.0/AETHER-Browser-v0.1.0-iOS.ipa')" style="font-size:11px;padding:6px 10px;flex:1;">⬇️ IPA</button>
                   <button class="btn btn-sm btn-secondary" onclick="IpcClient.navigateTab(State.activeTabId, 'https://github.com/A2004-a/amiyo-browser/tree/main/ios')" style="font-size:11px;padding:6px 10px;flex:1;">📱 Guide</button>
                 </div>
               </div>
@@ -736,7 +736,7 @@ const SettingsManager = {
                   </div>
                 </div>
                 <div style="display:flex;gap:6px;margin-top:4px;">
-                  <button class="btn btn-sm btn-secondary" onclick="IpcClient.navigateTab(State.activeTabId, 'https://github.com/A2004-a/amiyo-browser/releases/tag/v0.0.1')" style="font-size:11px;padding:6px 10px;width:100%;">📦 View All Downloads</button>
+                  <button class="btn btn-sm btn-secondary" onclick="IpcClient.navigateTab(State.activeTabId, 'https://github.com/A2004-a/amiyo-browser/releases/tag/v0.1.0')" style="font-size:11px;padding:6px 10px;width:100%;">📦 View All Downloads</button>
                 </div>
               </div>
 
@@ -1250,7 +1250,7 @@ const SettingsManager = {
         updateStatusText.innerHTML = '<span style="color:var(--accent);">Checking GitHub Release channel...</span>';
         setTimeout(() => {
           checkUpdatesBtn.disabled = false;
-          updateStatusText.innerHTML = '<span style="color:var(--success, #10B981);font-weight:600;">✓ AETHER Browser is up to date (Version 0.0.1)</span>';
+          updateStatusText.innerHTML = '<span style="color:var(--success, #10B981);font-weight:600;">✓ AETHER Browser is up to date (Version 0.1.0)</span>';
         }, 1200);
       });
     }

@@ -110,8 +110,8 @@ const CommandPalette = {
     const updateList = (query = '') => {
       const q = query.toLowerCase().trim();
       const all = this.getAllCommands();
-      this.filteredCommands = all.filter(c => 
-        c.title.toLowerCase().includes(q) || 
+      this.filteredCommands = all.filter(c =>
+        c.title.toLowerCase().includes(q) ||
         c.category.toLowerCase().includes(q) ||
         (c.url && c.url.toLowerCase().includes(q))
       );

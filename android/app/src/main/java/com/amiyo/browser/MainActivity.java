@@ -370,7 +370,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         defaultUserAgent = settings.getUserAgentString();
-        String customUA = defaultUserAgent + " AETHERBrowser/0.0.1";
+        String customUA = defaultUserAgent + " AETHERBrowser/0.1.0";
         settings.setUserAgentString(customUA);
 
         CookieManager.getInstance().setAcceptCookie(true);
@@ -1109,7 +1109,7 @@ public class MainActivity extends AppCompatActivity {
             settings.setBuiltInZoomControls(true);
             settings.setDisplayZoomControls(false);
         } else {
-            settings.setUserAgentString(defaultUserAgent != null ? defaultUserAgent + " AETHERBrowser/0.0.1" : null);
+            settings.setUserAgentString(defaultUserAgent != null ? defaultUserAgent + " AETHERBrowser/0.1.0" : null);
             settings.setUseWideViewPort(false);
             settings.setLoadWithOverviewMode(false);
         }

@@ -236,14 +236,14 @@ function testAllPlatformDownloadLinks() {
   const settings = fs.readFileSync(path.join(__dirname, '..', 'src', 'js', 'settings-manager.js'), 'utf8');
 
   const platforms = [
-    { name: 'Windows EXE', pattern: 'AETHER-Browser-Setup-0.0.1-x64.exe' },
-    { name: 'Windows ZIP', pattern: 'AETHER-Browser-Setup-0.0.1-x64.zip' },
-    { name: 'macOS DMG', pattern: 'AETHER-Browser-0.0.1-mac-universal.dmg' },
-    { name: 'macOS ZIP', pattern: 'AETHER-Browser-0.0.1-mac-universal.zip' },
-    { name: 'Linux AppImage', pattern: 'AETHER-Browser-0.0.1-linux-x64.AppImage' },
-    { name: 'Linux DEB', pattern: 'AETHER-Browser-0.0.1-linux-x64.deb' },
-    { name: 'Android APK', pattern: 'AETHER-Browser-v0.0.1-Android.apk' },
-    { name: 'iOS IPA', pattern: 'AETHER-Browser-v0.0.1-iOS.ipa' }
+    { name: 'Windows EXE', pattern: 'AETHER-Browser-Setup-0.1.0-x64.exe' },
+    { name: 'Windows ZIP', pattern: 'AETHER-Browser-Setup-0.1.0-x64.zip' },
+    { name: 'macOS DMG', pattern: 'AETHER-Browser-0.1.0-mac-universal.dmg' },
+    { name: 'macOS ZIP', pattern: 'AETHER-Browser-0.1.0-mac-universal.zip' },
+    { name: 'Linux AppImage', pattern: 'AETHER-Browser-0.1.0-linux-x64.AppImage' },
+    { name: 'Linux DEB', pattern: 'AETHER-Browser-0.1.0-linux-x64.deb' },
+    { name: 'Android APK', pattern: 'AETHER-Browser-v0.1.0-Android.apk' },
+    { name: 'iOS IPA', pattern: 'AETHER-Browser-v0.1.0-iOS.ipa' }
   ];
 
   for (const p of platforms) {
@@ -252,8 +252,8 @@ function testAllPlatformDownloadLinks() {
   }
 
   // Verify release hub link
-  assert(readme.includes('https://github.com/A2004-a/amiyo-browser/releases/tag/v0.0.1'), 'README must link to release hub');
-  assert(settings.includes('https://github.com/A2004-a/amiyo-browser/releases/tag/v0.0.1'), 'Settings must link to release hub');
+  assert(readme.includes('https://github.com/A2004-a/amiyo-browser/releases/tag/v0.1.0'), 'README must link to release hub');
+  assert(settings.includes('https://github.com/A2004-a/amiyo-browser/releases/tag/v0.1.0'), 'Settings must link to release hub');
 }
 
 module.exports = {
