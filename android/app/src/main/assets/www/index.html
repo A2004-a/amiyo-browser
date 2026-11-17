@@ -1296,6 +1296,13 @@
         </div>
         <span style="color:var(--text-secondary);">›</span>
       </div>
+      <div class="list-item" onclick="if(window.AetherAndroid && AetherAndroid.checkForUpdates){ AetherAndroid.checkForUpdates(); } else { alert('AETHER Browser v0.2.0 (Build 5) is up to date with full features!'); }">
+        <div class="list-item-content">
+          <span class="item-title">🚀 Software Update</span>
+          <span class="item-url" id="app-update-status">Version 0.2.0 (Build 5) • Tap to check updates</span>
+        </div>
+        <span class="chip-badge" style="background:rgba(16,185,129,0.15);color:var(--success);border:1px solid rgba(16,185,129,0.3);">Up to Date</span>
+      </div>
       <div class="list-item" onclick="clearAllHistory()">
         <div class="list-item-content">
           <span class="item-title" style="color:#ef4444;">Clear Browsing Data</span>
@@ -1306,7 +1313,7 @@
 
     <div style="text-align:center;padding:24px 0;color:var(--text-secondary);font-size:12px;line-height:1.6;">
       <strong style="color:var(--accent);">AETHER Browser for Android</strong><br>
-      Version 0.1.0 (Official Release)<br>
+      <span id="app-version-label">Version 0.2.0 (Build 5 — Updated Release)</span><br>
       Explore Without Limits • Chromium &amp; Android Native
     </div>
   </section>
@@ -2091,6 +2098,17 @@
       const label = engine.charAt(0).toUpperCase() + engine.slice(1);
       const descEl = document.getElementById('settings-current-engine');
       if (descEl) descEl.textContent = `Default: ${label}`;
+
+      if (window.AetherAndroid && AetherAndroid.getVersionName) {
+        try {
+          const vName = AetherAndroid.getVersionName();
+          const vCode = AetherAndroid.getVersionCode();
+          const verEl = document.getElementById('app-version-label');
+          if (verEl) verEl.textContent = `Version ${vName} (Build ${vCode} — Updated Release)`;
+          const updEl = document.getElementById('app-update-status');
+          if (updEl) updEl.textContent = `Version ${vName} (Build ${vCode}) • Tap to check updates`;
+        } catch(e) {}
+      }
     }
 
     function toggleShieldsSetting() {

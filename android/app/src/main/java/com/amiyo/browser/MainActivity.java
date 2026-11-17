@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.app.DownloadManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -61,6 +62,8 @@ import java.util.Set;
 public class MainActivity extends AppCompatActivity {
 
     public static final String HOME_URL = "file:///android_asset/www/index.html";
+    public static final String APP_VERSION_NAME = "0.2.0";
+    public static final int APP_VERSION_CODE = 5;
     private WebView webView;
     private EditText urlInput;
     private ProgressBar pageProgressBar;
@@ -228,6 +231,21 @@ public class MainActivity extends AppCompatActivity {
         @JavascriptInterface
         public void loadUrl(String url) {
             runOnUiThread(() -> loadTarget(url));
+        }
+
+        @JavascriptInterface
+        public String getVersionName() {
+            return APP_VERSION_NAME;
+        }
+
+        @JavascriptInterface
+        public int getVersionCode() {
+            return APP_VERSION_CODE;
+        }
+
+        @JavascriptInterface
+        public void checkForUpdates() {
+            runOnUiThread(MainActivity.this::showUpdateDialog);
         }
     }
 
@@ -406,8 +424,18 @@ public class MainActivity extends AppCompatActivity {
             webView.setRendererPriorityPolicy(WebView.RENDERER_PRIORITY_BOUND, false);
         }
 
+        // Auto-purge stale WebView cache when new version is installed
+        try {
+            SharedPreferences updatePrefs = getSharedPreferences("aether_app_prefs", MODE_PRIVATE);
+            int lastCode = updatePrefs.getInt("installed_version_code", -1);
+            if (lastCode < APP_VERSION_CODE) {
+                webView.clearCache(true);
+                updatePrefs.edit().putInt("installed_version_code", APP_VERSION_CODE).apply();
+            }
+        } catch (Exception ignored) {}
+
         defaultUserAgent = settings.getUserAgentString();
-        String customUA = defaultUserAgent + " AETHERBrowser/0.1.0";
+        String customUA = defaultUserAgent + " AETHERBrowser/0.2.0";
         settings.setUserAgentString(customUA);
 
         CookieManager.getInstance().setAcceptCookie(true);
@@ -993,7 +1021,7 @@ public class MainActivity extends AppCompatActivity {
         if (isIncognito) {
             webView.loadUrl(HOME_URL + "?private=1#incognito");
         } else {
-            webView.loadUrl(HOME_URL);
+            webView.loadUrl(HOME_URL + "?v=" + APP_VERSION_NAME);
         }
     }
 
@@ -1069,6 +1097,7 @@ public class MainActivity extends AppCompatActivity {
         popup.getMenu().add(0, 11, 14, "Zoom out (-)");
         popup.getMenu().add(0, 12, 15, "Reset zoom (" + currentTextZoom + "%)");
         popup.getMenu().add(0, 9, 16, "Settings");
+        popup.getMenu().add(0, 18, 17, "🚀 About & Updates (v" + APP_VERSION_NAME + ")");
 
         popup.setOnMenuItemClickListener(item -> {
             switch (item.getItemId()) {
@@ -1089,6 +1118,9 @@ public class MainActivity extends AppCompatActivity {
                     return true;
                 case 17:
                     openInternalPage("diagnostics");
+                    return true;
+                case 18:
+                    showUpdateDialog();
                     return true;
                 case 3:
                     openInternalPage("history");
@@ -1135,6 +1167,29 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         popup.show();
+    }
+
+    private void showUpdateDialog() {
+        new androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("🚀 AETHER Browser v" + APP_VERSION_NAME)
+            .setMessage("Version Code: " + APP_VERSION_CODE + " (Official Update)\n\n" +
+                        "✨ Installed Features:\n" +
+                        "• 💡 AETHER Notes with + Multi-Note & Checklists\n" +
+                        "• 🛡️ AETHER Secure VPN (32 Enterprise Superpowers)\n" +
+                        "• ✨ AETHER Intelligence AI Assistant\n" +
+                        "• 🔐 Passwords Vault & Cryptographic Generator\n" +
+                        "• 📱 High-Contrast QR Code Share Sheet\n" +
+                        "• ⚡ Real-Time Network Diagnostics\n" +
+                        "• 🛡️ Shields Ad & Tracker Blocker Active\n\n" +
+                        "Your browser is running the updated release!")
+            .setPositiveButton("Check Releases", (dialog, which) -> {
+                loadTarget("https://github.com/A2004-a/amiyo-browser/releases");
+            })
+            .setNeutralButton("Direct APK", (dialog, which) -> {
+                loadTarget("https://github.com/A2004-a/amiyo-browser/releases/download/v0.1.0/AETHER-Browser-v0.1.0-Android.apk");
+            })
+            .setNegativeButton("Close", null)
+            .show();
     }
 
     private void shareCurrentPage() {
