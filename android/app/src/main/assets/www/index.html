@@ -781,6 +781,169 @@
       gap: 6px;
     }
     .option-card.selected { border-color: var(--accent); background: rgba(56, 189, 248, 0.12); }
+
+    /* Theme: Pure AMOLED Black */
+    body[data-theme="amoled"] {
+      --bg-primary: #000000;
+      --bg-secondary: #050505;
+      --bg-card: #0d0d0d;
+      --bg-card-hover: #171717;
+      --border: rgba(255, 255, 255, 0.16);
+      --accent: #38bdf8;
+    }
+
+    /* Mobile Command Palette Modal */
+    .cp-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.78);
+      backdrop-filter: blur(8px);
+      z-index: 9999;
+      display: none;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 16px;
+    }
+    .cp-modal-backdrop.open {
+      display: flex;
+    }
+    .cp-modal-card {
+      width: 100%;
+      max-width: 520px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-hover);
+      border-radius: 20px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.7);
+      overflow: hidden;
+      margin-top: 24px;
+      display: flex;
+      flex-direction: column;
+      max-height: 82vh;
+    }
+    .cp-search-header {
+      display: flex;
+      align-items: center;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      gap: 12px;
+      background: var(--bg-secondary);
+    }
+    .cp-search-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--text-primary);
+      font-size: 15px;
+      outline: none;
+    }
+    .cp-results-list {
+      overflow-y: auto;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .cp-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      border-radius: 12px;
+      cursor: pointer;
+      color: var(--text-primary);
+      font-size: 14px;
+      transition: background 0.15s;
+    }
+    .cp-item:active {
+      background: var(--bg-card-hover);
+      color: var(--accent);
+    }
+    .cp-item-icon {
+      font-size: 18px;
+      width: 26px;
+      text-align: center;
+    }
+    .cp-item-meta {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+    .cp-item-title {
+      font-weight: 600;
+      font-size: 13.5px;
+    }
+    .cp-item-desc {
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+    .cp-item-badge {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 8px;
+      background: var(--bg-secondary);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+
+    /* Reader Mode View */
+    .reader-container {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 24px 18px;
+      line-height: 1.8;
+      font-size: 16px;
+      color: var(--text-primary);
+      transition: all 0.2s;
+    }
+    .reader-container[data-theme="sepia"] {
+      background: #fbf0d9;
+      color: #382c1e;
+      border-color: #ebd5b3;
+    }
+    .reader-container[data-theme="light"] {
+      background: #ffffff;
+      color: #111827;
+      border-color: #e5e7eb;
+    }
+    .reader-container[data-theme="black"] {
+      background: #000000;
+      color: #d1d5db;
+      border-color: #262626;
+    }
+    .reader-title {
+      font-size: 22px;
+      font-weight: 800;
+      margin-bottom: 8px;
+      line-height: 1.3;
+    }
+    .reader-meta {
+      display: flex;
+      gap: 10px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .reader-toolbar {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 14px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+    .reader-theme-btn {
+      padding: 6px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      font-size: 12px;
+      cursor: pointer;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      font-weight: 600;
+    }
   </style>
 </head>
 <body data-theme="dark">
@@ -866,6 +1029,9 @@
 
     <!-- Feature Quick-Launch Strip -->
     <div class="features-strip">
+      <div class="feature-chip" onclick="openCommandPaletteModal()" style="border-color:var(--accent);background:rgba(56,189,248,0.12);">
+        <span style="color:var(--accent);">⚡ Palette</span>
+      </div>
       <div class="feature-chip" onclick="navigateTo('#notes')">
         <span>💡 AETHER Notes</span>
         <span class="chip-badge" id="chip-notes-count">0</span>
@@ -876,6 +1042,9 @@
       </div>
       <div class="feature-chip" onclick="navigateTo('#ai')">
         <span>✨ AI Assistant</span>
+      </div>
+      <div class="feature-chip" onclick="navigateTo('#reader')">
+        <span>📖 Reader</span>
       </div>
       <div class="feature-chip" onclick="navigateTo('#passwords')">
         <span>🔐 Vault</span>
@@ -1079,7 +1248,18 @@
         <button class="back-btn" onclick="navigateTo('#newtab')">←</button>
         <h2 class="page-title">AETHER Intelligence</h2>
       </div>
-      <span style="font-size:12px;color:var(--accent);font-weight:700;">✨ Gemini Core</span>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <span style="font-size:12px;color:var(--accent);font-weight:700;">✨ Gemini Core</span>
+        <button class="note-btn-del" onclick="clearAiChat()" title="Clear Chat">🗑️</button>
+      </div>
+    </div>
+
+    <!-- Quick Prompt Action Chips -->
+    <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;margin-bottom:6px;">
+      <button class="reader-theme-btn" onclick="quickAiPrompt('Summarize the key points of the current article')">💡 Summarize Page</button>
+      <button class="reader-theme-btn" onclick="quickAiPrompt('Explain the core takeaways and significance')">🔍 Key Takeaways</button>
+      <button class="reader-theme-btn" onclick="quickAiPrompt('Draft a concise professional email reply')">✉️ Draft Email</button>
+      <button class="reader-theme-btn" onclick="quickAiPrompt('Provide a clean JavaScript code example for this')">💻 Code Helper</button>
     </div>
 
     <div class="ai-chat-box">
@@ -1296,10 +1476,10 @@
         </div>
         <span style="color:var(--text-secondary);">›</span>
       </div>
-      <div class="list-item" onclick="if(window.AetherAndroid && AetherAndroid.checkForUpdates){ AetherAndroid.checkForUpdates(); } else { alert('AETHER Browser v0.2.0 (Build 5) is up to date with full features!'); }">
+      <div class="list-item" onclick="if(window.AetherAndroid && AetherAndroid.checkForUpdates){ AetherAndroid.checkForUpdates(); } else { alert('AETHER Browser v0.2.1 (Build 6) is up to date with full features!'); }">
         <div class="list-item-content">
           <span class="item-title">🚀 Software Update</span>
-          <span class="item-url" id="app-update-status">Version 0.2.0 (Build 5) • Tap to check updates</span>
+          <span class="item-url" id="app-update-status">Version 0.2.1 (Build 6) • Tap to check updates</span>
         </div>
         <span class="chip-badge" style="background:rgba(16,185,129,0.15);color:var(--success);border:1px solid rgba(16,185,129,0.3);">Up to Date</span>
       </div>
@@ -1313,7 +1493,7 @@
 
     <div style="text-align:center;padding:24px 0;color:var(--text-secondary);font-size:12px;line-height:1.6;">
       <strong style="color:var(--accent);">AETHER Browser for Android</strong><br>
-      <span id="app-version-label">Version 0.2.0 (Build 5 — Updated Release)</span><br>
+      <span id="app-version-label">Version 0.2.1 (Build 6 — Enhanced Release)</span><br>
       Explore Without Limits • Chromium &amp; Android Native
     </div>
   </section>
@@ -1334,6 +1514,58 @@
       <button onclick="if(window.AetherAndroid && AetherAndroid.openDownloads) { AetherAndroid.openDownloads(); } else { location.href='content://downloads/all_downloads'; }" class="btn-primary" style="margin:0 auto;">Open Device Downloads</button>
     </div>
   </section>
+
+
+  <!-- ================= 13. DISTRACTION-FREE READER MODE ================= -->
+  <section id="view-reader" class="view-section">
+    <div class="page-header">
+      <div class="page-header-left">
+        <button class="back-btn" onclick="navigateTo('#newtab')">←</button>
+        <h2 class="page-title">Reader Mode</h2>
+      </div>
+      <div style="display:flex;gap:6px;">
+        <button class="reader-theme-btn" onclick="adjustReaderFont(-1)" title="Smaller font">A-</button>
+        <button class="reader-theme-btn" onclick="adjustReaderFont(1)" title="Larger font">A+</button>
+      </div>
+    </div>
+
+    <!-- Reader controls toolbar -->
+    <div class="reader-toolbar">
+      <button class="reader-theme-btn" onclick="setReaderTheme('dark')">🌙 Dark</button>
+      <button class="reader-theme-btn" onclick="setReaderTheme('sepia')">📜 Sepia</button>
+      <button class="reader-theme-btn" onclick="setReaderTheme('light')">☀️ Light</button>
+      <button class="reader-theme-btn" onclick="setReaderTheme('black')">🖤 OLED</button>
+      <button class="reader-theme-btn" style="margin-left:auto;color:var(--accent);" onclick="clipReaderToNotes()">💡 Save to Notes</button>
+    </div>
+
+    <!-- Reader Article Container -->
+    <div class="reader-container" id="reader-article-box" data-theme="dark">
+      <h1 class="reader-title" id="reader-article-title">The Future of Neural Browsing &amp; Private Networks</h1>
+      <div class="reader-meta">
+        <span id="reader-article-source">AETHER Research</span>
+        <span>•</span>
+        <span id="reader-reading-time">⏱️ 3 min read</span>
+      </div>
+      <div id="reader-article-body" style="font-size:16px;line-height:1.8;">
+        <p>AETHER Browser introduces a unified architecture combining quantum-resistant networking, client-side intelligence, and high-performance Shields blocking.</p>
+        <p>By routing network requests through ephemeral RAM-only endpoints with Kyber-1024 hybrid encapsulation, web telemetry, canvas fingerprinting, and behavioral tracking are eliminated at the socket level.</p>
+        <p>Simultaneously, the built-in AETHER Notes studio captures key takeaways, checklists, and web clips directly into an encrypted local vault without sending telemetry to remote telemetry servers.</p>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ================= 14. MOBILE ARC/RAYCAST-STYLE COMMAND PALETTE ================= -->
+  <div id="command-palette-backdrop" class="cp-modal-backdrop" onclick="if(event.target===this) closeCommandPaletteModal()">
+    <div class="cp-modal-card">
+      <div class="cp-search-header">
+        <span style="font-size:18px;">⚡</span>
+        <input type="text" id="cp-modal-input" class="cp-search-input" placeholder="Type a command or jump to feature..." autocomplete="off" oninput="filterCommandPalette(this.value)" />
+        <button class="item-del-btn" onclick="closeCommandPaletteModal()">✕</button>
+      </div>
+      <div class="cp-results-list" id="cp-modal-results"></div>
+    </div>
+  </div>
 
 
   <!-- ================= CUSTOMIZE BOTTOM SHEET MODAL ================= -->
@@ -1432,6 +1664,13 @@
         loadSettingsView();
       } else if (hash === '#downloads') {
         document.getElementById('view-downloads')?.classList.add('active');
+      } else if (hash === '#reader') {
+        document.getElementById('view-reader')?.classList.add('active');
+        initReaderView();
+      } else if (hash === '#palette') {
+        document.getElementById('view-home')?.classList.add('active');
+        renderHomeNotes();
+        openCommandPaletteModal();
       } else {
         document.getElementById('view-home')?.classList.add('active');
         renderHomeNotes();
@@ -2128,6 +2367,185 @@
       }
       if (window.AetherAndroid && AetherAndroid.showToast) {
         AetherAndroid.showToast(isChecked ? 'AETHER Shields Active' : 'Shields Paused');
+      }
+    }
+
+    // 11. MOBILE ARC/RAYCAST COMMAND PALETTE ENGINE
+    const mobileCommands = [
+      { id: 'notes-new', title: 'New Note', desc: 'Add note, checklist, or clip', icon: '💡', category: 'Notes', action: () => { navigateTo('#notes'); startNewNoteFocus(); } },
+      { id: 'notes-clip', title: 'Clip Current Page', desc: 'Save page URL & title to notes', icon: '🔗', category: 'Notes', action: () => clipCurrentPageToNotes() },
+      { id: 'notes-export', title: 'Export Notes Backup', desc: 'Download notes as JSON/text file', icon: '📤', category: 'Notes', action: () => exportNotesBackup() },
+      { id: 'vpn-toggle', title: 'Toggle AETHER VPN Tunnel', desc: 'Connect or disconnect secure VPN', icon: '🛡️', category: 'Privacy', action: () => toggleVpnAction() },
+      { id: 'vpn-studio', title: 'Open VPN Studio', desc: 'Switch server node (US, Swiss, Japan)', icon: '🌐', category: 'Privacy', action: () => navigateTo('#vpn') },
+      { id: 'ai-assistant', title: 'Open AETHER Intelligence AI', desc: 'Ask questions or summarize page', icon: '✨', category: 'AI', action: () => navigateTo('#ai') },
+      { id: 'reader-mode', title: 'Open Distraction-Free Reader Mode', desc: 'Clean article view with font controls', icon: '📖', category: 'View', action: () => navigateTo('#reader') },
+      { id: 'pwd-vault', title: 'Passwords Vault & Generator', desc: 'Generate strong passwords', icon: '🔐', category: 'Security', action: () => navigateTo('#passwords') },
+      { id: 'share-qr', title: 'QR Code Share Sheet', desc: 'Generate scannable QR code for link', icon: '📱', category: 'Share', action: () => navigateTo('#share') },
+      { id: 'network-diag', title: 'Network Latency Diagnostics', desc: 'Measure real-time ping and jitter', icon: '⚡', category: 'System', action: () => navigateTo('#diagnostics') },
+      { id: 'history', title: 'Browsing History', desc: 'Search and clear past visits', icon: '🕒', category: 'History', action: () => navigateTo('#history') },
+      { id: 'bookmarks', title: 'Bookmarks Vault', desc: 'Quick access to saved websites', icon: '⭐', category: 'Bookmarks', action: () => navigateTo('#bookmarks') },
+      { id: 'downloads', title: 'Open Downloads', desc: 'View downloaded files', icon: '📥', category: 'Tools', action: () => navigateTo('#downloads') },
+      { id: 'theme-dark', title: 'Theme: Obsidian Dark', desc: 'Modern dark UI', icon: '🌙', category: 'Theme', action: () => selectTheme('dark') },
+      { id: 'theme-amoled', title: 'Theme: Pure AMOLED Black', desc: 'Pitch black theme for OLED battery saving', icon: '🖤', category: 'Theme', action: () => selectTheme('amoled') },
+      { id: 'theme-light', title: 'Theme: Clean Light', desc: 'High-contrast light interface', icon: '☀️', category: 'Theme', action: () => selectTheme('light') },
+      { id: 'theme-cyber', title: 'Theme: Cyberpunk Cyan', desc: 'Vibrant neon blue accent', icon: '⚡', category: 'Theme', action: () => selectTheme('cyberpunk') },
+      { id: 'shields-toggle', title: 'Toggle AETHER Shields', desc: 'Block trackers, ads, and fingerprinting', icon: '🛡️', category: 'Privacy', action: () => toggleShieldsSetting() },
+      { id: 'clear-data', title: 'Clear Browsing Data', desc: 'Clear cache, cookies, and history', icon: '🧹', category: 'Privacy', action: () => clearAllHistory() }
+    ];
+
+    function openCommandPaletteModal() {
+      const modal = document.getElementById('command-palette-backdrop');
+      if (!modal) return;
+      modal.classList.add('open');
+      const input = document.getElementById('cp-modal-input');
+      if (input) {
+        input.value = '';
+        input.focus();
+      }
+      renderCommandPaletteList(mobileCommands);
+    }
+
+    function closeCommandPaletteModal() {
+      document.getElementById('command-palette-backdrop')?.classList.remove('open');
+    }
+
+    function filterCommandPalette(q) {
+      const query = (q || '').trim().toLowerCase();
+      if (!query) {
+        renderCommandPaletteList(mobileCommands);
+        return;
+      }
+      const filtered = mobileCommands.filter(c => 
+        c.title.toLowerCase().includes(query) || 
+        c.desc.toLowerCase().includes(query) || 
+        c.category.toLowerCase().includes(query)
+      );
+      renderCommandPaletteList(filtered);
+    }
+
+    function renderCommandPaletteList(items) {
+      const container = document.getElementById('cp-modal-results');
+      if (!container) return;
+      if (items.length === 0) {
+        container.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text-muted);">No matching commands found</div>';
+        return;
+      }
+      container.innerHTML = items.map(item => `
+        <div class="cp-item" onclick="executeMobileCommand('${item.id}')">
+          <span class="cp-item-icon">${item.icon}</span>
+          <div class="cp-item-meta">
+            <span class="cp-item-title">${escapeHtml(item.title)}</span>
+            <span class="cp-item-desc">${escapeHtml(item.desc)}</span>
+          </div>
+          <span class="cp-item-badge">${escapeHtml(item.category)}</span>
+        </div>
+      `).join('');
+    }
+
+    function executeMobileCommand(id) {
+      closeCommandPaletteModal();
+      const cmd = mobileCommands.find(c => c.id === id);
+      if (cmd && cmd.action) {
+        cmd.action();
+      }
+    }
+
+    // 12. DISTRACTION-FREE READER MODE ENGINE
+    let currentReaderFontSize = 16;
+    function initReaderView() {
+      const box = document.getElementById('reader-article-box');
+      if (box) {
+        box.style.fontSize = currentReaderFontSize + 'px';
+      }
+    }
+
+    function adjustReaderFont(delta) {
+      currentReaderFontSize = Math.min(28, Math.max(13, currentReaderFontSize + (delta * 2)));
+      const box = document.getElementById('reader-article-box');
+      if (box) {
+        box.style.fontSize = currentReaderFontSize + 'px';
+      }
+    }
+
+    function setReaderTheme(theme) {
+      const box = document.getElementById('reader-article-box');
+      if (box) {
+        box.setAttribute('data-theme', theme);
+      }
+    }
+
+    function clipReaderToNotes() {
+      const title = document.getElementById('reader-article-title')?.textContent || 'Reader Article';
+      const body = document.getElementById('reader-article-body')?.textContent || '';
+      const notes = getStoredNotes();
+      notes.unshift({
+        id: 'clip_' + Date.now(),
+        title: '📖 ' + title,
+        body: body.slice(0, 300) + '...',
+        color: 'teal',
+        pinned: false,
+        isChecklist: false,
+        items: [],
+        updatedAt: Date.now()
+      });
+      saveStoredNotes(notes);
+      renderHomeNotes();
+      if (window.AetherAndroid && AetherAndroid.showToast) {
+        AetherAndroid.showToast('Article clipped to AETHER Notes!');
+      } else {
+        alert('Article clipped to AETHER Notes!');
+      }
+    }
+
+    function clipCurrentPageToNotes() {
+      const title = document.title || 'AETHER Web Clip';
+      const url = window.location.href;
+      const notes = getStoredNotes();
+      notes.unshift({
+        id: 'clip_' + Date.now(),
+        title: '🔗 ' + title,
+        body: `Clipped from ${url} on ${new Date().toLocaleDateString()}`,
+        color: 'teal',
+        pinned: false,
+        isChecklist: false,
+        items: [],
+        updatedAt: Date.now()
+      });
+      saveStoredNotes(notes);
+      renderHomeNotes();
+      if (window.AetherAndroid && AetherAndroid.showToast) {
+        AetherAndroid.showToast('Page clipped to AETHER Notes!');
+      } else {
+        alert('Page clipped to AETHER Notes!');
+      }
+    }
+
+    function exportNotesBackup() {
+      const notes = getStoredNotes();
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(notes, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `aether_notes_backup_${Date.now()}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+      if (window.AetherAndroid && AetherAndroid.showToast) {
+        AetherAndroid.showToast('Notes backup downloaded');
+      }
+    }
+
+    function quickAiPrompt(promptText) {
+      const input = document.getElementById('ai-input-field');
+      if (input) {
+        input.value = promptText;
+        sendAiMessage();
+      }
+    }
+
+    function clearAiChat() {
+      const chat = document.getElementById('ai-chat-messages');
+      if (chat) {
+        chat.innerHTML = '<div class="ai-msg bot">👋 <strong>Chat cleared.</strong> How can I assist you with your research or browsing?</div>';
       }
     }
 

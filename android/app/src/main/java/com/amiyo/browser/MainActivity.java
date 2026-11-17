@@ -62,8 +62,8 @@ import java.util.Set;
 public class MainActivity extends AppCompatActivity {
 
     public static final String HOME_URL = "file:///android_asset/www/index.html";
-    public static final String APP_VERSION_NAME = "0.2.0";
-    public static final int APP_VERSION_CODE = 5;
+    public static final String APP_VERSION_NAME = "0.2.1";
+    public static final int APP_VERSION_CODE = 6;
     private WebView webView;
     private EditText urlInput;
     private ProgressBar pageProgressBar;
@@ -615,6 +615,7 @@ public class MainActivity extends AppCompatActivity {
 
                 injectZoomUnlocker(view);
                 injectYouTubeOptimizations(view);
+                injectCosmeticAdBlocker(view);
             }
 
             @Override
@@ -1087,7 +1088,9 @@ public class MainActivity extends AppCompatActivity {
         popup.getMenu().add(0, 13, 4, isVpnEnabled ? "🛡️ AETHER VPN: Connected (" + vpnLocation + ")" : "🛡️ AETHER VPN: Disconnected");
         popup.getMenu().add(0, 16, 5, "🔐 Passwords Vault");
         popup.getMenu().add(0, 6, 6, "📱 Share & QR Code...");
-        popup.getMenu().add(0, 17, 7, "⚡ Network Diagnostics");
+        popup.getMenu().add(0, 19, 7, "📖 Reader Mode");
+        popup.getMenu().add(0, 20, 8, "⚡ Command Palette...");
+        popup.getMenu().add(0, 17, 9, "⚡ Network Diagnostics");
         popup.getMenu().add(0, 3, 8, "History");
         popup.getMenu().add(0, 4, 9, "Downloads");
         popup.getMenu().add(0, 5, 10, "Bookmarks");
@@ -1118,6 +1121,12 @@ public class MainActivity extends AppCompatActivity {
                     return true;
                 case 17:
                     openInternalPage("diagnostics");
+                    return true;
+                case 19:
+                    openInternalPage("reader");
+                    return true;
+                case 20:
+                    webView.evaluateJavascript("if(typeof openCommandPaletteModal === 'function') openCommandPaletteModal(); else location.hash = '#palette';", null);
                     return true;
                 case 18:
                     showUpdateDialog();
@@ -1314,6 +1323,18 @@ public class MainActivity extends AppCompatActivity {
             "  }" +
             "})();";
         view.evaluateJavascript(ytScript, null);
+    }
+
+    private void injectCosmeticAdBlocker(WebView view) {
+        if (view == null || !shieldsEnabled) return;
+        String cssHide = "(function() {" +
+            "  try {" +
+            "    const style = document.createElement('style');" +
+            "    style.textContent = '.ad, .ads, .ad-banner, .advertisement, [id*=\"google_ads\"], [id*=\"banner_ad\"], .cookie-banner, #onetrust-banner-sdk { display: none !important; visibility: hidden !important; height: 0 !important; }';" +
+            "    (document.head || document.documentElement).appendChild(style);" +
+            "  } catch(e) {}" +
+            "})();";
+        view.evaluateJavascript(cssHide, null);
     }
 
     private void showCustomView(View view, WebChromeClient.CustomViewCallback callback) {
