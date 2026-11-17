@@ -10,14 +10,15 @@
   width: 360px;
   background: var(--bg-card);
   border-left: 1px solid var(--border-subtle);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  box-shadow: -10px 0 30px rgba(0, 0, 0, 0.6);
+  box-shadow: -8px 0 24px rgba(0, 0, 0, 0.45);
   display: flex;
   flex-direction: column;
   z-index: 120;
-  animation: keepSlideIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: keepSlideIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   overflow: hidden;
+  transform: translateZ(0);
+  will-change: transform;
+  contain: paint layout;
 }
 
 @keyframes keepSlideIn {
@@ -95,7 +96,7 @@
   justify-content: center;
   cursor: pointer;
   font-size: 13px;
-  transition: all var(--transition-fast);
+  transition: background-color 0.12s ease, color 0.12s ease;
 }
 
 .keep-icon-btn:hover {
@@ -198,7 +199,7 @@
   font-weight: 500;
   cursor: pointer;
   white-space: nowrap;
-  transition: all var(--transition-fast);
+  transition: background-color 0.12s ease, color 0.12s ease;
 }
 
 .keep-pill:hover {
@@ -220,7 +221,8 @@
   border: 1px solid var(--border-subtle);
   border-radius: 10px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  transition: all 0.2s ease;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transform: translateZ(0);
   flex-shrink: 0;
   overflow: hidden;
 }
@@ -512,7 +514,7 @@
   padding: 4px 12px;
   border-radius: 6px;
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: background-color 0.12s ease, color 0.12s ease;
 }
 
 .keep-btn-primary:hover {
@@ -587,6 +589,10 @@
   flex-direction: column;
   gap: 16px;
   scrollbar-width: thin;
+  content-visibility: auto;
+  contain-intrinsic-size: 200px;
+  will-change: scroll-position;
+  contain: layout paint;
 }
 
 .keep-section-title {
@@ -602,6 +608,7 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+  contain: layout;
 }
 
 /* Google Keep Note Card */
@@ -612,11 +619,13 @@
   border: 1px solid var(--border-subtle);
   background: var(--bg-surface);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
   cursor: pointer;
   display: flex;
   flex-direction: column;
   gap: 6px;
+  contain: content;
+  transform: translateZ(0);
 }
 
 .keep-card:hover {
@@ -739,7 +748,7 @@
   font-size: 12px;
   padding: 3px 6px;
   border-radius: 4px;
-  transition: all var(--transition-fast);
+  transition: background-color 0.12s ease, color 0.12s ease;
 }
 
 .keep-action-btn:hover {
@@ -928,7 +937,8 @@
   gap: 6px;
   cursor: pointer;
   box-shadow: 0 4px 16px rgba(245, 158, 11, 0.45);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transform: translateZ(0);
   z-index: 130;
 }
 

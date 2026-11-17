@@ -95,11 +95,14 @@ const KeepNotes = {
       this.startNewNote();
     });
 
-    // Search
+    // Search with requestAnimationFrame debounce for instant, lag-free filtering
     this.searchInput?.addEventListener('input', (e) => {
       this.searchQuery = e.target.value.toLowerCase().trim();
       this.searchClearBtn?.classList.toggle('hidden', !this.searchQuery);
-      this.render();
+      if (this._searchFrame) cancelAnimationFrame(this._searchFrame);
+      this._searchFrame = requestAnimationFrame(() => {
+        this.render();
+      });
     });
 
     this.searchClearBtn?.addEventListener('click', () => {
@@ -247,7 +250,21 @@ const KeepNotes = {
     }
   },
 
-  persistNotes() {
+  persistNotes(immediate = false) {
+    if (immediate) {
+      if (this._persistTimer) clearTimeout(this._persistTimer);
+      this._persistTimer = null;
+      this._doPersist();
+      return;
+    }
+    if (this._persistTimer) return;
+    this._persistTimer = setTimeout(() => {
+      this._persistTimer = null;
+      this._doPersist();
+    }, 150);
+  },
+
+  _doPersist() {
     try {
       localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.notes));
       // Keep legacy key in sync with all note texts for backward compatibility

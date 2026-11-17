@@ -84,6 +84,8 @@ if (app && app.commandLine) {
     app.commandLine.appendSwitch('enable-zero-copy');
     app.commandLine.appendSwitch('enable-accelerated-2d-canvas');
     app.commandLine.appendSwitch('enable-accelerated-video-decode');
+    app.commandLine.appendSwitch('enable-native-gpu-memory-buffers');
+    app.commandLine.appendSwitch('enable-hardware-overlays', 'single-fullscreen,single-on-top,underlay');
     app.commandLine.appendSwitch('force-color-profile', 'srgb');
   } else {
     app.commandLine.appendSwitch('disable-gpu-shader-disk-cache');
