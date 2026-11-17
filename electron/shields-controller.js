@@ -180,15 +180,13 @@ class ShieldsController {
       /\/prebid[\.\/_\-]/i
     ];
 
-    // Specialized YouTube video ad endpoint patterns
+    // Specialized YouTube ad telemetry and external ad server patterns
+    // NOTE: videoplayback, ptracking, and ad_break are intentionally NOT network-blocked
+    // because blocking them causes MediaSource network errors and player crashes (black screen).
     this.youtubeAdPatterns = [
       /youtube\.com\/pagead\//i,
-      /youtube\.com\/ptracking/i,
       /youtube\.com\/api\/stats\/ads/i,
       /youtube\.com\/api\/stats\/qoe\?.*adformat=/i,
-      /youtube\.com\/get_midroll_info/i,
-      /youtube\.com\/youtubei\/v1\/player\/ad_break/i,
-      /googlevideo\.com\/videoplayback\?.*&adformat=/i,
       /static\.doubleclick\.net\/instream\/ad_status\.js/i,
       /googleads\.g\.doubleclick\.net\/pagead\//i,
       /youtube\.com\/api\/stats\/watchtime\?.*&ns=yt&.*el=ad/i,
@@ -613,15 +611,11 @@ class ShieldsController {
       [class*="sticky-ad"],
       [id*="bottom-sticky-ad"],
       [id*="floating_ad"],
-      .video-ads,
-      /* YouTube Ad Modules, Player Overlays & Sponsored Cards */
-      .ytp-ad-module,
+      /* YouTube Overlay & External Ads (Preserves internal player DOM, canvas & controls) */
       .ytp-ad-overlay-container,
-      .ytp-ad-player-overlay,
-      .ytp-ad-text,
-      .ytp-ad-message-container,
-      .ytp-ad-preview-container,
-      .ytp-ad-skip-button-container,
+      .ytp-ad-module .ytp-ad-overlay-container,
+      .ytp-ad-module .ytp-ad-image-overlay,
+      .ytp-ad-module .ytp-ad-text-overlay,
       ytd-ad-slot-renderer,
       ytd-in-feed-ad-layout-renderer,
       ytd-banner-promo-renderer,
@@ -631,7 +625,6 @@ class ShieldsController {
       ytd-compact-promoted-video-renderer,
       ytd-companion-slot-renderer,
       ytd-companion-ad-renderer,
-      ytd-player-legacy-desktop-watch-ads-renderer,
       ytd-action-companion-ad-renderer,
       ytd-engagement-panel-section-list-renderer[target-id="engagement-panel-ads"],
       ytd-video-masthead-ad-v3-renderer,
@@ -640,7 +633,6 @@ class ShieldsController {
       ytd-brand-video-singleton-renderer,
       ytd-merch-shelf-renderer,
       ytd-display-ad-renderer,
-      #player-ads,
       #masthead-ad,
       #merchandise-shelf,
       tp-yt-paper-dialog:has(ytd-enforcement-message-view-model),
@@ -819,20 +811,75 @@ class ShieldsController {
           setTimeout(unlockScroll, 400);
           setTimeout(unlockScroll, 1200);
 
-          // 3. YouTube Ad-Skipper & Video Fast-Forward Engine v2.0
+          // 3. YouTube Ad-Skipper & Video Fast-Forward Engine v2.0 (Brave-Grade)
           if (location.hostname.includes('youtube.com')) {
-            // Neutralize ad queues from player response without breaking playback tracking
-            if (window.ytInitialPlayerResponse) {
+            // Neutralize ad queues from player response by resetting arrays (never delete to avoid undefined TypeErrors)
+            const neutralizePlayerAds = (obj) => {
+              if (!obj || typeof obj !== 'object') return;
               try {
-                if (window.ytInitialPlayerResponse.adPlacements) delete window.ytInitialPlayerResponse.adPlacements;
-                if (window.ytInitialPlayerResponse.playerAds) delete window.ytInitialPlayerResponse.playerAds;
-                if (window.ytInitialPlayerResponse.adSlots) delete window.ytInitialPlayerResponse.adSlots;
+                if (Array.isArray(obj.adPlacements)) obj.adPlacements = [];
+                if (Array.isArray(obj.playerAds)) obj.playerAds = [];
+                if (Array.isArray(obj.adSlots)) obj.adSlots = [];
               } catch (e) {}
+            };
+            if (window.ytInitialPlayerResponse) {
+              neutralizePlayerAds(window.ytInitialPlayerResponse);
             }
 
             const purgeYouTubeAds = () => {
               try {
-                // 1. Remove sidebar and in-feed sponsored ads (strictly outside the video player)
+                // 1. Instant Video Ad Skipper & Fast-Forward Engine
+                const player = document.getElementById('movie_player') || document.querySelector('.html5-video-player');
+                const isAdActive = player && (player.classList.contains('ad-showing') || player.classList.contains('ad-interrupting'));
+                const video = document.querySelector('video.html5-main-video') || document.querySelector('video');
+
+                if (isAdActive) {
+                  // Direct YouTube player API skip
+                  if (player && typeof player.skipAd === 'function') {
+                    try { player.skipAd(); } catch (e) {}
+                  }
+
+                  // Click all skip button variants immediately
+                  const skipBtn = document.querySelector('.ytp-ad-skip-button, .ytp-ad-skip-button-modern, button.ytp-ad-skip-button, .ytp-skip-ad-button, .ytp-ad-skip-button-slot button, .ytp-ad-skip-button-slot, [id^="skip-button"]');
+                  if (skipBtn) {
+                    skipBtn.click();
+                  }
+
+                  // Mute and fast-forward video ad to completion
+                  if (video) {
+                    video.muted = true;
+                    video.__aether_ad_muted = true;
+                    video.playbackRate = 16.0;
+                    if (isFinite(video.duration) && video.duration > 0) {
+                      video.currentTime = video.duration;
+                    }
+                  }
+                } else if (video && video.__aether_ad_muted) {
+                  // Main video resumed: restore natural speed and unmute
+                  video.__aether_ad_muted = false;
+                  if (video.playbackRate > 2.0) {
+                    video.playbackRate = 1.0;
+                  }
+                  video.muted = false;
+                }
+
+                // Auto-close overlay banners
+                const overlayClose = document.querySelector('.ytp-ad-overlay-close-button');
+                if (overlayClose) overlayClose.click();
+
+                // Dismiss anti-adblock modal and resume playback
+                const dismissBtn = document.querySelector('ytd-enforcement-message-view-model #dismiss-button, tp-yt-paper-dialog #dismiss-button');
+                if (dismissBtn) {
+                  dismissBtn.click();
+                  if (video && video.paused) video.play();
+                }
+                const enforcementDialog = document.querySelector('tp-yt-paper-dialog:has(ytd-enforcement-message-view-model), ytd-enforcement-message-view-model');
+                if (enforcementDialog) {
+                  enforcementDialog.remove();
+                  if (video && video.paused) video.play();
+                }
+
+                // 2. Remove sidebar and in-feed sponsored ads (strictly outside video player)
                 const adSelectors = [
                   'ytd-ad-slot-renderer',
                   'ytd-in-feed-ad-layout-renderer',
@@ -845,9 +892,12 @@ class ShieldsController {
                   'ytd-companion-ad-renderer',
                   'ytd-action-companion-ad-renderer',
                   'ytd-engagement-panel-section-list-renderer[target-id="engagement-panel-ads"]',
+                  'ytd-video-masthead-ad-v3-renderer',
+                  'ytd-primetime-promo-renderer',
+                  'ytd-mealbar-promo-renderer',
                   'ytd-brand-video-singleton-renderer',
                   'ytd-merch-shelf-renderer',
-                  '#player-ads',
+                  'ytd-display-ad-renderer',
                   '#masthead-ad',
                   '#merchandise-shelf',
                   'div#secondary ytd-ad-slot-renderer',
@@ -875,48 +925,32 @@ class ShieldsController {
                   }
                 }
 
-                // 2. Video Ad Fast-Forward & Skip (Mute + Fast Forward to End of Ad)
-                const player = document.querySelector('.html5-video-player');
-                const isAdActive = player && (player.classList.contains('ad-showing') || player.classList.contains('ad-interrupting'));
-                const video = document.querySelector('video.html5-main-video') || document.querySelector('video');
-                if (video && isAdActive) {
-                  video.muted = true;
-                  video.playbackRate = 16.0;
-                  if (isFinite(video.duration) && video.duration > 0) {
-                    video.currentTime = video.duration - 0.05;
-                  }
-                }
-
-                // Auto-close in-video overlay ads
-                const overlayClose = document.querySelector('.ytp-ad-overlay-close-button');
-                if (overlayClose) overlayClose.click();
-
-                // Click skip button immediately when available
-                const skipBtn = document.querySelector('.ytp-ad-skip-button, .ytp-ad-skip-button-modern, button.ytp-ad-skip-button, .ytp-skip-ad-button, .ytp-ad-skip-button-slot');
-                if (skipBtn) {
-                  skipBtn.click();
-                }
-
-                // Dismiss anti-adblock modal and resume playback
-                const dismissBtn = document.querySelector('ytd-enforcement-message-view-model #dismiss-button, tp-yt-paper-dialog #dismiss-button');
-                if (dismissBtn) {
-                  dismissBtn.click();
-                  if (video && video.paused) video.play();
-                }
-                const enforcementDialog = document.querySelector('tp-yt-paper-dialog:has(ytd-enforcement-message-view-model), ytd-enforcement-message-view-model');
-                if (enforcementDialog) enforcementDialog.remove();
-
-                // Strip progress bar mid-roll markers
+                // Strip progress bar mid-roll markers safely
                 document.querySelectorAll('.ytp-ad-progress-list, .ytp-ad-marker').forEach(el => el.remove());
               } catch (e) {}
             };
 
-            const skipYouTubeAds = purgeYouTubeAds;
+            const hookVideoEvents = () => {
+              const video = document.querySelector('video');
+              if (video && !video.__aether_hooked) {
+                video.__aether_hooked = true;
+                video.addEventListener('timeupdate', purgeYouTubeAds);
+                video.addEventListener('playing', purgeYouTubeAds);
+                video.addEventListener('play', purgeYouTubeAds);
+                video.addEventListener('seeking', purgeYouTubeAds);
+              }
+            };
+
+            const skipYouTubeAds = () => {
+              purgeYouTubeAds();
+              hookVideoEvents();
+            };
+
             skipYouTubeAds();
             window.addEventListener('yt-navigate-finish', skipYouTubeAds);
             window.addEventListener('spfdone', skipYouTubeAds);
             window.addEventListener('popstate', skipYouTubeAds);
-            setInterval(skipYouTubeAds, 100);
+            setInterval(skipYouTubeAds, 50);
           }
 
           // 4. Pop-under & Click-Hijack Defusers
