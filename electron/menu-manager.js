@@ -527,12 +527,12 @@ class MenuManager {
     menu.append(new MenuItem({ type: 'separator' }));
 
     menu.append(new MenuItem({
-      label: '↗️ Safari Share Sheet & QR Code',
+      label: '↗️ AETHER Share Sheet & QR Code',
       click: () => browserWindow.webContents.send('trigger-share-sheet')
     }));
 
     menu.append(new MenuItem({
-      label: '💡 AETHER Keep Notes',
+      label: '💡 AETHER Notes',
       accelerator: 'CmdOrCtrl+Alt+N',
       click: () => browserWindow.webContents.send('trigger-quick-notes')
     }));

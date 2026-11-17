@@ -1637,7 +1637,7 @@ const App = {
           <canvas id="share-qr-canvas" width="180" height="180" class="share-qr-canvas"></canvas>
           <div class="share-qr-caption">
             <span>📱 <strong>Scan with Phone Camera</strong></span>
-            <span style="font-size:11px;color:var(--text-muted);">Instant Mobile Handoff to Safari / Chrome</span>
+            <span style="font-size:11px;color:var(--text-muted);">Instant Mobile Handoff (iOS &amp; Android)</span>
           </div>
         </div>
 
@@ -1645,7 +1645,7 @@ const App = {
           <button class="share-action-btn" id="share-btn-copy-clean">
             <span class="share-action-icon">🔗</span>
             <div class="share-action-text">
-              <div class="share-action-label" id="share-copy-label">Copy Clean Link (Safari Advanced Tracking Protection)</div>
+              <div class="share-action-label" id="share-copy-label">Copy Clean Link (Advanced Tracking Stripped)</div>
               <div class="share-action-desc">Strips UTM parameters, click IDs &amp; trackers from URL</div>
             </div>
           </button>
@@ -1653,7 +1653,7 @@ const App = {
           <button class="share-action-btn" id="share-btn-reading-list">
             <span class="share-action-icon">📖</span>
             <div class="share-action-text">
-              <div class="share-action-label" id="share-reading-label">Add to Safari Reading List</div>
+              <div class="share-action-label" id="share-reading-label">Add to Reading List</div>
               <div class="share-action-desc">Save offline for reading anytime</div>
             </div>
           </button>
@@ -1669,7 +1669,7 @@ const App = {
       </div>
     `;
 
-    this.showModal('Safari Share Sheet', bodyHtml, [
+    this.showModal('AETHER Share Sheet', bodyHtml, [
       { label: 'Done', class: 'btn-secondary', click: () => this.closeModal() }
     ]);
 
@@ -1694,13 +1694,13 @@ const App = {
         label.textContent = '✓ Copied Clean Link!';
         label.style.color = 'var(--accent)';
         setTimeout(() => {
-          label.textContent = 'Copy Clean Link (Safari Advanced Tracking Protection)';
+          label.textContent = 'Copy Clean Link (Advanced Tracking Stripped)';
           label.style.color = '';
         }, 2000);
       }
     });
 
-    // Add to Safari Reading List
+    // Add to Reading List
     document.getElementById('share-btn-reading-list')?.addEventListener('click', () => {
       const readingList = State.readingList || [];
       const exists = readingList.some(item => item.url === tab.url);

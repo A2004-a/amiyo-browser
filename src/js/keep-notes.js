@@ -1,9 +1,9 @@
 /**
- * AETHER Keep Notes — Google Keep-style Notes & Checklists
+ * AETHER Notes — Notes & Checklists
  * Features:
  * - Multi-note management with Pinned & Others sections
  * - Rich Note Types: Plain Text, Todo Checklists, and Web Clips
- * - 10 Google Keep color accents (coral, peach, sand, mint, sage, fog, storm, blossom, clay)
+ * - 10 Vibrant color accents (coral, peach, sand, mint, sage, fog, storm, blossom, clay)
  * - 1-Click "Clip Page": saves active tab's title & URL with direct web navigation
  * - Live instant search & category pill filtering
  * - Checkbox interaction directly from cards
@@ -198,7 +198,7 @@ const KeepNotes = {
           // Welcome starter note
           this.notes = [{
             id: 'note_welcome',
-            title: '💡 Welcome to Keep Notes!',
+            title: '💡 Welcome to AETHER Notes!',
             content: 'Take research notes, save todo checklists, and clip web pages while you browse without losing your focus.\n\n• Click 📌 to pin important notes\n• Click ☑️ for todo checklists\n• Click 🔗 to clip current tabs',
             type: 'text',
             checklist: [],
@@ -718,7 +718,7 @@ const KeepNotes = {
 
     const jsonContent = JSON.stringify(this.notes, null, 2);
 
-    App.showModal('Export Keep Notes', `
+    App.showModal('Export AETHER Notes', `
       <div style="padding:10px 0;">
         <p style="font-size:13px;color:var(--text-secondary);margin-bottom:14px;">
           Choose your desired format to download all your notes:
