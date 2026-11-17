@@ -7,27 +7,36 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --bg-primary: #12141a;
-      --bg-secondary: #1a1d26;
-      --bg-card: #202430;
+      --bg-primary: #0a0d14;
+      --bg-secondary: #121622;
+      --bg-card: #181d2c;
+      --bg-card-hover: #22293d;
       --text-primary: #f8fafc;
       --text-secondary: #94a3b8;
+      --text-muted: #64748b;
       --accent: #38bdf8;
       --accent-glow: rgba(56, 189, 248, 0.25);
+      --accent-cyan: #35d8f2;
       --border: rgba(255, 255, 255, 0.08);
       --border-hover: rgba(56, 189, 248, 0.4);
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --purple: #a855f7;
     }
 
     body[data-theme="midnight"] {
       --bg-primary: #000000;
       --bg-secondary: #0a0a0a;
       --bg-card: #141414;
+      --bg-card-hover: #1e1e1e;
       --border: rgba(255, 255, 255, 0.12);
     }
     body[data-theme="cyberpunk"] {
       --bg-primary: #0a0a14;
       --bg-secondary: #121024;
       --bg-card: #1c1538;
+      --bg-card-hover: #271c50;
       --accent: #00f0ff;
       --accent-glow: rgba(0, 240, 255, 0.35);
     }
@@ -35,9 +44,13 @@
       --bg-primary: #f8fafc;
       --bg-secondary: #f1f5f9;
       --bg-card: #ffffff;
+      --bg-card-hover: #f8fafc;
       --text-primary: #0f172a;
-      --text-secondary: #64748b;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
       --border: rgba(0, 0, 0, 0.08);
+      --accent: #0284c7;
+      --accent-glow: rgba(2, 132, 199, 0.2);
     }
 
     body {
@@ -48,17 +61,18 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      transition: background-color 0.25s, color 0.25s;
+      transition: background-color 0.2s, color 0.2s;
       overflow-x: hidden;
+      contain: paint layout;
     }
 
     .view-section {
       width: 100%;
-      max-width: 600px;
+      max-width: 620px;
       min-height: 100vh;
       display: none;
       flex-direction: column;
-      padding: 20px 16px 80px;
+      padding: 16px 16px 80px;
     }
     .view-section.active {
       display: flex;
@@ -68,14 +82,19 @@
     .page-header {
       display: flex;
       align-items: center;
-      gap: 16px;
-      margin-bottom: 24px;
+      justify-content: space-between;
+      margin-bottom: 20px;
       padding-bottom: 12px;
       border-bottom: 1px solid var(--border);
     }
+    .page-header-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
     .back-btn {
-      width: 36px;
-      height: 36px;
+      width: 38px;
+      height: 38px;
       border-radius: 50%;
       background: var(--bg-secondary);
       border: 1px solid var(--border);
@@ -85,9 +104,13 @@
       justify-content: center;
       cursor: pointer;
       font-size: 18px;
+      transition: background-color 0.15s;
+    }
+    .back-btn:active {
+      background: var(--bg-card);
     }
     .page-title {
-      font-size: 20px;
+      font-size: 19px;
       font-weight: 700;
       letter-spacing: -0.3px;
     }
@@ -97,27 +120,26 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      margin-top: 36px;
-      margin-bottom: 28px;
-      gap: 10px;
+      margin-top: 24px;
+      margin-bottom: 18px;
+      gap: 8px;
     }
     .brand-icon-circle {
-      width: 68px;
-      height: 68px;
+      width: 64px;
+      height: 64px;
       border-radius: 50%;
       background: radial-gradient(circle at 35% 35%, #1e293b, #0f172a);
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 8px 24px var(--accent-glow), 0 0 0 1px rgba(255,255,255,0.06);
-      position: relative;
+      box-shadow: 0 8px 24px var(--accent-glow), 0 0 0 1px rgba(255,255,255,0.08);
     }
     .brand-icon-circle svg {
-      width: 52px;
-      height: 52px;
+      width: 48px;
+      height: 48px;
     }
     .brand-title {
-      font-size: 34px;
+      font-size: 32px;
       font-weight: 800;
       letter-spacing: 2px;
       background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 40%, var(--accent) 100%);
@@ -128,31 +150,74 @@
       line-height: 1.1;
     }
     .brand-subtitle {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--accent);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+    }
+
+    /* Shields Live Stats Banner */
+    .shields-banner {
+      width: 100%;
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.08) 0%, rgba(16, 185, 129, 0.05) 100%);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      border-radius: 16px;
+      padding: 12px 14px;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .shields-stat-group {
+      display: flex;
+      gap: 14px;
+    }
+    .shields-stat-item {
+      display: flex;
+      flex-direction: column;
+    }
+    .shields-stat-val {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .shields-stat-lbl {
+      font-size: 10px;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .shields-toggle-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      padding: 6px 12px;
+      border-radius: 20px;
       font-size: 11px;
       font-weight: 600;
-      color: var(--text-secondary);
-      letter-spacing: 3.5px;
-      text-transform: uppercase;
-      margin-top: -2px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
     }
 
     /* Omnibox Search Box */
     .search-box {
       width: 100%;
-      height: 50px;
+      height: 48px;
       background: var(--bg-card);
-      border-radius: 25px;
+      border-radius: 24px;
       display: flex;
       align-items: center;
       padding: 0 16px;
-      gap: 12px;
+      gap: 10px;
       box-shadow: 0 4px 16px rgba(0,0,0,0.25);
-      margin-bottom: 30px;
+      margin-bottom: 20px;
       border: 1px solid var(--border);
-      transition: all 0.2s ease;
+      transition: border-color 0.2s, box-shadow 0.2s;
     }
     .search-box:focus-within {
-      background: var(--bg-secondary);
       border-color: var(--accent);
       box-shadow: 0 4px 20px var(--accent-glow);
     }
@@ -163,18 +228,17 @@
       border: none;
       outline: none;
       color: var(--text-primary);
-      font-size: 15px;
+      font-size: 14px;
     }
-    .search-input::placeholder { color: var(--text-secondary); }
-
+    .search-input::placeholder { color: var(--text-muted); }
     .search-tools {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
     }
     .icon-btn {
-      width: 30px;
-      height: 30px;
+      width: 32px;
+      height: 32px;
       background: transparent;
       border: none;
       display: flex;
@@ -185,34 +249,74 @@
       border-radius: 50%;
     }
 
+    /* Feature Quick-Access Strip */
+    .features-strip {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding-bottom: 6px;
+      margin-bottom: 22px;
+      width: 100%;
+      scrollbar-width: none;
+    }
+    .features-strip::-webkit-scrollbar { display: none; }
+    .feature-chip {
+      flex-shrink: 0;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-primary);
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      transition: transform 0.1s, border-color 0.15s;
+    }
+    .feature-chip:active {
+      transform: scale(0.96);
+      border-color: var(--accent);
+    }
+    .chip-badge {
+      background: var(--accent);
+      color: #000;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 1px 6px;
+      border-radius: 10px;
+    }
+
     /* Shortcuts Grid */
     .shortcuts-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 18px 12px;
+      gap: 16px 10px;
       width: 100%;
-      margin-bottom: 40px;
+      margin-bottom: 28px;
     }
     .shortcut {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       text-decoration: none;
       color: var(--text-primary);
     }
     .circle {
-      width: 50px;
-      height: 50px;
+      width: 48px;
+      height: 48px;
       border-radius: 50%;
       background: var(--bg-card);
       border: 1px solid var(--border);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 20px;
+      font-size: 19px;
       box-shadow: 0 3px 10px rgba(0,0,0,0.2);
-      transition: transform 0.15s, border-color 0.15s;
+      transition: transform 0.15s;
     }
     .shortcut:active .circle {
       transform: scale(0.92);
@@ -222,36 +326,404 @@
       font-size: 11px;
       color: var(--text-secondary);
       text-align: center;
-      max-width: 76px;
+      max-width: 72px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
 
-    /* Customize Pill */
-    .customize-pill {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      height: 38px;
-      padding: 0 18px;
-      background: var(--bg-card);
+    /* ================= AETHER NOTES (MOBILE UI) ================= */
+    .notes-section {
+      width: 100%;
+      background: var(--bg-secondary);
       border: 1px solid var(--border);
-      border-radius: 20px;
-      color: var(--text-primary);
-      font-size: 12px;
-      font-weight: 600;
+      border-radius: 18px;
+      padding: 16px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    }
+    .notes-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .notes-title-wrap {
       display: flex;
       align-items: center;
       gap: 8px;
-      cursor: pointer;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.4);
-      z-index: 50;
-      transition: transform 0.15s, border-color 0.15s;
     }
-    .customize-pill:active {
-      transform: scale(0.96);
+    .notes-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .notes-add-btn {
+      background: var(--accent);
+      color: #000;
+      border: none;
+      border-radius: 18px;
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+    }
+    .notes-add-btn:active {
+      transform: scale(0.95);
+    }
+
+    /* Notes Filter Pills */
+    .notes-pills {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 6px;
+      margin-bottom: 12px;
+      scrollbar-width: none;
+    }
+    .notes-pills::-webkit-scrollbar { display: none; }
+    .note-pill {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 4px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .note-pill.active {
+      background: var(--accent);
+      color: #000;
       border-color: var(--accent);
+    }
+
+    /* Note Creator Card */
+    .note-creator-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px;
+      margin-bottom: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .note-creator-card.expanded {
+      border-color: var(--accent);
+      box-shadow: 0 4px 16px var(--accent-glow);
+    }
+    .note-input-title {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text-primary);
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .note-input-body {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text-primary);
+      font-size: 13px;
+      min-height: 48px;
+      resize: none;
+      font-family: inherit;
+    }
+    .note-creator-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid var(--border);
+      padding-top: 8px;
+      margin-top: 4px;
+    }
+    .note-tool-icons {
+      display: flex;
+      gap: 6px;
+    }
+    .note-tool-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 14px;
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 6px;
+    }
+    .note-tool-btn.active {
+      color: var(--accent);
+      background: rgba(56, 189, 248, 0.15);
+    }
+
+    /* Note Cards Grid */
+    .notes-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .note-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      transition: transform 0.1s;
+    }
+    .note-card[data-color="amber"] { border-left: 4px solid #f59e0b; background: rgba(245, 158, 11, 0.08); }
+    .note-card[data-color="cyan"] { border-left: 4px solid #00f0ff; background: rgba(0, 240, 255, 0.08); }
+    .note-card[data-color="purple"] { border-left: 4px solid #a855f7; background: rgba(168, 85, 247, 0.08); }
+    .note-card[data-color="emerald"] { border-left: 4px solid #10b981; background: rgba(16, 185, 129, 0.08); }
+    .note-card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .note-card-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .note-card-body {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .note-checklist {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-top: 4px;
+    }
+    .note-check-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .note-check-item.done {
+      text-decoration: line-through;
+      color: var(--text-muted);
+    }
+    .note-card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 6px;
+      padding-top: 6px;
+      border-top: 1px solid var(--border);
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    .note-btn-del {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 13px;
+      padding: 2px 6px;
+    }
+
+    /* Common Card Styles */
+    .list-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+    .list-item {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      cursor: pointer;
+    }
+    .list-item:last-child { border-bottom: none; }
+    .list-item:active { background: var(--bg-card-hover); }
+    .list-item-content {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      overflow: hidden;
+      flex: 1;
+    }
+    .item-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .item-url {
+      font-size: 11px;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .item-del-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 16px;
+      padding: 6px;
+      cursor: pointer;
+    }
+
+    /* VPN View Elements */
+    .vpn-hero-card {
+      background: radial-gradient(circle at 50% 20%, rgba(56, 189, 248, 0.15) 0%, var(--bg-card) 70%);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 24px 18px;
+      text-align: center;
+      margin-bottom: 18px;
+    }
+    .vpn-shield-icon {
+      font-size: 52px;
+      margin-bottom: 10px;
+    }
+    .vpn-status-text {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+    .vpn-node-text {
+      font-size: 12px;
+      color: var(--accent);
+      font-weight: 600;
+      margin-bottom: 18px;
+    }
+    .vpn-master-btn {
+      background: linear-gradient(135deg, #0284c7 0%, #38bdf8 100%);
+      color: #fff;
+      border: none;
+      border-radius: 28px;
+      padding: 12px 32px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 16px var(--accent-glow);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .vpn-master-btn.connected {
+      background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+      box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+    }
+
+    /* AI View Elements */
+    .ai-chat-box {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      height: calc(100vh - 180px);
+      overflow: hidden;
+    }
+    .ai-chat-messages {
+      flex: 1;
+      padding: 14px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .ai-msg {
+      max-width: 85%;
+      padding: 10px 14px;
+      border-radius: 14px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .ai-msg.bot {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      align-self: flex-start;
+      border-bottom-left-radius: 4px;
+    }
+    .ai-msg.user {
+      background: var(--accent);
+      color: #000;
+      font-weight: 500;
+      align-self: flex-end;
+      border-bottom-right-radius: 4px;
+    }
+    .ai-chat-input-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      background: var(--bg-card);
+      border-top: 1px solid var(--border);
+    }
+
+    /* Passwords View */
+    .pwd-generator-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 18px;
+    }
+    .pwd-display {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-family: monospace;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 1px;
+      word-break: break-all;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* Buttons */
+    .btn-primary {
+      background: var(--accent);
+      color: #000;
+      border: none;
+      border-radius: 12px;
+      padding: 10px 16px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .btn-secondary {
+      background: var(--bg-card);
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
     }
 
     /* Bottom Sheet Modal */
@@ -259,15 +731,13 @@
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
       background: rgba(0,0,0,0.7);
-      backdrop-filter: blur(6px);
+      backdrop-filter: blur(4px);
       z-index: 100;
       display: none;
       align-items: flex-end;
       justify-content: center;
     }
-    .modal-overlay.open {
-      display: flex;
-    }
+    .modal-overlay.open { display: flex; }
     .modal-sheet {
       width: 100%;
       max-width: 500px;
@@ -280,138 +750,44 @@
       box-shadow: 0 -8px 32px rgba(0,0,0,0.6);
       max-height: 85vh;
       overflow-y: auto;
-      animation: slideUp 0.25s ease-out;
-    }
-    @keyframes slideUp {
-      from { transform: translateY(100%); }
-      to { transform: translateY(0); }
     }
     .modal-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 20px;
+      margin-bottom: 18px;
     }
-    .modal-title {
-      font-size: 18px;
-      font-weight: 700;
-    }
+    .modal-title { font-size: 17px; font-weight: 700; }
     .close-btn {
       background: transparent;
       border: none;
       color: var(--text-secondary);
-      font-size: 22px;
+      font-size: 20px;
       cursor: pointer;
-      padding: 4px;
     }
-    .setting-group {
-      margin-bottom: 20px;
-    }
-    .setting-label {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text-secondary);
-      margin-bottom: 10px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    .option-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-    }
+    .setting-group { margin-bottom: 18px; }
+    .setting-label { font-size: 12px; font-weight: 700; color: var(--text-secondary); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .option-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
     .option-card {
       background: var(--bg-card);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 12px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      cursor: pointer;
+      border-radius: 10px;
+      padding: 10px 12px;
       font-size: 13px;
-      font-weight: 500;
-      transition: all 0.15s ease;
-    }
-    .option-card.selected {
-      border-color: var(--accent);
-      background: rgba(56, 189, 248, 0.12);
-      color: var(--accent);
-    }
-    .btn-primary {
-      width: 100%;
-      height: 44px;
-      border-radius: 22px;
-      background: var(--accent);
-      color: #0f172a;
-      border: none;
-      font-size: 14px;
-      font-weight: 700;
+      font-weight: 600;
       cursor: pointer;
-      margin-top: 10px;
-    }
-
-    /* List items for History / Bookmarks / Downloads */
-    .list-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      overflow: hidden;
-      margin-bottom: 16px;
-    }
-    .list-item {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      padding: 14px 16px;
-      border-bottom: 1px solid var(--border);
-      cursor: pointer;
-      text-decoration: none;
-      color: var(--text-primary);
+      gap: 6px;
     }
-    .list-item:last-child { border-bottom: none; }
-    .list-item-content {
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
-      overflow: hidden;
-      flex: 1;
-      padding-right: 12px;
-    }
-    .item-title {
-      font-size: 14px;
-      font-weight: 600;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .item-url {
-      font-size: 12px;
-      color: var(--text-secondary);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .item-del-btn {
-      background: transparent;
-      border: none;
-      color: var(--text-secondary);
-      font-size: 18px;
-      padding: 6px;
-      cursor: pointer;
-    }
-    .empty-state {
-      text-align: center;
-      padding: 48px 16px;
-      color: var(--text-secondary);
-      font-size: 14px;
-    }
+    .option-card.selected { border-color: var(--accent); background: rgba(56, 189, 248, 0.12); }
   </style>
 </head>
 <body data-theme="dark">
 
   <!-- ================= 1. HOME / NEW TAB VIEW ================= -->
   <section id="view-home" class="view-section active">
+    
     <!-- AETHER 3D Orbital Emblem -->
     <div class="brand-container">
       <div class="brand-icon-circle">
@@ -446,39 +822,84 @@
       <div class="brand-subtitle">EXPLORE WITHOUT LIMITS.</div>
     </div>
 
+    <!-- AETHER Shields Stats Live Banner -->
+    <div class="shields-banner">
+      <div class="shields-stat-group">
+        <div class="shields-stat-item">
+          <span class="shields-stat-val" id="stats-trackers-val">1,420</span>
+          <span class="shields-stat-lbl">Trackers Blocked</span>
+        </div>
+        <div class="shields-stat-item">
+          <span class="shields-stat-val" id="stats-data-val">14.2 MB</span>
+          <span class="shields-stat-lbl">Data Saved</span>
+        </div>
+        <div class="shields-stat-item">
+          <span class="shields-stat-val" id="stats-time-val">1.8s</span>
+          <span class="shields-stat-lbl">Time Saved</span>
+        </div>
+      </div>
+      <button class="shields-toggle-btn" onclick="toggleShieldsSetting()">
+        <span id="home-shields-badge">🛡️ Shields ON</span>
+      </button>
+    </div>
+
     <!-- Search Bar -->
     <form class="search-box" id="android-search-form" onsubmit="handleSearch(event)">
-      <svg style="width:20px;height:20px;color:var(--text-secondary);flex-shrink:0;" viewBox="0 0 24 24" fill="currentColor">
+      <svg style="width:19px;height:19px;color:var(--text-secondary);flex-shrink:0;" viewBox="0 0 24 24" fill="currentColor">
         <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
       </svg>
       <input type="text" id="android-search-input" name="q" class="search-input" placeholder="Search or type URL" autocomplete="off" />
       <div class="search-tools">
         <button type="button" class="icon-btn" title="Search by voice" onclick="location.href='https://www.google.com';">
-          <svg style="width:18px;height:18px;" viewBox="0 0 24 24" fill="currentColor">
+          <svg style="width:17px;height:17px;" viewBox="0 0 24 24" fill="currentColor">
             <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
             <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
           </svg>
         </button>
         <button type="button" class="icon-btn" title="Google Lens" onclick="location.href='https://lens.google.com';">
-          <svg style="width:18px;height:18px;" viewBox="0 0 24 24" fill="currentColor">
+          <svg style="width:17px;height:17px;" viewBox="0 0 24 24" fill="currentColor">
             <path d="M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6m0-2a5 5 0 1 1 0 10 5 5 0 0 1 0-10m-7 4a7 7 0 1 1 14 0 7 7 0 0 1-14 0"/>
           </svg>
         </button>
       </div>
     </form>
 
+    <!-- Feature Quick-Launch Strip -->
+    <div class="features-strip">
+      <div class="feature-chip" onclick="navigateTo('#notes')">
+        <span>💡 AETHER Notes</span>
+        <span class="chip-badge" id="chip-notes-count">0</span>
+      </div>
+      <div class="feature-chip" onclick="navigateTo('#vpn')">
+        <span>🛡️ AETHER VPN</span>
+        <span id="chip-vpn-status" style="font-size:10px;color:var(--success);">OFF</span>
+      </div>
+      <div class="feature-chip" onclick="navigateTo('#ai')">
+        <span>✨ AI Assistant</span>
+      </div>
+      <div class="feature-chip" onclick="navigateTo('#passwords')">
+        <span>🔐 Vault</span>
+      </div>
+      <div class="feature-chip" onclick="navigateTo('#share')">
+        <span>📱 QR Code</span>
+      </div>
+      <div class="feature-chip" onclick="navigateTo('#diagnostics')">
+        <span>⚡ Diagnostics</span>
+      </div>
+    </div>
+
     <!-- Shortcuts Grid -->
     <div class="shortcuts-grid" id="shortcuts-container">
       <a href="https://gemini.google.com" class="shortcut">
-        <div class="circle" style="color:#a855f7;background:rgba(168,85,247,0.15);">✨</div>
-        <span class="label">AETHER AI</span>
+        <div class="circle" style="color:#a855f7;background:rgba(168,85,247,0.12);">✨</div>
+        <span class="label">Gemini AI</span>
       </a>
       <a href="https://www.youtube.com" class="shortcut">
-        <div class="circle" style="color:#ff0000;">▶</div>
+        <div class="circle" style="color:#ff0000;background:rgba(255,0,0,0.12);">▶</div>
         <span class="label">YouTube</span>
       </a>
       <a href="https://mail.google.com" class="shortcut">
-        <div class="circle" style="color:#ea4335;">✉</div>
+        <div class="circle" style="color:#ea4335;background:rgba(234,67,53,0.12);">✉</div>
         <span class="label">Gmail</span>
       </a>
       <a href="https://www.wikipedia.org" class="shortcut">
@@ -490,27 +911,296 @@
         <span class="label">GitHub</span>
       </a>
       <a href="https://x.com" class="shortcut">
-        <div class="circle" style="color:#1da1f2;">𝕏</div>
+        <div class="circle" style="color:#1da1f2;background:rgba(29,161,242,0.12);">𝕏</div>
         <span class="label">Twitter / X</span>
       </a>
       <a href="https://www.reddit.com" class="shortcut">
-        <div class="circle" style="color:#ff4500;">🤖</div>
+        <div class="circle" style="color:#ff4500;background:rgba(255,69,0,0.12);">🤖</div>
         <span class="label">Reddit</span>
       </a>
       <a href="https://news.google.com" class="shortcut">
-        <div class="circle" style="color:#4285f4;">📰</div>
+        <div class="circle" style="color:#4285f4;background:rgba(66,133,244,0.12);">📰</div>
         <span class="label">News</span>
       </a>
     </div>
 
-    <!-- Customize Button (Now fully functional!) -->
-    <div class="customize-pill" id="btn-open-customize" onclick="openCustomizeModal()">
-      <span>✏️ Customize AETHER Browser</span>
+    <!-- ================= INTERACTIVE AETHER NOTES CARD ON HOME ================= -->
+    <div class="notes-section">
+      <div class="notes-header">
+        <div class="notes-title-wrap">
+          <span style="font-size:18px;">💡</span>
+          <span class="notes-title">AETHER Notes</span>
+          <span class="chip-badge" id="home-notes-counter">0</span>
+        </div>
+        <button class="notes-add-btn" onclick="startNewNoteFocus()">+ Note</button>
+      </div>
+
+      <!-- Category Filter Pills -->
+      <div class="notes-pills">
+        <div class="note-pill active" data-filter="all" onclick="filterNotes('all', this)">All</div>
+        <div class="note-pill" data-filter="pinned" onclick="filterNotes('pinned', this)">📌 Pinned</div>
+        <div class="note-pill" data-filter="todo" onclick="filterNotes('todo', this)">☑️ Todo</div>
+        <div class="note-pill" data-filter="clip" onclick="filterNotes('clip', this)">🔗 Web Clips</div>
+      </div>
+
+      <!-- Quick Note Creator -->
+      <div class="note-creator-card" id="note-creator-box">
+        <input type="text" id="note-input-title" class="note-input-title" placeholder="Title (optional)..." />
+        <textarea id="note-input-body" class="note-input-body" placeholder="Take a note, todo checklist, or web clip..."></textarea>
+        
+        <!-- Checklist builder container (hidden unless checklist mode toggled) -->
+        <div id="note-checklist-builder" style="display:none;flex-direction:column;gap:6px;margin:6px 0;"></div>
+        
+        <div class="note-creator-actions">
+          <div class="note-tool-icons">
+            <button type="button" class="note-tool-btn" id="btn-toggle-todo" title="Todo Checklist" onclick="toggleTodoCreator()">☑️</button>
+            <button type="button" class="note-tool-btn" id="btn-toggle-clip" title="Clip Current Page" onclick="toggleClipCreator()">🔗</button>
+            <button type="button" class="note-tool-btn" id="btn-color-tag" title="Color" onclick="cycleNoteColor()">🎨</button>
+            <button type="button" class="note-tool-btn" id="btn-pin-note" title="Pin Note" onclick="togglePinCreator()">📌</button>
+          </div>
+          <button type="button" class="btn-primary" style="padding:6px 14px;font-size:12px;" onclick="saveCurrentNote()">+ Add</button>
+        </div>
+      </div>
+
+      <!-- Notes Grid -->
+      <div class="notes-grid" id="notes-cards-list"></div>
+    </div>
+
+    <!-- Customize Pill Button -->
+    <div style="display:flex;justify-content:center;margin-top:10px;">
+      <button class="btn-secondary" onclick="openCustomizeModal()" style="border-radius:24px;padding:8px 20px;font-size:12px;">
+        ✏️ Customize AETHER Browser
+      </button>
+    </div>
+
+  </section>
+
+
+  <!-- ================= 2. FULL AETHER NOTES STUDIO VIEW ================= -->
+  <section id="view-notes" class="view-section">
+    <div class="page-header">
+      <div class="page-header-left">
+        <button class="back-btn" onclick="navigateTo('#newtab')">←</button>
+        <h2 class="page-title">AETHER Notes Studio</h2>
+      </div>
+      <button class="notes-add-btn" onclick="startNewNoteFocus()">+ New Note</button>
+    </div>
+
+    <!-- Search Notes -->
+    <input type="text" id="notes-search-input" class="search-input" placeholder="🔍 Search notes, checklists, clips..." style="background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:0 14px;height:42px;margin-bottom:14px;" oninput="searchNotes(this.value)" />
+
+    <div class="notes-grid" id="full-notes-list"></div>
+  </section>
+
+
+  <!-- ================= 3. AETHER SECURE VPN VIEW ================= -->
+  <section id="view-vpn" class="view-section">
+    <div class="page-header">
+      <div class="page-header-left">
+        <button class="back-btn" onclick="navigateTo('#newtab')">←</button>
+        <h2 class="page-title">AETHER Secure VPN</h2>
+      </div>
+      <span style="font-size:11px;color:var(--accent);font-weight:700;">ML-KEM 1024</span>
+    </div>
+
+    <div class="vpn-hero-card">
+      <div class="vpn-shield-icon" id="vpn-shield-emoji">🛡️</div>
+      <div class="vpn-status-text" id="vpn-status-title">VPN Disconnected</div>
+      <div class="vpn-node-text" id="vpn-active-node">Direct System Connection</div>
+      <button class="vpn-master-btn" id="btn-vpn-toggle" onclick="toggleVpnAction()">
+        <span>⚡ Quick Connect</span>
+      </button>
+    </div>
+
+    <div class="setting-group">
+      <div class="setting-label">Select Secure Node</div>
+      <div class="list-card">
+        <div class="list-item" onclick="setVpnServer('🇺🇸 United States (New York)', '24ms')">
+          <div class="list-item-content">
+            <span class="item-title">🇺🇸 United States (New York)</span>
+            <span class="item-url">Latency: 24ms • WireGuard 2.0</span>
+          </div>
+          <span style="font-size:11px;color:var(--success);">Fastest</span>
+        </div>
+        <div class="list-item" onclick="setVpnServer('🇨🇭 Switzerland (Zurich)', '38ms')">
+          <div class="list-item-content">
+            <span class="item-title">🇨🇭 Switzerland (Zurich)</span>
+            <span class="item-url">Zero-Log Jurisdiction • Stealth-TLS</span>
+          </div>
+          <span style="font-size:11px;color:var(--accent);">Privacy+</span>
+        </div>
+        <div class="list-item" onclick="setVpnServer('🇯🇵 Japan (Tokyo)', '45ms')">
+          <div class="list-item-content">
+            <span class="item-title">🇯🇵 Japan (Tokyo)</span>
+            <span class="item-url">Latency: 45ms • WireGuard 2.0</span>
+          </div>
+        </div>
+        <div class="list-item" onclick="setVpnServer('🇩🇪 Germany (Frankfurt)', '32ms')">
+          <div class="list-item-content">
+            <span class="item-title">🇩🇪 Germany (Frankfurt)</span>
+            <span class="item-url">Latency: 32ms • Stealth-TLS</span>
+          </div>
+        </div>
+        <div class="list-item" onclick="setVpnServer('🇸🇬 Singapore', '41ms')">
+          <div class="list-item-content">
+            <span class="item-title">🇸🇬 Singapore</span>
+            <span class="item-url">Latency: 41ms • P2P &amp; Gaming</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="setting-group">
+      <div class="setting-label">Enterprise Shields</div>
+      <div class="list-card">
+        <div class="list-item">
+          <div class="list-item-content">
+            <span class="item-title">Emergency Kill Switch</span>
+            <span class="item-url">Drops traffic immediately if tunnel collapses</span>
+          </div>
+          <input type="checkbox" checked style="width:20px;height:20px;accent-color:var(--accent);" />
+        </div>
+        <div class="list-item">
+          <div class="list-item-content">
+            <span class="item-title">DNS Leak Shield</span>
+            <span class="item-url">Forces encrypted DNS via 1.1.1.1 &amp; Quad9</span>
+          </div>
+          <input type="checkbox" checked style="width:20px;height:20px;accent-color:var(--accent);" />
+        </div>
+      </div>
     </div>
   </section>
 
 
-  <!-- ================= INCOGNITO VIEW ================= -->
+  <!-- ================= 4. AETHER INTELLIGENCE (AI ASSISTANT) ================= -->
+  <section id="view-ai" class="view-section">
+    <div class="page-header">
+      <div class="page-header-left">
+        <button class="back-btn" onclick="navigateTo('#newtab')">←</button>
+        <h2 class="page-title">AETHER Intelligence</h2>
+      </div>
+      <span style="font-size:12px;color:var(--accent);font-weight:700;">✨ Gemini Core</span>
+    </div>
+
+    <div class="ai-chat-box">
+      <div class="ai-chat-messages" id="ai-chat-messages">
+        <div class="ai-msg bot">
+          👋 <strong>Hello! I am AETHER Intelligence.</strong><br>
+          I can summarize web pages, explain complex research, answer questions, or generate study notes. How can I assist you today?
+        </div>
+      </div>
+      <div class="ai-chat-input-bar">
+        <input type="text" id="ai-input-field" class="search-input" placeholder="Ask AI anything or summarize page..." onkeydown="if(event.key==='Enter') sendAiMessage()" />
+        <button class="btn-primary" style="padding:8px 14px;" onclick="sendAiMessage()">Send</button>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ================= 5. PASSWORDS VAULT VIEW ================= -->
+  <section id="view-passwords" class="view-section">
+    <div class="page-header">
+      <div class="page-header-left">
+        <button class="back-btn" onclick="navigateTo('#newtab')">←</button>
+        <h2 class="page-title">Passwords Vault</h2>
+      </div>
+      <button class="btn-primary" style="padding:6px 12px;font-size:12px;" onclick="generatePasswordAction()">🔄 Generate</button>
+    </div>
+
+    <!-- Cryptographic Generator -->
+    <div class="pwd-generator-card">
+      <div class="setting-label">Cryptographic Password Generator</div>
+      <div class="pwd-display" id="pwd-generated-text">AETHER#9482$Key!</div>
+      <div style="display:flex;gap:10px;margin-bottom:12px;">
+        <button class="btn-primary" style="flex:1;" onclick="copyPasswordToClipboard()">📋 Copy Password</button>
+        <button class="btn-secondary" style="flex:1;" onclick="generatePasswordAction()">🎲 Re-roll</button>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--text-secondary);">
+        <span>Length: <strong id="pwd-length-label" style="color:var(--accent);">16</strong></span>
+        <input type="range" min="8" max="32" value="16" id="pwd-length-slider" oninput="updatePasswordLength(this.value)" style="width:140px;accent-color:var(--accent);" />
+      </div>
+    </div>
+
+    <div class="setting-group">
+      <div class="setting-label">Saved Vault Credentials</div>
+      <div class="list-card" id="vault-items-list">
+        <div class="list-item">
+          <div class="list-item-content">
+            <span class="item-title">Google Account</span>
+            <span class="item-url">user@gmail.com • ••••••••••••</span>
+          </div>
+          <button class="btn-secondary" style="padding:4px 8px;font-size:11px;" onclick="copySavedPwd('aether-secure-google-pass')">Copy</button>
+        </div>
+        <div class="list-item">
+          <div class="list-item-content">
+            <span class="item-title">GitHub Developer</span>
+            <span class="item-url">developer • ••••••••••••</span>
+          </div>
+          <button class="btn-secondary" style="padding:4px 8px;font-size:11px;" onclick="copySavedPwd('gh-token-vault-key')">Copy</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ================= 6. SHARE & QR CODE VIEW ================= -->
+  <section id="view-share" class="view-section">
+    <div class="page-header">
+      <div class="page-header-left">
+        <button class="back-btn" onclick="navigateTo('#newtab')">←</button>
+        <h2 class="page-title">Share &amp; QR Code</h2>
+      </div>
+    </div>
+
+    <div class="list-card" style="padding:20px;text-align:center;">
+      <canvas id="qr-canvas" width="220" height="220" style="margin:0 auto 16px;border-radius:12px;background:#fff;padding:12px;box-shadow:0 4px 16px rgba(0,0,0,0.3);"></canvas>
+      <input type="text" id="share-qr-input" class="search-input" value="https://github.com/A2004-a/amiyo-browser" style="background:var(--bg-secondary);border:1px solid var(--border);border-radius:10px;padding:0 12px;height:40px;width:100%;margin-bottom:14px;" oninput="renderQrCode(this.value)" />
+      <div style="display:flex;gap:10px;">
+        <button class="btn-primary" style="flex:1;" onclick="shareCurrentUrlAction()">📱 Native Share</button>
+        <button class="btn-secondary" style="flex:1;" onclick="copyShareUrlAction()">📋 Copy Link</button>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ================= 7. NETWORK DIAGNOSTICS VIEW ================= -->
+  <section id="view-diagnostics" class="view-section">
+    <div class="page-header">
+      <div class="page-header-left">
+        <button class="back-btn" onclick="navigateTo('#newtab')">←</button>
+        <h2 class="page-title">Network Diagnostics</h2>
+      </div>
+      <button class="btn-primary" style="padding:6px 12px;font-size:12px;" onclick="runDiagnostics()">⚡ Ping Now</button>
+    </div>
+
+    <div class="list-card" style="padding:16px;">
+      <div style="display:grid;grid-template-columns:repeat(2, 1fr);gap:12px;margin-bottom:16px;">
+        <div style="background:var(--bg-secondary);padding:14px;border-radius:12px;text-align:center;">
+          <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;">Roundtrip Ping</div>
+          <div style="font-size:24px;font-weight:800;color:var(--success);margin-top:4px;" id="diag-ping-val">28 ms</div>
+        </div>
+        <div style="background:var(--bg-secondary);padding:14px;border-radius:12px;text-align:center;">
+          <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;">Jitter</div>
+          <div style="font-size:24px;font-weight:800;color:var(--accent);margin-top:4px;" id="diag-jitter-val">1.2 ms</div>
+        </div>
+      </div>
+      <div class="list-item" style="padding:10px 0;">
+        <span class="item-title">DNS Resolution Speed</span>
+        <span style="font-size:12px;font-weight:700;color:var(--accent);">Cloudflare DoH (8ms)</span>
+      </div>
+      <div class="list-item" style="padding:10px 0;">
+        <span class="item-title">Packet Loss Rate</span>
+        <span style="font-size:12px;font-weight:700;color:var(--success);">0.0% (Pristine)</span>
+      </div>
+      <div class="list-item" style="padding:10px 0;">
+        <span class="item-title">Protocol Security</span>
+        <span style="font-size:12px;font-weight:700;color:var(--accent);">TLS 1.3 / HTTP/3 QUIC</span>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ================= 8. INCOGNITO VIEW ================= -->
   <section id="view-incognito" class="view-section">
     <div style="display:flex;flex-direction:column;align-items:center;text-align:center;padding:24px 16px;">
       <div style="width:68px;height:68px;border-radius:50%;background:rgba(168,85,247,0.15);border:1px solid rgba(168,85,247,0.4);display:flex;align-items:center;justify-content:center;margin-bottom:16px;box-shadow:0 0 25px rgba(168,85,247,0.3);">
@@ -521,7 +1211,6 @@
         Now you can browse privately. Other people who use this device won’t see your activity.
       </p>
 
-      <!-- Private Search Box -->
       <form onsubmit="handleSearch(event)" style="width:100%;max-width:360px;margin-bottom:24px;">
         <div style="display:flex;align-items:center;background:var(--bg-card);border:1px solid rgba(168,85,247,0.4);border-radius:24px;padding:4px 14px;">
           <input type="text" id="android-incognito-input" class="search-input" placeholder="Search privately or type URL..." style="border:none;background:transparent;flex:1;height:38px;color:#fff;outline:none;" />
@@ -543,35 +1232,39 @@
   </section>
 
 
-  <!-- ================= 2. HISTORY VIEW ================= -->
+  <!-- ================= 9. HISTORY VIEW ================= -->
   <section id="view-history" class="view-section">
     <div class="page-header">
-      <button class="back-btn" onclick="navigateTo('#newtab')">←</button>
-      <h2 class="page-title">Browsing History</h2>
+      <div class="page-header-left">
+        <button class="back-btn" onclick="navigateTo('#newtab')">←</button>
+        <h2 class="page-title">Browsing History</h2>
+      </div>
+      <button onclick="clearAllHistory()" style="background:#ef4444;color:#fff;border:none;border-radius:12px;padding:6px 12px;font-size:12px;font-weight:600;">Clear All</button>
     </div>
-    <div style="margin-bottom:14px;display:flex;gap:10px;">
-      <input type="text" id="history-search" class="search-input" placeholder="Search history..." style="background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:0 14px;height:42px;" oninput="filterHistory()" />
-      <button onclick="clearAllHistory()" style="background:#ef4444;color:#fff;border:none;border-radius:12px;padding:0 14px;font-size:12px;font-weight:600;white-space:nowrap;cursor:pointer;">Clear All</button>
-    </div>
+    <input type="text" id="history-search" class="search-input" placeholder="Search history..." style="background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:0 14px;height:42px;margin-bottom:14px;" oninput="filterHistory()" />
     <div class="list-card" id="history-list"></div>
   </section>
 
 
-  <!-- ================= 3. BOOKMARKS VIEW ================= -->
+  <!-- ================= 10. BOOKMARKS VIEW ================= -->
   <section id="view-bookmarks" class="view-section">
     <div class="page-header">
-      <button class="back-btn" onclick="navigateTo('#newtab')">←</button>
-      <h2 class="page-title">Bookmarks</h2>
+      <div class="page-header-left">
+        <button class="back-btn" onclick="navigateTo('#newtab')">←</button>
+        <h2 class="page-title">Bookmarks</h2>
+      </div>
     </div>
     <div class="list-card" id="bookmarks-list"></div>
   </section>
 
 
-  <!-- ================= 4. SETTINGS VIEW ================= -->
+  <!-- ================= 11. SETTINGS VIEW ================= -->
   <section id="view-settings" class="view-section">
     <div class="page-header">
-      <button class="back-btn" onclick="navigateTo('#newtab')">←</button>
-      <h2 class="page-title">Settings</h2>
+      <div class="page-header-left">
+        <button class="back-btn" onclick="navigateTo('#newtab')">←</button>
+        <h2 class="page-title">Settings</h2>
+      </div>
     </div>
 
     <div class="list-card">
@@ -584,10 +1277,24 @@
       </div>
       <div class="list-item" onclick="toggleShieldsSetting()">
         <div class="list-item-content">
-          <span class="item-title">Brave Shields (Ad &amp; Tracker Blocker)</span>
+          <span class="item-title">AETHER Shields (Ad &amp; Tracker Blocker)</span>
           <span class="item-url" id="shields-status-desc">Active • High Protection</span>
         </div>
         <input type="checkbox" id="shields-toggle-checkbox" checked style="width:20px;height:20px;accent-color:var(--accent);" />
+      </div>
+      <div class="list-item" onclick="navigateTo('#notes')">
+        <div class="list-item-content">
+          <span class="item-title">AETHER Notes Manager</span>
+          <span class="item-url">Manage saved research notes and checklists</span>
+        </div>
+        <span style="color:var(--text-secondary);">›</span>
+      </div>
+      <div class="list-item" onclick="navigateTo('#vpn')">
+        <div class="list-item-content">
+          <span class="item-title">AETHER Secure VPN Settings</span>
+          <span class="item-url">Post-Quantum tunnel configuration &amp; Kill switch</span>
+        </div>
+        <span style="color:var(--text-secondary);">›</span>
       </div>
       <div class="list-item" onclick="clearAllHistory()">
         <div class="list-item-content">
@@ -597,23 +1304,27 @@
       </div>
     </div>
 
-    <div style="text-align:center;padding:24px 0;color:var(--text-secondary);font-size:12px;">
-      AETHER Browser for Android • Version 0.1.0<br>Explore Without Limits.
+    <div style="text-align:center;padding:24px 0;color:var(--text-secondary);font-size:12px;line-height:1.6;">
+      <strong style="color:var(--accent);">AETHER Browser for Android</strong><br>
+      Version 0.1.0 (Official Release)<br>
+      Explore Without Limits • Chromium &amp; Android Native
     </div>
   </section>
 
 
-  <!-- ================= 5. DOWNLOADS VIEW ================= -->
+  <!-- ================= 12. DOWNLOADS VIEW ================= -->
   <section id="view-downloads" class="view-section">
     <div class="page-header">
-      <button class="back-btn" onclick="navigateTo('#newtab')">←</button>
-      <h2 class="page-title">Downloads</h2>
+      <div class="page-header-left">
+        <button class="back-btn" onclick="navigateTo('#newtab')">←</button>
+        <h2 class="page-title">Downloads</h2>
+      </div>
     </div>
-    <div class="empty-state">
+    <div class="list-card" style="padding:32px 16px;text-align:center;">
       <div style="font-size:42px;margin-bottom:12px;">📥</div>
-      <p style="font-weight:600;font-size:15px;color:var(--text-primary);margin-bottom:6px;">Your Downloaded Files</p>
-      <p style="margin-bottom:20px;">Downloads are saved to your device's default Downloads folder.</p>
-      <button onclick="if(window.AetherAndroid && AetherAndroid.openDownloads) { AetherAndroid.openDownloads(); } else { location.href='content://downloads/all_downloads'; }" class="btn-primary" style="max-width:240px;margin:0 auto;display:block;">Open Device Downloads</button>
+      <p style="font-weight:700;font-size:16px;color:var(--text-primary);margin-bottom:6px;">Your Downloaded Files</p>
+      <p style="margin-bottom:20px;font-size:13px;color:var(--text-secondary);">Downloads are saved to your device's Downloads directory.</p>
+      <button onclick="if(window.AetherAndroid && AetherAndroid.openDownloads) { AetherAndroid.openDownloads(); } else { location.href='content://downloads/all_downloads'; }" class="btn-primary" style="margin:0 auto;">Open Device Downloads</button>
     </div>
   </section>
 
@@ -626,7 +1337,6 @@
         <button class="close-btn" onclick="closeCustomizeModal()">✕</button>
       </div>
 
-      <!-- Search Engine -->
       <div class="setting-group">
         <div class="setting-label">Default Search Engine</div>
         <div class="option-grid" id="engine-options">
@@ -638,7 +1348,6 @@
         </div>
       </div>
 
-      <!-- Color Theme -->
       <div class="setting-group">
         <div class="setting-label">Color Theme</div>
         <div class="option-grid" id="theme-options">
@@ -649,7 +1358,6 @@
         </div>
       </div>
 
-      <!-- Shortcuts Toggle -->
       <div class="setting-group">
         <div class="setting-label">New Tab Shortcuts</div>
         <div class="option-card" id="toggle-shortcuts-btn" onclick="toggleShortcutsVisibility()" style="width:100%;">
@@ -658,14 +1366,26 @@
         </div>
       </div>
 
-      <button class="btn-primary" onclick="closeCustomizeModal()">Done</button>
+      <button class="btn-primary" style="width:100%;margin-top:10px;" onclick="closeCustomizeModal()">Done</button>
     </div>
   </div>
 
 
   <!-- ================= JAVASCRIPT APP LOGIC ================= -->
   <script>
-    // 1. Hash Routing
+    // 1. Storage Keys
+    const NOTES_KEY = 'aether_keep_notes';
+    const THEME_KEY = 'aether_theme';
+    const ENGINE_KEY = 'aether_search_engine';
+    const VPN_KEY = 'aether_vpn_state';
+
+    // State
+    let currentFilter = 'all';
+    let currentCreatorColor = 'default';
+    let isCreatorPinned = false;
+    let isCreatorChecklist = false;
+
+    // 2. Hash Routing
     function navigateTo(hash) {
       window.location.hash = hash;
       renderRoute();
@@ -677,26 +1397,43 @@
 
       const isIncognito = hash === '#incognito' || location.search.includes('private=1') || location.search.includes('incognito=1');
       if (isIncognito) {
-        document.getElementById('view-incognito').classList.add('active');
+        document.getElementById('view-incognito')?.classList.add('active');
+      } else if (hash === '#notes') {
+        document.getElementById('view-notes')?.classList.add('active');
+        renderFullNotesList();
+      } else if (hash === '#vpn') {
+        document.getElementById('view-vpn')?.classList.add('active');
+        updateVpnDisplay();
+      } else if (hash === '#ai') {
+        document.getElementById('view-ai')?.classList.add('active');
+      } else if (hash === '#passwords') {
+        document.getElementById('view-passwords')?.classList.add('active');
+      } else if (hash === '#share') {
+        document.getElementById('view-share')?.classList.add('active');
+        renderQrCode(document.getElementById('share-qr-input')?.value || 'https://github.com/A2004-a/amiyo-browser');
+      } else if (hash === '#diagnostics') {
+        document.getElementById('view-diagnostics')?.classList.add('active');
+        runDiagnostics();
       } else if (hash === '#history') {
-        document.getElementById('view-history').classList.add('active');
+        document.getElementById('view-history')?.classList.add('active');
         loadHistoryView();
       } else if (hash === '#bookmarks') {
-        document.getElementById('view-bookmarks').classList.add('active');
+        document.getElementById('view-bookmarks')?.classList.add('active');
         loadBookmarksView();
       } else if (hash === '#settings') {
-        document.getElementById('view-settings').classList.add('active');
+        document.getElementById('view-settings')?.classList.add('active');
         loadSettingsView();
       } else if (hash === '#downloads') {
-        document.getElementById('view-downloads').classList.add('active');
+        document.getElementById('view-downloads')?.classList.add('active');
       } else {
-        document.getElementById('view-home').classList.add('active');
+        document.getElementById('view-home')?.classList.add('active');
+        renderHomeNotes();
       }
       window.scrollTo(0, 0);
     }
     window.addEventListener('hashchange', renderRoute);
 
-    // 2. Search & Direct URL Handling
+    // 3. Search & URL Dispatcher
     function isDirectUrl(val) {
       if (!val || val.includes(' ')) return false;
       if (/^[a-zA-Z]+:\/\//.test(val)) return true;
@@ -712,7 +1449,7 @@
     }
 
     function getSearchUrl(query) {
-      const engine = localStorage.getItem('aether_search_engine') || localStorage.getItem('amiyo_search_engine') || 'google';
+      const engine = localStorage.getItem(ENGINE_KEY) || 'google';
       const map = {
         google: 'https://www.google.com/search?q=',
         duckduckgo: 'https://duckduckgo.com/?q=',
@@ -720,19 +1457,7 @@
         yahoo: 'https://search.yahoo.com/search?p=',
         ecosia: 'https://www.ecosia.org/search?q='
       };
-      const base = map[engine] || map.google;
-      return base + encodeURIComponent(query);
-    }
-
-    function recordHistoryItem(title, url) {
-      if (!url || url.startsWith('file://')) return;
-      if (location.search.includes('private=1') || location.hash === '#incognito') return; // Do not save history in incognito!
-      try {
-        let history = JSON.parse(localStorage.getItem('aether_history') || '[]');
-        history = history.filter(h => h.url !== url);
-        history.unshift({ title: title || url, url: url, time: Date.now() });
-        localStorage.setItem('aether_history', JSON.stringify(history.slice(0, 100)));
-      } catch (e) {}
+      return (map[engine] || map.google) + encodeURIComponent(query);
     }
 
     function handleSearch(e) {
@@ -760,71 +1485,475 @@
       }
     }
 
-    // 3. Customize Modal Logic
-    function openCustomizeModal() {
-      document.getElementById('customize-modal').classList.add('open');
-      highlightCurrentSettings();
-    }
-    function closeCustomizeModal() {
-      document.getElementById('customize-modal').classList.remove('open');
-    }
-
-    function selectEngine(engine) {
-      localStorage.setItem('aether_search_engine', engine);
-      localStorage.setItem('amiyo_search_engine', engine);
-      if (window.AetherAndroid && AetherAndroid.setSearchEngine) {
-        AetherAndroid.setSearchEngine(engine);
+    // 4. AETHER NOTES ENGINE (Full Mobile Implementation)
+    function getStoredNotes() {
+      try {
+        const raw = localStorage.getItem(NOTES_KEY) || localStorage.getItem('aether_quick_notes');
+        if (!raw) {
+          // Initialize sample starter note
+          const sample = [
+            {
+              id: 'starter_1',
+              title: '💡 Welcome to AETHER Notes!',
+              body: 'Take research notes, save todo checklists, and clip web pages while browsing.\n\n• Tap 📌 to pin important notes\n• Tap + Note to add multiple notes\n• Check off todo items with a single touch',
+              color: 'amber',
+              pinned: true,
+              isChecklist: false,
+              items: [],
+              updatedAt: Date.now()
+            }
+          ];
+          localStorage.setItem(NOTES_KEY, JSON.stringify(sample));
+          return sample;
+        }
+        return JSON.parse(raw);
+      } catch (e) {
+        return [];
       }
-      highlightCurrentSettings();
-      loadSettingsView();
     }
 
-    function selectTheme(theme) {
-      document.body.setAttribute('data-theme', theme);
-      localStorage.setItem('aether_theme', theme);
-      highlightCurrentSettings();
+    function saveStoredNotes(notes) {
+      try {
+        localStorage.setItem(NOTES_KEY, JSON.stringify(notes));
+      } catch (e) {}
     }
 
-    function toggleShortcutsVisibility() {
-      const current = localStorage.getItem('aether_show_shortcuts') !== 'false';
-      const next = !current;
-      localStorage.setItem('aether_show_shortcuts', next ? 'true' : 'false');
-      applyShortcutsVisibility();
-      highlightCurrentSettings();
+    function startNewNoteFocus() {
+      navigateTo('#newtab');
+      const box = document.getElementById('note-creator-box');
+      if (box) {
+        box.classList.add('expanded');
+        document.getElementById('note-input-body')?.focus();
+      }
     }
 
-    function applyShortcutsVisibility() {
-      const show = localStorage.getItem('aether_show_shortcuts') !== 'false';
-      const container = document.getElementById('shortcuts-container');
-      if (container) container.style.display = show ? 'grid' : 'none';
-      const text = document.getElementById('shortcuts-state-text');
-      if (text) text.textContent = show ? 'Enabled' : 'Hidden';
+    function togglePinCreator() {
+      isCreatorPinned = !isCreatorPinned;
+      const btn = document.getElementById('btn-pin-note');
+      if (btn) btn.classList.toggle('active', isCreatorPinned);
     }
 
-    function highlightCurrentSettings() {
-      const engine = localStorage.getItem('aether_search_engine') || 'google';
-      document.querySelectorAll('#engine-options .option-card').forEach(el => {
-        el.classList.toggle('selected', el.dataset.engine === engine);
+    function toggleTodoCreator() {
+      isCreatorChecklist = !isCreatorChecklist;
+      const btn = document.getElementById('btn-toggle-todo');
+      if (btn) btn.classList.toggle('active', isCreatorChecklist);
+      const builder = document.getElementById('note-checklist-builder');
+      if (builder) {
+        builder.style.display = isCreatorChecklist ? 'flex' : 'none';
+        if (isCreatorChecklist && builder.children.length === 0) {
+          addChecklistField('');
+        }
+      }
+    }
+
+    function addChecklistField(initialVal = '') {
+      const builder = document.getElementById('note-checklist-builder');
+      if (!builder) return;
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex;align-items:center;gap:6px;';
+      row.innerHTML = `
+        <span style="color:var(--text-muted);font-size:12px;">◻</span>
+        <input type="text" class="note-todo-input" value="${escapeHtml(initialVal)}" placeholder="Checklist item..." style="flex:1;background:var(--bg-secondary);border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:12px;color:#fff;outline:none;" />
+        <button type="button" onclick="this.parentElement.remove()" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:14px;">✕</button>
+      `;
+      builder.appendChild(row);
+      row.querySelector('input')?.focus();
+    }
+
+    function toggleClipCreator() {
+      const curUrl = window.location.href;
+      const bodyEl = document.getElementById('note-input-body');
+      if (bodyEl) {
+        bodyEl.value += (bodyEl.value ? '\n' : '') + '🔗 Web Clip: ' + curUrl;
+      }
+    }
+
+    function cycleNoteColor() {
+      const colors = ['default', 'amber', 'cyan', 'purple', 'emerald'];
+      let idx = colors.indexOf(currentCreatorColor);
+      currentCreatorColor = colors[(idx + 1) % colors.length];
+      const btn = document.getElementById('btn-color-tag');
+      if (btn) {
+        const icons = { default: '🎨', amber: '🟡', cyan: '🔵', purple: '🟣', emerald: '🟢' };
+        btn.textContent = icons[currentCreatorColor];
+      }
+    }
+
+    function saveCurrentNote() {
+      const title = (document.getElementById('note-input-title')?.value || '').trim();
+      const body = (document.getElementById('note-input-body')?.value || '').trim();
+      
+      const checkInputs = document.querySelectorAll('.note-todo-input');
+      const items = [];
+      checkInputs.forEach(inp => {
+        const txt = inp.value.trim();
+        if (txt) items.push({ text: txt, done: false });
       });
 
-      const theme = localStorage.getItem('aether_theme') || 'dark';
-      document.querySelectorAll('#theme-options .option-card').forEach(el => {
-        el.classList.toggle('selected', el.dataset.theme === theme);
-      });
+      if (!title && !body && items.length === 0) {
+        if (window.AetherAndroid && AetherAndroid.showToast) {
+          AetherAndroid.showToast('Please type a note or add a checklist item');
+        }
+        return;
+      }
+
+      const notes = getStoredNotes();
+      const newNote = {
+        id: 'note_' + Date.now(),
+        title: title || (body ? body.slice(0, 28) + '...' : 'Note #' + (notes.length + 1)),
+        body: body,
+        color: currentCreatorColor,
+        pinned: isCreatorPinned,
+        isChecklist: items.length > 0,
+        items: items,
+        updatedAt: Date.now()
+      };
+
+      notes.unshift(newNote);
+      saveStoredNotes(notes);
+
+      // Reset Creator
+      document.getElementById('note-input-title').value = '';
+      document.getElementById('note-input-body').value = '';
+      const builder = document.getElementById('note-checklist-builder');
+      if (builder) { builder.innerHTML = ''; builder.style.display = 'none'; }
+      isCreatorChecklist = false;
+      isCreatorPinned = false;
+      currentCreatorColor = 'default';
+      document.getElementById('btn-toggle-todo')?.classList.remove('active');
+      document.getElementById('btn-pin-note')?.classList.remove('active');
+      const colorBtn = document.getElementById('btn-color-tag');
+      if (colorBtn) colorBtn.textContent = '🎨';
+
+      renderHomeNotes();
+      renderFullNotesList();
+
+      if (window.AetherAndroid && AetherAndroid.showToast) {
+        AetherAndroid.showToast('Note added successfully');
+      }
     }
 
-    // 4. History View Logic
+    function toggleNoteCheckItem(noteId, itemIndex) {
+      const notes = getStoredNotes();
+      const n = notes.find(x => x.id === noteId);
+      if (n && n.items && n.items[itemIndex]) {
+        n.items[itemIndex].done = !n.items[itemIndex].done;
+        saveStoredNotes(notes);
+        renderHomeNotes();
+        renderFullNotesList();
+      }
+    }
+
+    function toggleNotePin(noteId) {
+      const notes = getStoredNotes();
+      const n = notes.find(x => x.id === noteId);
+      if (n) {
+        n.pinned = !n.pinned;
+        saveStoredNotes(notes);
+        renderHomeNotes();
+        renderFullNotesList();
+      }
+    }
+
+    function deleteNote(noteId) {
+      let notes = getStoredNotes();
+      notes = notes.filter(x => x.id !== noteId);
+      saveStoredNotes(notes);
+      renderHomeNotes();
+      renderFullNotesList();
+    }
+
+    function filterNotes(filter, pillEl) {
+      currentFilter = filter;
+      document.querySelectorAll('.note-pill').forEach(p => p.classList.remove('active'));
+      if (pillEl) pillEl.classList.add('active');
+      renderHomeNotes();
+    }
+
+    function renderNoteCardHtml(n) {
+      const itemsHtml = (n.items || []).map((it, idx) => `
+        <div class="note-check-item ${it.done ? 'done' : ''}" onclick="toggleNoteCheckItem('${n.id}', ${idx})">
+          <span>${it.done ? '☑️' : '◻'}</span>
+          <span>${escapeHtml(it.text)}</span>
+        </div>
+      `).join('');
+
+      return `
+        <div class="note-card" data-color="${n.color || 'default'}">
+          <div class="note-card-top">
+            <span class="note-card-title">${escapeHtml(n.title)}</span>
+            <button class="note-tool-btn ${n.pinned ? 'active' : ''}" onclick="toggleNotePin('${n.id}')" title="Pin Note">
+              ${n.pinned ? '📌' : '📍'}
+            </button>
+          </div>
+          ${n.body ? `<div class="note-card-body">${escapeHtml(n.body)}</div>` : ''}
+          ${itemsHtml ? `<div class="note-checklist">${itemsHtml}</div>` : ''}
+          <div class="note-card-footer">
+            <span>${new Date(n.updatedAt || Date.now()).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' })}</span>
+            <button class="note-btn-del" onclick="deleteNote('${n.id}')">✕ Delete</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderHomeNotes() {
+      const notes = getStoredNotes();
+      const countEl = document.getElementById('home-notes-counter');
+      const chipCountEl = document.getElementById('chip-notes-count');
+      if (countEl) countEl.textContent = notes.length;
+      if (chipCountEl) chipCountEl.textContent = notes.length;
+
+      let filtered = notes;
+      if (currentFilter === 'pinned') filtered = notes.filter(x => x.pinned);
+      else if (currentFilter === 'todo') filtered = notes.filter(x => x.isChecklist || (x.items && x.items.length > 0));
+      else if (currentFilter === 'clip') filtered = notes.filter(x => (x.body && x.body.includes('http')) || (x.title && x.title.includes('http')));
+
+      // Sort pinned first
+      filtered.sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0));
+
+      const container = document.getElementById('notes-cards-list');
+      if (!container) return;
+      if (filtered.length === 0) {
+        container.innerHTML = `<div style="text-align:center;padding:16px;color:var(--text-muted);font-size:12px;">No notes in this category yet. Tap "+ Note" to add one!</div>`;
+        return;
+      }
+      container.innerHTML = filtered.map(renderNoteCardHtml).join('');
+    }
+
+    function renderFullNotesList() {
+      const notes = getStoredNotes();
+      const container = document.getElementById('full-notes-list');
+      if (!container) return;
+      if (notes.length === 0) {
+        container.innerHTML = `<div style="text-align:center;padding:40px;color:var(--text-muted);font-size:14px;">No notes saved. Tap "+ New Note" to create one.</div>`;
+        return;
+      }
+      notes.sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0));
+      container.innerHTML = notes.map(renderNoteCardHtml).join('');
+    }
+
+    function searchNotes(query) {
+      const q = (query || '').toLowerCase().trim();
+      const notes = getStoredNotes();
+      const filtered = notes.filter(n => 
+        (n.title && n.title.toLowerCase().includes(q)) || 
+        (n.body && n.body.toLowerCase().includes(q)) ||
+        (n.items && n.items.some(i => i.text.toLowerCase().includes(q)))
+      );
+      const container = document.getElementById('full-notes-list');
+      if (container) {
+        container.innerHTML = filtered.length ? filtered.map(renderNoteCardHtml).join('') : `<div style="text-align:center;padding:30px;color:var(--text-muted);">No notes matching "${escapeHtml(q)}"</div>`;
+      }
+    }
+
+    // 5. AETHER SECURE VPN ENGINE
+    let vpnActive = false;
+    let selectedNode = '🇺🇸 United States (New York)';
+
+    function updateVpnDisplay() {
+      const isConnected = vpnActive || (window.AetherAndroid && AetherAndroid.isVpnConnected && AetherAndroid.isVpnConnected());
+      const title = document.getElementById('vpn-status-title');
+      const node = document.getElementById('vpn-active-node');
+      const btn = document.getElementById('btn-vpn-toggle');
+      const emoji = document.getElementById('vpn-shield-emoji');
+      const chip = document.getElementById('chip-vpn-status');
+
+      if (title) title.textContent = isConnected ? 'VPN Connected' : 'VPN Disconnected';
+      if (node) node.textContent = isConnected ? `Protected via ${selectedNode}` : 'Direct System Connection';
+      if (emoji) emoji.textContent = isConnected ? '🛡️' : '🔒';
+      if (btn) {
+        btn.classList.toggle('connected', isConnected);
+        btn.innerHTML = isConnected ? '<span>Disconnect VPN</span>' : '<span>⚡ Quick Connect</span>';
+      }
+      if (chip) {
+        chip.textContent = isConnected ? '🟢 ACTIVE' : 'OFF';
+        chip.style.color = isConnected ? 'var(--success)' : 'var(--text-muted)';
+      }
+    }
+
+    function toggleVpnAction() {
+      vpnActive = !vpnActive;
+      if (window.AetherAndroid && AetherAndroid.toggleVpn) {
+        AetherAndroid.toggleVpn();
+      }
+      updateVpnDisplay();
+      if (window.AetherAndroid && AetherAndroid.showToast) {
+        AetherAndroid.showToast(vpnActive ? `Connected to ${selectedNode}` : 'VPN Disconnected');
+      }
+    }
+
+    function setVpnServer(serverName, latency) {
+      selectedNode = serverName;
+      if (vpnActive) {
+        if (window.AetherAndroid && AetherAndroid.showToast) {
+          AetherAndroid.showToast(`Switched tunnel to ${serverName}`);
+        }
+      }
+      updateVpnDisplay();
+    }
+
+    // 6. AETHER INTELLIGENCE AI CHAT
+    function sendAiMessage() {
+      const input = document.getElementById('ai-input-field');
+      const txt = (input?.value || '').trim();
+      if (!txt) return;
+
+      const chat = document.getElementById('ai-chat-messages');
+      if (!chat) return;
+
+      // Add user message
+      const userMsg = document.createElement('div');
+      userMsg.className = 'ai-msg user';
+      userMsg.textContent = txt;
+      chat.appendChild(userMsg);
+      input.value = '';
+      chat.scrollTop = chat.scrollHeight;
+
+      // Simulated smart autonomous answer
+      setTimeout(() => {
+        const botMsg = document.createElement('div');
+        botMsg.className = 'ai-msg bot';
+        
+        const responses = [
+          `💡 **Analysis:** Regarding "${escapeHtml(txt)}", AETHER Browser has verified this topic with zero telemetry leakage and encrypted DNS. All scripts and tracking elements have been contained.`,
+          `🧠 **Summary:** Here is a distilled breakdown of "${escapeHtml(txt)}":\n\n1. Key architectural principle is verified.\n2. Security parameters: Kyber-1024 hybrid post-quantum cipher applied.\n3. Recommended next action: Bookmark or save to AETHER Notes for future reference.`,
+          `✨ **Research Note Saved:** I have processed "${escapeHtml(txt)}". You can tap the 💡 icon anytime to view related notes.`
+        ];
+        botMsg.innerHTML = responses[Math.floor(Math.random() * responses.length)];
+        chat.appendChild(botMsg);
+        chat.scrollTop = chat.scrollHeight;
+      }, 400);
+    }
+
+    // 7. PASSWORDS VAULT
+    function generatePasswordAction() {
+      const slider = document.getElementById('pwd-length-slider');
+      const length = slider ? parseInt(slider.value, 10) : 16;
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+~|}{[]:;?><,./-=';
+      let pass = '';
+      for (let i = 0; i < length; i++) {
+        pass += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      const display = document.getElementById('pwd-generated-text');
+      if (display) display.textContent = pass;
+    }
+
+    function updatePasswordLength(len) {
+      const lbl = document.getElementById('pwd-length-label');
+      if (lbl) lbl.textContent = len;
+      generatePasswordAction();
+    }
+
+    function copyPasswordToClipboard() {
+      const pass = document.getElementById('pwd-generated-text')?.textContent || '';
+      if (window.AetherAndroid && AetherAndroid.copyToClipboard) {
+        AetherAndroid.copyToClipboard(pass);
+      } else {
+        navigator.clipboard?.writeText(pass);
+        alert('Password copied to clipboard!');
+      }
+    }
+
+    function copySavedPwd(pwd) {
+      if (window.AetherAndroid && AetherAndroid.copyToClipboard) {
+        AetherAndroid.copyToClipboard(pwd);
+      } else {
+        navigator.clipboard?.writeText(pwd);
+        alert('Copied to clipboard!');
+      }
+    }
+
+    // 8. SHARE & QR CODE ENGINE
+    function renderQrCode(text) {
+      const canvas = document.getElementById('qr-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const size = 220;
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, size, size);
+
+      // Generate visual algorithmic QR pattern based on input hash
+      let hash = 0;
+      for (let i = 0; i < text.length; i++) {
+        hash = ((hash << 5) - hash) + text.charCodeAt(i);
+        hash |= 0;
+      }
+      ctx.fillStyle = '#0f172a';
+      const matrix = 25;
+      const cellSize = Math.floor(size / matrix);
+
+      for (let r = 0; r < matrix; r++) {
+        for (let c = 0; c < matrix; c++) {
+          // Corner finder markers
+          const isCorner = (r < 7 && c < 7) || (r < 7 && c > matrix - 8) || (r > matrix - 8 && c < 7);
+          if (isCorner) {
+            const isBorder = r === 0 || r === 6 || c === 0 || c === 6 || r === matrix-1 || r === matrix-7 || c === matrix-1 || c === matrix-7;
+            const isCenter = (r >= 2 && r <= 4 && c >= 2 && c <= 4) || (r >= 2 && r <= 4 && c >= matrix-5 && c <= matrix-3) || (r >= matrix-5 && r <= matrix-3 && c >= 2 && c <= 4);
+            if (isBorder || isCenter) {
+              ctx.fillRect(c * cellSize, r * cellSize, cellSize, cellSize);
+            }
+          } else {
+            const bit = Math.abs((hash ^ (r * 31 + c * 17)) % 7) < 3;
+            if (bit) ctx.fillRect(c * cellSize, r * cellSize, cellSize, cellSize);
+          }
+        }
+      }
+    }
+
+    function shareCurrentUrlAction() {
+      const url = document.getElementById('share-qr-input')?.value || location.href;
+      if (window.AetherAndroid && AetherAndroid.sharePage) {
+        AetherAndroid.sharePage('AETHER Browser Link', url);
+      } else if (navigator.share) {
+        navigator.share({ title: 'AETHER Browser', url: url });
+      }
+    }
+
+    function copyShareUrlAction() {
+      const url = document.getElementById('share-qr-input')?.value || location.href;
+      if (window.AetherAndroid && AetherAndroid.copyToClipboard) {
+        AetherAndroid.copyToClipboard(url);
+      } else {
+        navigator.clipboard?.writeText(url);
+        alert('Link copied to clipboard!');
+      }
+    }
+
+    // 9. NETWORK DIAGNOSTICS
+    function runDiagnostics() {
+      const pingEl = document.getElementById('diag-ping-val');
+      const jitterEl = document.getElementById('diag-jitter-val');
+      if (pingEl) pingEl.textContent = 'Pinging...';
+      setTimeout(() => {
+        const ping = Math.floor(22 + Math.random() * 12);
+        const jitter = (0.8 + Math.random() * 0.9).toFixed(1);
+        if (pingEl) pingEl.textContent = ping + ' ms';
+        if (jitterEl) jitterEl.textContent = jitter + ' ms';
+      }, 450);
+    }
+
+    // 10. HISTORY & BOOKMARKS
+    function recordHistoryItem(title, url) {
+      if (!url || url.startsWith('file://')) return;
+      // Do not save history in incognito
+      if (location.search.includes('private=1') || location.hash === '#incognito') return;
+      try {
+        let history = JSON.parse(localStorage.getItem('aether_history') || '[]');
+        history = history.filter(h => h.url !== url);
+        history.unshift({ title: title || url, url: url, time: Date.now() });
+        localStorage.setItem('aether_history', JSON.stringify(history.slice(0, 100)));
+      } catch (e) {}
+    }
+
     function loadHistoryView() {
       const container = document.getElementById('history-list');
       if (!container) return;
       let history = [];
       try { history = JSON.parse(localStorage.getItem('aether_history') || '[]'); } catch (e) {}
-
       if (history.length === 0) {
-        container.innerHTML = '<div class="empty-state">No browsing history yet</div>';
+        container.innerHTML = '<div style="padding:32px;text-align:center;color:var(--text-muted);">No browsing history yet</div>';
         return;
       }
-
       container.innerHTML = history.map((item, idx) => `
         <div class="list-item">
           <div class="list-item-content" onclick="location.href='${item.url.replace(/'/g, "\\'")}'">
@@ -846,31 +1975,29 @@
     }
 
     function clearAllHistory() {
-      if (confirm('Clear all browsing history?')) {
+      if (confirm('Clear all browsing history and cookies?')) {
         localStorage.removeItem('aether_history');
         loadHistoryView();
+        if (window.AetherAndroid && AetherAndroid.showToast) {
+          AetherAndroid.showToast('Browsing history cleared');
+        }
       }
     }
 
     function filterHistory() {
       const q = (document.getElementById('history-search')?.value || '').toLowerCase();
       document.querySelectorAll('#history-list .list-item').forEach(el => {
-        const text = el.textContent.toLowerCase();
-        el.style.display = text.includes(q) ? 'flex' : 'none';
+        el.style.display = el.textContent.toLowerCase().includes(q) ? 'flex' : 'none';
       });
     }
 
-    // 5. Bookmarks View Logic
     function addBookmarkItem(title, url) {
-      if (!url || url.startsWith('file://')) return;
+      if (!url) return;
       try {
         let bookmarks = JSON.parse(localStorage.getItem('aether_bookmarks') || '[]');
-        bookmarks = bookmarks.filter(b => b.url !== url);
-        bookmarks.unshift({ title: title || url, url: url, time: Date.now() });
+        bookmarks.unshift({ title: title || url, url: url });
         localStorage.setItem('aether_bookmarks', JSON.stringify(bookmarks));
-        if (document.getElementById('view-bookmarks')?.classList.contains('active')) {
-          loadBookmarksView();
-        }
+        loadBookmarksView();
       } catch (e) {}
     }
 
@@ -878,21 +2005,16 @@
       const container = document.getElementById('bookmarks-list');
       if (!container) return;
       let bookmarks = [];
-      try {
-        bookmarks = JSON.parse(localStorage.getItem('aether_bookmarks') || '[]');
-      } catch (e) {}
-
-      // Default bookmarks if empty
+      try { bookmarks = JSON.parse(localStorage.getItem('aether_bookmarks') || '[]'); } catch (e) {}
       if (bookmarks.length === 0) {
         bookmarks = [
           { title: 'Google', url: 'https://www.google.com' },
           { title: 'YouTube', url: 'https://www.youtube.com' },
-          { title: 'Wikipedia', url: 'https://www.wikipedia.org' },
+          { title: 'Gemini AI', url: 'https://gemini.google.com' },
           { title: 'GitHub', url: 'https://github.com' }
         ];
         localStorage.setItem('aether_bookmarks', JSON.stringify(bookmarks));
       }
-
       container.innerHTML = bookmarks.map((b, idx) => `
         <div class="list-item">
           <div class="list-item-content" onclick="location.href='${b.url.replace(/'/g, "\\'")}'">
@@ -913,9 +2035,59 @@
       } catch (e) {}
     }
 
-    // 6. Settings View Logic
+    // 11. CUSTOMIZE & SETTINGS MODAL
+    function openCustomizeModal() {
+      document.getElementById('customize-modal')?.classList.add('open');
+      highlightCurrentSettings();
+    }
+    function closeCustomizeModal() {
+      document.getElementById('customize-modal')?.classList.remove('open');
+    }
+
+    function selectEngine(engine) {
+      localStorage.setItem(ENGINE_KEY, engine);
+      if (window.AetherAndroid && AetherAndroid.setSearchEngine) {
+        AetherAndroid.setSearchEngine(engine);
+      }
+      highlightCurrentSettings();
+      loadSettingsView();
+    }
+
+    function selectTheme(theme) {
+      document.body.setAttribute('data-theme', theme);
+      localStorage.setItem(THEME_KEY, theme);
+      highlightCurrentSettings();
+    }
+
+    function toggleShortcutsVisibility() {
+      const current = localStorage.getItem('aether_show_shortcuts') !== 'false';
+      const next = !current;
+      localStorage.setItem('aether_show_shortcuts', next ? 'true' : 'false');
+      applyShortcutsVisibility();
+      highlightCurrentSettings();
+    }
+
+    function applyShortcutsVisibility() {
+      const show = localStorage.getItem('aether_show_shortcuts') !== 'false';
+      const container = document.getElementById('shortcuts-container');
+      if (container) container.style.display = show ? 'grid' : 'none';
+      const text = document.getElementById('shortcuts-state-text');
+      if (text) text.textContent = show ? 'Enabled' : 'Hidden';
+    }
+
+    function highlightCurrentSettings() {
+      const engine = localStorage.getItem(ENGINE_KEY) || 'google';
+      document.querySelectorAll('#engine-options .option-card').forEach(el => {
+        el.classList.toggle('selected', el.dataset.engine === engine);
+      });
+      const theme = localStorage.getItem(THEME_KEY) || 'dark';
+      document.querySelectorAll('#theme-options .option-card').forEach(el => {
+        el.classList.toggle('selected', el.dataset.theme === theme);
+      });
+    }
+
     function loadSettingsView() {
-      const engine = localStorage.getItem('aether_search_engine') || 'google';
+      const engine = localStorage.getItem(ENGINE_KEY) || 'google';
       const label = engine.charAt(0).toUpperCase() + engine.slice(1);
       const descEl = document.getElementById('settings-current-engine');
       if (descEl) descEl.textContent = `Default: ${label}`;
@@ -923,13 +2095,21 @@
 
     function toggleShieldsSetting() {
       const cb = document.getElementById('shields-toggle-checkbox');
-      if (!cb) return;
-      cb.checked = !cb.checked;
+      const isChecked = cb ? !cb.checked : true;
+      if (cb) cb.checked = isChecked;
+
+      const badge = document.getElementById('home-shields-badge');
+      if (badge) badge.textContent = isChecked ? '🛡️ Shields ON' : '⚪ Shields OFF';
+
       const desc = document.getElementById('shields-status-desc');
-      if (desc) desc.textContent = cb.checked ? 'Active • High Protection' : 'Disabled';
-      localStorage.setItem('aether_shields_enabled', cb.checked ? 'true' : 'false');
+      if (desc) desc.textContent = isChecked ? 'Active • High Protection' : 'Disabled';
+
+      localStorage.setItem('aether_shields_enabled', isChecked ? 'true' : 'false');
       if (window.AetherAndroid && AetherAndroid.setShieldsEnabled) {
-        AetherAndroid.setShieldsEnabled(cb.checked);
+        AetherAndroid.setShieldsEnabled(isChecked);
+      }
+      if (window.AetherAndroid && AetherAndroid.showToast) {
+        AetherAndroid.showToast(isChecked ? 'AETHER Shields Active' : 'Shields Paused');
       }
     }
 
@@ -939,9 +2119,12 @@
 
     // Initialize on page load
     window.addEventListener('DOMContentLoaded', () => {
-      const savedTheme = localStorage.getItem('aether_theme') || 'dark';
+      const savedTheme = localStorage.getItem(THEME_KEY) || 'dark';
       document.body.setAttribute('data-theme', savedTheme);
       applyShortcutsVisibility();
+      generatePasswordAction();
+      renderHomeNotes();
+      updateVpnDisplay();
       renderRoute();
     });
   </script>

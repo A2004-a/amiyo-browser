@@ -192,6 +192,43 @@ public class MainActivity extends AppCompatActivity {
         public void showToast(String message) {
             runOnUiThread(() -> Toast.makeText(MainActivity.this, message, Toast.LENGTH_SHORT).show());
         }
+
+        @JavascriptInterface
+        public void copyToClipboard(String text) {
+            runOnUiThread(() -> {
+                android.content.ClipboardManager clipboard = (android.content.ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                if (clipboard != null) {
+                    android.content.ClipData clip = android.content.ClipData.newPlainText("AETHER Browser", text);
+                    clipboard.setPrimaryClip(clip);
+                    Toast.makeText(MainActivity.this, "Copied to clipboard", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+
+        @JavascriptInterface
+        public boolean isVpnConnected() {
+            return isVpnEnabled;
+        }
+
+        @JavascriptInterface
+        public String getVpnNode() {
+            return vpnLocation != null ? vpnLocation : "US East";
+        }
+
+        @JavascriptInterface
+        public void toggleVpn() {
+            runOnUiThread(MainActivity.this::toggleMobileVpn);
+        }
+
+        @JavascriptInterface
+        public void openInternal(String page) {
+            runOnUiThread(() -> openInternalPage(page));
+        }
+
+        @JavascriptInterface
+        public void loadUrl(String url) {
+            runOnUiThread(() -> loadTarget(url));
+        }
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -1017,17 +1054,21 @@ public class MainActivity extends AppCompatActivity {
         PopupMenu popup = new PopupMenu(this, anchor);
         popup.getMenu().add(0, 1, 0, "New tab");
         popup.getMenu().add(0, 2, 1, "New Incognito tab");
-        popup.getMenu().add(0, 3, 2, "History");
-        popup.getMenu().add(0, 4, 3, "Downloads");
-        popup.getMenu().add(0, 5, 4, "Bookmarks");
-        popup.getMenu().add(0, 6, 5, "Share...");
-        popup.getMenu().add(0, 7, 6, "Find in page");
-        popup.getMenu().add(0, 8, 7, isDesktopSite ? "Mobile site" : "Desktop site");
-        popup.getMenu().add(0, 13, 8, isVpnEnabled ? "🛡️ AETHER VPN: Connected (" + vpnLocation + ")" : "🛡️ AETHER VPN: Disconnected");
-        popup.getMenu().add(0, 10, 9, "Zoom in (+)");
-        popup.getMenu().add(0, 11, 10, "Zoom out (-)");
-        popup.getMenu().add(0, 12, 11, "Reset zoom (" + currentTextZoom + "%)");
-        popup.getMenu().add(0, 9, 12, "Settings");
+        popup.getMenu().add(0, 14, 2, "💡 AETHER Notes (+)");
+        popup.getMenu().add(0, 15, 3, "✨ AETHER AI Assistant");
+        popup.getMenu().add(0, 13, 4, isVpnEnabled ? "🛡️ AETHER VPN: Connected (" + vpnLocation + ")" : "🛡️ AETHER VPN: Disconnected");
+        popup.getMenu().add(0, 16, 5, "🔐 Passwords Vault");
+        popup.getMenu().add(0, 6, 6, "📱 Share & QR Code...");
+        popup.getMenu().add(0, 17, 7, "⚡ Network Diagnostics");
+        popup.getMenu().add(0, 3, 8, "History");
+        popup.getMenu().add(0, 4, 9, "Downloads");
+        popup.getMenu().add(0, 5, 10, "Bookmarks");
+        popup.getMenu().add(0, 7, 11, "Find in page");
+        popup.getMenu().add(0, 8, 12, isDesktopSite ? "Mobile site" : "Desktop site");
+        popup.getMenu().add(0, 10, 13, "Zoom in (+)");
+        popup.getMenu().add(0, 11, 14, "Zoom out (-)");
+        popup.getMenu().add(0, 12, 15, "Reset zoom (" + currentTextZoom + "%)");
+        popup.getMenu().add(0, 9, 16, "Settings");
 
         popup.setOnMenuItemClickListener(item -> {
             switch (item.getItemId()) {
@@ -1036,6 +1077,18 @@ public class MainActivity extends AppCompatActivity {
                     return true;
                 case 2:
                     createNewTab(true);
+                    return true;
+                case 14:
+                    openInternalPage("notes");
+                    return true;
+                case 15:
+                    openInternalPage("ai");
+                    return true;
+                case 16:
+                    openInternalPage("passwords");
+                    return true;
+                case 17:
+                    openInternalPage("diagnostics");
                     return true;
                 case 3:
                     openInternalPage("history");
