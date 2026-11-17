@@ -95,6 +95,26 @@
   color: var(--text-primary);
 }
 
+.keep-btn-svg {
+  width: 15px;
+  height: 15px;
+  fill: currentColor;
+  display: block;
+}
+
+.keep-add-note-btn {
+  color: #F59E0B !important;
+  background: rgba(245, 158, 11, 0.12) !important;
+  border: 1px solid rgba(245, 158, 11, 0.35) !important;
+  font-weight: 700;
+}
+
+.keep-add-note-btn:hover {
+  background: rgba(245, 158, 11, 0.25) !important;
+  transform: scale(1.08);
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.35);
+}
+
 /* Search Box */
 .keep-search-box {
   margin: 12px 14px 8px 14px;
@@ -492,6 +512,27 @@
   transform: translateY(-1px);
 }
 
+.keep-btn-secondary {
+  background: rgba(245, 158, 11, 0.12);
+  color: #F59E0B;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.keep-btn-secondary:hover {
+  background: rgba(245, 158, 11, 0.22);
+  border-color: #F59E0B;
+  transform: translateY(-1px);
+}
+
 /* Color Palette Dropdown Menu */
 .keep-color-picker-wrapper {
   position: relative;
@@ -781,4 +822,82 @@
 
 .keep-link-btn:hover {
   color: #EF4444;
+}
+
+/* Floating Action Button (+ New Note) */
+.keep-fab-add {
+  position: absolute;
+  bottom: 46px;
+  right: 18px;
+  background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+  color: #0A0F1D;
+  border: none;
+  border-radius: 24px;
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.45);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 130;
+}
+
+.keep-fab-add:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 6px 22px rgba(245, 158, 11, 0.65);
+}
+
+.keep-fab-svg {
+  width: 15px;
+  height: 15px;
+  fill: currentColor;
+  display: block;
+}
+
+/* Creator Pulse Animation */
+.keep-pulse-glow {
+  animation: keepPulseGlow 0.6s ease;
+}
+
+@keyframes keepPulseGlow {
+  0% { box-shadow: 0 0 0 rgba(245, 158, 11, 0); }
+  50% { box-shadow: 0 0 16px rgba(245, 158, 11, 0.6); border-color: #F59E0B; }
+  100% { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); }
+}
+
+/* Note Card Meta Information */
+.keep-card-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 4px;
+  padding-top: 5px;
+  font-size: 10px;
+  color: var(--text-muted);
+  border-top: 1px dashed rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="light"] .keep-card-meta {
+  border-top-color: rgba(0, 0, 0, 0.08);
+}
+
+.keep-card-time {
+  opacity: 0.8;
+  font-size: 10px;
+}
+
+.keep-card-badge-pill {
+  font-size: 9px;
+  padding: 1px 6px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-secondary);
+}
+
+[data-theme="light"] .keep-card-badge-pill {
+  background: rgba(0, 0, 0, 0.06);
+  color: #3C4043;
 }

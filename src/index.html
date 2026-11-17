@@ -951,6 +951,10 @@
               <span class="keep-notes-badge" id="keep-notes-count-badge">0</span>
             </div>
             <div class="keep-notes-header-actions">
+              <button class="keep-icon-btn keep-add-note-btn" id="keep-add-btn" title="Add New Note (+)">
+                <svg viewBox="0 0 24 24" class="keep-btn-svg"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+              </button>
+              <button class="keep-icon-btn" id="keep-bulk-add-btn" title="Add Multiple Notes at Once (Bulk Paste)">⚡+</button>
               <button class="keep-icon-btn" id="keep-export-btn" title="Export Notes (Markdown / JSON)">💾</button>
               <button class="keep-icon-btn" id="keep-close-btn" title="Close Notes">✕</button>
             </div>
@@ -977,6 +981,7 @@
             <div class="keep-create-collapsed" id="keep-create-collapsed" tabindex="0">
               <span class="keep-create-placeholder">Take a note...</span>
               <div class="keep-create-quick-actions">
+                <button class="keep-quick-btn keep-quick-plus" id="quick-new-note-btn" title="Add new note (+)">➕</button>
                 <button class="keep-quick-btn" id="quick-new-list-btn" title="New checklist">☑️</button>
                 <button class="keep-quick-btn" id="quick-clip-page-btn" title="Clip active web page">🔗</button>
               </div>
@@ -1034,6 +1039,7 @@
                 </div>
                 <div class="keep-create-actions">
                   <button class="keep-text-btn" id="keep-cancel-btn">Cancel</button>
+                  <button class="keep-btn-secondary" id="keep-save-and-add-btn" title="Save this note & add another (+)">+ Add Another</button>
                   <button class="keep-btn-primary" id="keep-save-btn">Save</button>
                 </div>
               </div>
@@ -1060,6 +1066,12 @@
               <div class="keep-empty-title">Notes you add appear here</div>
               <div class="keep-empty-subtitle">Capture thoughts, tasks, and web research on the fly</div>
             </div>
+
+            <!-- Floating Action Button (+ New Note) -->
+            <button class="keep-fab-add" id="keep-fab-add-btn" title="Add New Note (+)">
+              <svg viewBox="0 0 24 24" class="keep-fab-svg"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+              <span class="keep-fab-text">New Note</span>
+            </button>
           </div>
 
           <!-- Footer Stats -->

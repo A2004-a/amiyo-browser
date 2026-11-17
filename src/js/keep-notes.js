@@ -38,6 +38,8 @@ const KeepNotes = {
     this.panelEl = document.getElementById('quick-notes-panel');
     this.notesBtn = document.getElementById('notes-tool-btn');
     this.closeBtn = document.getElementById('keep-close-btn');
+    this.addBtn = document.getElementById('keep-add-btn');
+    this.bulkAddBtn = document.getElementById('keep-bulk-add-btn');
     this.exportBtn = document.getElementById('keep-export-btn');
     this.countBadge = document.getElementById('keep-notes-count-badge');
     this.searchInput = document.getElementById('keep-search-input');
@@ -64,10 +66,14 @@ const KeepNotes = {
     this.attachTabBtn = document.getElementById('keep-attach-tab-btn');
     this.cancelBtn = document.getElementById('keep-cancel-btn');
     this.saveBtn = document.getElementById('keep-save-btn');
+    this.saveAndAddBtn = document.getElementById('keep-save-and-add-btn');
+    this.quickNewNoteBtn = document.getElementById('quick-new-note-btn');
     this.quickListBtn = document.getElementById('quick-new-list-btn');
     this.quickClipBtn = document.getElementById('quick-clip-page-btn');
+    this.fabAddBtn = document.getElementById('keep-fab-add-btn');
 
     // Grids
+    this.scrollContainer = document.getElementById('keep-notes-scroll');
     this.pinnedSection = document.getElementById('keep-pinned-section');
     this.pinnedGrid = document.getElementById('keep-pinned-grid');
     this.othersSection = document.getElementById('keep-others-section');
@@ -78,9 +84,16 @@ const KeepNotes = {
   },
 
   bindEvents() {
-    // Panel Toggle
+    // Panel Toggle & New Note Actions
     this.notesBtn?.addEventListener('click', () => this.toggle());
     this.closeBtn?.addEventListener('click', () => this.close());
+    this.addBtn?.addEventListener('click', () => this.startNewNote());
+    this.fabAddBtn?.addEventListener('click', () => this.startNewNote());
+    this.bulkAddBtn?.addEventListener('click', () => this.openBulkAddModal());
+    this.quickNewNoteBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.startNewNote();
+    });
 
     // Search
     this.searchInput?.addEventListener('input', (e) => {
@@ -163,9 +176,26 @@ const KeepNotes = {
       });
     });
 
-    // Cancel / Save
+    // Cancel / Save / Save & Add Another
     this.cancelBtn?.addEventListener('click', () => this.collapseCreator(false));
     this.saveBtn?.addEventListener('click', () => this.saveFromCreator());
+    this.saveAndAddBtn?.addEventListener('click', () => this.saveAndAddAnother());
+
+    // Keyboard shortcuts in creator inputs: Ctrl+Enter (Save), Ctrl+Shift+Enter (Save & Add Another)
+    const handleCreatorKey = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        if (e.shiftKey) {
+          this.saveAndAddAnother();
+        } else {
+          this.saveFromCreator();
+        }
+      } else if (e.key === 'Escape') {
+        this.collapseCreator(false);
+      }
+    };
+    this.inputTitle?.addEventListener('keydown', handleCreatorKey);
+    this.inputBody?.addEventListener('keydown', handleCreatorKey);
 
     // Export & Clear All
     this.exportBtn?.addEventListener('click', () => this.exportNotes());
@@ -253,6 +283,23 @@ const KeepNotes = {
     if (typeof IpcClient !== 'undefined' && IpcClient.setSideOffset) {
       IpcClient.setSideOffset(0);
     }
+  },
+
+  startNewNote(isChecklist = false) {
+    if (!this.isOpen()) {
+      this.toggle();
+    }
+    if (this.scrollContainer) {
+      this.scrollContainer.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    this.expandCreator(isChecklist);
+    setTimeout(() => {
+      if (this.inputTitle) {
+        this.inputTitle.focus();
+      }
+      this.createCard?.classList.add('keep-pulse-glow');
+      setTimeout(() => this.createCard?.classList.remove('keep-pulse-glow'), 600);
+    }, 50);
   },
 
   expandCreator(isChecklist = false) {
@@ -418,6 +465,53 @@ const KeepNotes = {
     this.persistNotes();
     this.collapseCreator(false);
     this.render();
+    this.showToast('✓ Note saved to AETHER Notes');
+  },
+
+  saveAndAddAnother() {
+    const title = this.inputTitle?.value.trim() || '';
+    const body = this.inputBody?.value.trim() || '';
+    const items = [...this.creatorState.checklistItems];
+    const clip = this.creatorState.attachedClip;
+
+    if (!title && !body && items.length === 0 && !clip) {
+      if (this.inputTitle) this.inputTitle.focus();
+      return;
+    }
+
+    const newNote = {
+      id: 'note_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+      title: title || (clip ? clip.title : (items[0]?.text || 'Untitled Note')),
+      content: body,
+      type: this.creatorState.isChecklist ? 'checklist' : 'text',
+      checklist: items,
+      color: this.creatorState.color || 'default',
+      pinned: this.creatorState.pinned,
+      webClip: clip,
+      createdAt: Date.now(),
+      updatedAt: Date.now()
+    };
+
+    this.notes.unshift(newNote);
+    this.persistNotes();
+    this.render();
+
+    // Reset creator fields for the next note without collapsing
+    if (this.inputTitle) this.inputTitle.value = '';
+    if (this.inputBody) this.inputBody.value = '';
+    this.creatorState.checklistItems = [];
+    this.creatorState.attachedClip = null;
+    if (this.checklistItemsEl) this.checklistItemsEl.innerHTML = '';
+    if (this.attachedClipEl) this.attachedClipEl.classList.add('hidden');
+
+    this.showToast('✓ Note saved! Type your next note...');
+    if (this.creatorState.isChecklist) {
+      this.checklistNewInput?.focus();
+    } else {
+      this.inputTitle?.focus();
+    }
+    this.createCard?.classList.add('keep-pulse-glow');
+    setTimeout(() => this.createCard?.classList.remove('keep-pulse-glow'), 600);
   },
 
   toggleNotePin(id, e) {
@@ -436,6 +530,22 @@ const KeepNotes = {
     this.notes = this.notes.filter(n => n.id !== id);
     this.persistNotes();
     this.render();
+    this.showToast('✓ Note deleted');
+  },
+
+  duplicateNote(id, e) {
+    if (e) e.stopPropagation();
+    const note = this.notes.find(n => n.id === id);
+    if (!note) return;
+    const copy = JSON.parse(JSON.stringify(note));
+    copy.id = 'note_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
+    copy.title = (copy.title || 'Untitled Note') + ' (Copy)';
+    copy.createdAt = Date.now();
+    copy.updatedAt = Date.now();
+    this.notes.unshift(copy);
+    this.persistNotes();
+    this.render();
+    this.showToast('✓ Note duplicated');
   },
 
   changeNoteColor(id, color, e) {
@@ -546,7 +656,7 @@ const KeepNotes = {
       </div>
     `;
 
-    App.showModal('Edit Keep Note', contentHtml, [
+    App.showModal('Edit AETHER Note', contentHtml, [
       { label: 'Cancel', class: 'btn-secondary', click: () => App.closeModal() },
       {
         label: 'Save Changes',
@@ -592,6 +702,33 @@ const KeepNotes = {
     });
   },
 
+  formatTime(timestamp) {
+    if (!timestamp) return '';
+    const diff = Math.floor((Date.now() - timestamp) / 1000);
+    if (diff < 60) return 'Just now';
+    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+    if (diff < 604800) return `${Math.floor(diff / 86400)}d ago`;
+    const d = new Date(timestamp);
+    return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+  },
+
+  showToast(message) {
+    const statusText = document.getElementById('keep-status-text');
+    if (statusText) {
+      const original = '✓ Saved locally in AETHER Vault';
+      statusText.textContent = message;
+      statusText.style.color = '#F59E0B';
+      statusText.style.fontWeight = '600';
+      clearTimeout(this._toastTimer);
+      this._toastTimer = setTimeout(() => {
+        statusText.textContent = original;
+        statusText.style.color = '';
+        statusText.style.fontWeight = '';
+      }, 2500);
+    }
+  },
+
   renderCard(note) {
     let bodyHtml = '';
     if (note.type === 'checklist') {
@@ -619,6 +756,19 @@ const KeepNotes = {
       </a>
     ` : '';
 
+    const timeStr = this.formatTime(note.updatedAt || note.createdAt);
+    let badgeText = '';
+    if (note.type === 'checklist') {
+      const total = (note.checklist || []).length;
+      const done = (note.checklist || []).filter(i => i.done).length;
+      badgeText = `${done}/${total} tasks`;
+    } else if (note.webClip) {
+      badgeText = 'Web Clip';
+    } else if (note.content) {
+      const words = note.content.trim().split(/\s+/).filter(Boolean).length;
+      badgeText = `${words} word${words === 1 ? '' : 's'}`;
+    }
+
     return `
       <div class="keep-card" data-id="${note.id}" data-color="${note.color || 'default'}" onclick="KeepNotes.editNote('${note.id}')">
         <div class="keep-card-header">
@@ -629,8 +779,13 @@ const KeepNotes = {
         </div>
         ${bodyHtml}
         ${clipHtml}
+        <div class="keep-card-meta">
+          <span class="keep-card-time">${timeStr}</span>
+          ${badgeText ? `<span class="keep-card-badge-pill">${badgeText}</span>` : ''}
+        </div>
         <div class="keep-card-actions">
           <button class="keep-action-btn" title="Copy text" onclick="KeepNotes.copyNoteContent('${note.id}', event)">📋</button>
+          <button class="keep-action-btn" title="Duplicate note" onclick="KeepNotes.duplicateNote('${note.id}', event)">📑</button>
           <button class="keep-action-btn delete" title="Delete note" onclick="KeepNotes.deleteNote('${note.id}', event)">🗑️</button>
         </div>
       </div>
@@ -697,6 +852,110 @@ const KeepNotes = {
     }
   },
 
+  openBulkAddModal() {
+    if (typeof App === 'undefined') return;
+
+    const bodyHtml = `
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <p style="font-size:12px;color:var(--text-secondary);margin:0;line-height:1.5;">
+          Paste or type multiple notes at once. Separate each note using <strong>three dashes (---)</strong> or <strong>blank lines</strong>.
+        </p>
+        <textarea id="bulk-notes-input" class="settings-input" style="width:100%;height:160px;font-family:inherit;font-size:12px;line-height:1.5;resize:vertical;" placeholder="Project Ideas&#10;Research electron native tabs and WebContentsView&#10;---&#10;Reading List&#10;Clean modern browsers documentation&#10;---&#10;Shopping Checklist&#10;Milk, coffee beans, matcha"></textarea>
+        
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid var(--border-subtle);flex-wrap:wrap;">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-secondary);cursor:pointer;">
+              <input type="checkbox" id="bulk-pin-all" />
+              <span>📌 Pin all</span>
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-secondary);cursor:pointer;">
+              <input type="checkbox" id="bulk-split-blank" checked />
+              <span>Split by blank lines</span>
+            </label>
+          </div>
+          <div id="bulk-notes-count-preview" style="font-size:12px;font-weight:600;color:#F59E0B;">0 notes detected</div>
+        </div>
+      </div>
+    `;
+
+    App.showModal('Add Multiple Notes (Bulk)', bodyHtml, [
+      { label: 'Cancel', class: 'btn-secondary', click: () => App.closeModal() },
+      {
+        label: '➕ Create Notes',
+        class: 'btn-primary',
+        click: () => {
+          const text = document.getElementById('bulk-notes-input')?.value || '';
+          const pinAll = !!document.getElementById('bulk-pin-all')?.checked;
+          const splitBlank = !!document.getElementById('bulk-split-blank')?.checked;
+          this.processBulkAdd(text, pinAll, splitBlank);
+          App.closeModal();
+        }
+      }
+    ]);
+
+    const textarea = document.getElementById('bulk-notes-input');
+    const preview = document.getElementById('bulk-notes-count-preview');
+    const splitChk = document.getElementById('bulk-split-blank');
+    const updateCount = () => {
+      const raw = textarea?.value || '';
+      const count = this.parseBulkNotes(raw, splitChk?.checked).length;
+      if (preview) {
+        preview.textContent = `${count} note${count === 1 ? '' : 's'} detected`;
+      }
+    };
+    textarea?.addEventListener('input', updateCount);
+    splitChk?.addEventListener('change', updateCount);
+    setTimeout(() => textarea?.focus(), 60);
+  },
+
+  parseBulkNotes(text, splitBlank = true) {
+    if (!text || !text.trim()) return [];
+    let chunks = [];
+    if (text.includes('---')) {
+      chunks = text.split(/\n\s*---\s*\n/);
+    } else if (splitBlank) {
+      chunks = text.split(/\n\s*\n+/);
+    } else {
+      chunks = [text];
+    }
+    return chunks
+      .map(c => c.trim())
+      .filter(c => c.length > 0)
+      .map(chunk => {
+        const lines = chunk.split('\n');
+        const firstLine = lines[0].replace(/^[#*\-•\d.]+\s*/, '').trim();
+        const body = lines.slice(1).join('\n').trim();
+        return {
+          title: firstLine || 'Untitled Note',
+          content: body || (lines.length === 1 ? '' : chunk)
+        };
+      });
+  },
+
+  processBulkAdd(text, pinAll = false, splitBlank = true) {
+    const parsed = this.parseBulkNotes(text, splitBlank);
+    if (parsed.length === 0) return;
+
+    const now = Date.now();
+    const newNotes = parsed.map((item, idx) => ({
+      id: 'note_' + (now + idx) + '_' + Math.random().toString(36).substr(2, 4),
+      title: item.title,
+      content: item.content,
+      type: 'text',
+      checklist: [],
+      color: 'default',
+      pinned: pinAll,
+      webClip: null,
+      createdAt: now + idx,
+      updatedAt: now + idx
+    }));
+
+    this.notes.unshift(...newNotes);
+    this.persistNotes();
+    this.render();
+    this.showToast(`✓ Added ${newNotes.length} notes!`);
+  },
+
   exportNotes() {
     if (this.notes.length === 0) {
       alert('No notes available to export.');
@@ -736,7 +995,7 @@ const KeepNotes = {
       const blob = new Blob([mdContent], { type: 'text/markdown;charset=utf-8' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
-      a.download = `aether-keep-notes-${new Date().toISOString().slice(0, 10)}.md`;
+      a.download = `aether-notes-${new Date().toISOString().slice(0, 10)}.md`;
       a.click();
       App.closeModal();
     });
@@ -745,7 +1004,7 @@ const KeepNotes = {
       const blob = new Blob([jsonContent], { type: 'application/json;charset=utf-8' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
-      a.download = `aether-keep-notes-${new Date().toISOString().slice(0, 10)}.json`;
+      a.download = `aether-notes-${new Date().toISOString().slice(0, 10)}.json`;
       a.click();
       App.closeModal();
     });
