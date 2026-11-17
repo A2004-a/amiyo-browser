@@ -1239,7 +1239,7 @@ public class MainActivity extends AppCompatActivity {
                 loadTarget("https://github.com/A2004-a/amiyo-browser/releases");
             })
             .setNeutralButton("Direct APK", (dialog, which) -> {
-                loadTarget("https://github.com/A2004-a/amiyo-browser/releases/download/v0.1.0/AETHER-Browser-v0.1.0-Android.apk");
+                loadTarget("https://github.com/A2004-a/amiyo-browser/releases/download/v0.1.0/AETHER-Browser-v0.2.3-Android.apk");
             })
             .setNegativeButton("Close", null)
             .show();
